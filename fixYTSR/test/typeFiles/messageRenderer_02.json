@@ -1,0 +1,18 @@
+{
+  "specialities": "Chinese \"no more results\"",
+  "throws": null,
+  "type": "messageRenderer",
+  "parsed": null,
+  "raw": {
+    "messageRenderer": {
+      "text": {
+        "runs": [
+          {
+            "text": "沒有其他結果"
+          }
+        ]
+      },
+      "trackingParams": "CAIQljsYACITCLOR_uPfrO4CFRztOAYdqz8M2w=="
+    }
+  }
+}

@@ -1,0 +1,1756 @@
+<div class="wc-morew-main-outter-wrapper" [ngClass]="{'iswifing':mTitle==='wifing'}">
+  <div class="wc-childw-main-inner-wrapper" [ngStyle]="{'border-top-left-radius':mWin&&(mWin.snaps.top||mWin.snaps.left)?'0px':'8px','border-top-right-radius':mWin&&(mWin.snaps.top||mWin.snaps.right)?'0px':'8px','border-bottom-right-radius':mWin&&(mWin.snaps.bottom||mWin.snaps.right)?'0px':'8px','border-bottom-left-radius':mWin&&(mWin.snaps.bottom||mWin.snaps.left)?'0px':'8px'}">
+    <div *ngIf="!mwDataReady" class="wc-childw-loading-wrapper">
+      <div class="wc-childw-spinner-wrap">
+        <ion-spinner duration="400" class="childw-data-loading" name="dots"></ion-spinner>
+      </div>
+    </div>
+    <ion-grid *ngIf="mwDataReady" [ngStyle]="{'border-top-left-radius':mWin&&(mWin.snaps.top||mWin.snaps.left)?'0px':'8px','border-top-right-radius':mWin&&(mWin.snaps.top||mWin.snaps.right)?'0px':'8px','border-bottom-right-radius':mWin&&(mWin.snaps.bottom||mWin.snaps.right)?'0px':'8px','border-bottom-left-radius':mWin&&(mWin.snaps.bottom||mWin.snaps.left)?'0px':'8px'}" class="mw-main-grid">
+      <ion-row class="mw-header-row">
+        <ion-col class="wc-col childw-col main-col header-icon-col">
+          <div class="childw-header-icon-wrap">
+            <img *ngIf="mTitle==='ytdl'" src="assets/wc-ytdl-ico.png" class="childw-header-icon main">
+            <img *ngIf="mTitle==='wifing'" src="assets/wc-tray-wifi-ng-ico.png" class="childw-header-icon main">
+          </div>
+          <div class="childw-header-title-wrap">
+            <span *ngIf="mTitle==='ytdl'">{{mTitle}}</span>
+            <span *ngIf="mTitle==='wifing'">{{mTitle}}</span>
+          </div>
+          <div [ngStyle]="{'display':!sHeader||!doShowCtrlBtns()?'none':'flex'}" class="childw-header-status-wrap">
+            <img *ngIf="sHeader.status==='ok'" src="assets/wcc-status-green-led.png" class="childw-header-icon status green">
+            <img *ngIf="sHeader.status==='warn'" src="assets/wcc-status-yellow-led.png" class="childw-header-icon status yellow">
+            <img *ngIf="sHeader.status==='err'" src="assets/wcc-status-red-led.png" class="childw-header-icon status red">
+            <div [ngClass]="{'hst-green':sHeader.status==='ok','hst-yellow':sHeader.status==='warn','hst-red':sHeader.status==='err'}" class="mw-header-status-text">{{sHeader.text}}</div>
+          </div>
+        </ion-col>
+        <ion-col class="wc-col childw-col main-col function-btns-col">
+          <div *ngIf="doShowCtrlBtns()" class="header-fn-controlbtns-outter-wrapper">
+            <div class="header-fn-controlbtns-inner-wrapper">
+              <button (click)="doHeaderCtrlBtn('play')" [ngClass]="{'ctrl-btn-active':(getCtrlBtnState('play'))}" [disabled]="getCtrlBtnState('play')&&!getCtrlBtnState('pause')" class="header-fn-controlbtn play">
+                <img class="header-fn-controlbtn-ico play" src="assets/ytdl-header-ctrlbtn-play-ico.png">
+              </button>
+              <button (click)="doHeaderCtrlBtn('pause')" [ngClass]="{'ctrl-btn-active':(getCtrlBtnState('pause'))}" [disabled]="(getCtrlBtnState('pause')||(getCtrlBtnState('stop')))" class="header-fn-controlbtn pause">
+                <img class="header-fn-controlbtn-ico pause" src="assets/ytdl-header-ctrlbtn-pause-ico.png">
+              </button>
+              <button (click)="doHeaderCtrlBtn('stop')" [ngClass]="{'ctrl-btn-active':(getCtrlBtnState('stop'))}" [disabled]="(getCtrlBtnState('stop'))" class="header-fn-controlbtn stop">
+                <img class="header-fn-controlbtn-ico stop" src="assets/ytdl-header-ctrlbtn-stop-ico.png">
+              </button>
+            </div>
+          </div>
+          <div class="twtfnbtns-all-outter-wrapper">
+            <div class="header-fn-btn-outter-wrapper header-twtformattoggle-btns outter-wrapper">
+              <div class="header-fn-btn-inner-wrapper header-twtformattoggle-btns inner-wrapper">
+                <button *ngFor="let hfb of sHeadScreenBtns[mTitle];index as hfbI" (click)="doHeaderScreenBtn(hfbI)" [ngClass]="{'format-selected':hfb.state}" class="twtstreamfn-btn">
+                  <img [src]="hfb.state&&hfb.altico?hfb.altico:hfb.ico" class="twtstreamfn-btn-ico audio off">
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="wificue-winbtn-wrap close-btn childw" [ngClass]="{'iswifing':mTitle==='wifing'}">
+            <button (click)="killMoreWin()" [ngClass]="{'detached-btn-radius-right':mWin&&(!mWin.snaps.top&&!mWin.snaps.right)}" class="wificue-winbtn close-btn childw">
+              <img src="assets/wc-winbtn-close-ico.png" class="wifi-cue-winbtn-ico close-btn childw">
+            </button>
+          </div>
+        </ion-col>
+      </ion-row>
+      <ion-row class="mw-content-row">
+        <ion-col class="mw-content-col">
+          <!-- //////////////////////////////////////////////// WIFING MODULE STARTS //////////////////////////////////////////////// -->
+          <div *ngIf="mTitle==='wifing'" class="wifing-module-main-outter-wrapper">
+            <div class="wifing-module-main-inner-wrapper">
+              <!------------------------- ROUTERS SCREEN ----------------------------->
+              <div *ngIf="(getActScrn('routers'))" class="wifing-main-scrape-wrapper">
+                <ion-grid class="wc-grid wifing-module-main-grid stations">
+                  <ion-row class="wc-row wifing-module-main-row stations heading-row">
+                    <ion-col class="wc-col wifing-module-main-col stations heading-col left">
+                      <div class="wifing-area-header-title-wrapper stations">
+                        <div class="wifing-area-title-wrap stations">
+                          <img class="wifing-area-title-ico stations" src="assets/wc-wifing-header-stations-ico.png">
+                          <div class="wifing-area-title-txt stations">
+                            <div class="wifing-area-title-txt-wrap routers">routers</div>
+                          </div>
+                        </div>
+                      </div>
+                    </ion-col>
+                    <ion-col class="wc-col wifing-module-main-col stations heading-col right">
+                      <div class="wifing-area-header-fnbtns-wrapper stations">
+                        <div [ngStyle]="{'display':wifingRoutersParamInputOpen?'flex':'none'}" class="header-fnbtn-input-okcancel-wrapper">
+                          <div class="hfbinput-okcancel-btn-wrap ok">
+                            <button (click)="wifingRParamInput('ok',null)" class="hfbinputoc-btn ok" [disabled]="wifingRInputOKDisabled">
+                              <img class="hfbib-ico ok" src="assets/compz-launcher-npfnval-true-ico.png">
+                            </button>
+                          </div>
+                          <div (click)="wifingRParamInput('cancel',null)" class="hfbinput-okcancel-btn-wrap cancel">
+                            <button class="hfbinputoc-btn cancel">
+                              <img class="hfbib-ico ok" src="assets/compz-launcher-npfnval-false-ico.png">
+                            </button>
+                          </div>
+                        </div>
+                        <div class="wifing-bools-container-wrapper outter routers">
+                          <div class="wifing-bools-container-wrapper inner routers">
+                            <div class="wifing-bools-btn-wrap sel2top routers">
+                              <button (click)="wifingBoolToggle('routers','sel2Top')" [ngClass]="{'istrue':this.wifingData.routers.optBools.sel2Top}" [disabled]="(wifingData.routers.selectedRouters.length<1||wifingJustRouters.length<1)" class="wifing-bools-btn sel2top routers">
+                                <img class="wifing-bools-btn-ico sel2top routers" src="assets/wc-wifing-routers-sel2top-ico.png">
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <div [ngStyle]="{'display':wifingRoutersParamInputOpen?'flex':'none'}" class="header-fnbtn-input-wrapper routers">
+                          <input #wifingRouterParamInput type="text" value={{wifingRInputOldValue}} (keyup)="wifingRParamInput('input',wifingRouterParamInput.value)" (blur)="wifingRParamInput('input',wifingRouterParamInput.value)" (mouseenter)="wifingRParamInput('input',wifingRouterParamInput.value)" (focus)="wifingRParamInput('input',wifingRouterParamInput.value)" (mouseleave)="wifingRParamInput('input',wifingRouterParamInput.value)" class="header-fnbtn-input routers">
+                        </div>
+                        <div class="header-fnbtn-section stations showmynet" [ngClass]="{'router-param-input-open':wifingRoutersParamInputOpen}">
+                          <button (click)="wifingAreaFnToggle('unknownOnly')" [ngClass]="{'wifing-aft-isactive':wifingData.routers.fnBtns.unknownOnly.active}" [disabled]="wifingRoutersParamInputOpen" class="hfb-toggle-btn stations showmynet">
+                            <img class="hfb-label-img stations showmynet" src="assets/wc-wifing-areafnbtn-showmynet-ico.png">
+                          </button>
+                        </div>
+                        <div class="header-fnbtn-section stations recentonly" [ngClass]="{'router-param-input-open':wifingRoutersParamInputOpen}">
+                          <button (click)="wifingAreaFnToggle('recentOnly')" (contextmenu)="wifingRParamInput('show',{name:'recentOnly',e:$event})" [disabled]="wifingRoutersParamInputOpen" [ngClass]="{'wifing-aft-isactive':wifingData.routers.fnBtns.recentOnly.active}" class="hfb-toggle-btn stations recentonly">
+                            <img class="hfb-label-img stations recentonly" src="assets/wc-wifing-areafnbtn-recentonly-ico.png">
+                          </button>
+                        </div>
+                        <div class="header-fnbtn-section stations activeonly" [ngClass]="{'router-param-input-open':wifingRoutersParamInputOpen}">
+                          <button (click)="wifingAreaFnToggle('activeOnly')" (contextmenu)="wifingRParamInput('show',{name:'activeOnly',e:$event})" [disabled]="wifingRoutersParamInputOpen" [ngClass]="{'wifing-aft-isactive':wifingData.routers.fnBtns.activeOnly.active}" class="hfb-toggle-btn stations activeonly">
+                            <img class="hfb-label-img stations activeonly" src="assets/wc-wifing-areafnbtn-activeonly-ico.png">
+                          </button>
+                        </div>
+                        <div class="header-fnbtn-section stations clientsonly" [ngClass]="{'router-param-input-open':wifingRoutersParamInputOpen}">
+                          <button (click)="wifingAreaFnToggle('clientsOnly')" (contextmenu)="wifingRParamInput('show',{name:'clientsOnly',e:$event})" [disabled]="wifingRoutersParamInputOpen" [ngClass]="{'wifing-aft-isactive':wifingData.routers.fnBtns.clientsOnly.active}" class="hfb-toggle-btn stations clientsonly">
+                            <img class="hfb-label-img stations clientsonly" src="assets/wc-wifing-areafnbtn-clientsonly-ico.png">
+                          </button>
+                        </div>
+                        <div class="header-fnbtn-section stations strongsigonly" [ngClass]="{'router-param-input-open':wifingRoutersParamInputOpen}">
+                          <button (click)="wifingAreaFnToggle('strongsigOnly')" (contextmenu)="wifingRParamInput('show',{name:'strongsigOnly',e:$event})" [disabled]="wifingRoutersParamInputOpen" [ngClass]="{'wifing-aft-isactive':wifingData.routers.fnBtns.strongsigOnly.active}" class="hfb-toggle-btn stations strongsigonly">
+                            <img class="hfb-label-img stations strongsigonly" src="assets/wc-wifing-areafnbtn-ssonly-ico.png">
+                          </button>
+                        </div>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row class="wc-row wifing-module-main-row stations content-row">
+                    <ion-col class="wc-col wifing-module-main-col stations content-col">
+                      <div class="wifing-content-grid-wrapper stations">
+                        <ion-grid class="wifing-content-grid stations">
+                          <ion-row [ngStyle]="{'height':wifingData.routers.vizTogs.routers==='min'?'17px':wifingData.routers.vizTogs.clients==='min'?'calc(100% - 17px)':'50%'}" class="wifing-contentarea-row stations routers-list-row">
+                            <ion-col class="wifing-contentarea-col stations routers-list-col">
+                              <div class="wifing-content-list-header routers">
+                                <div class="wifing-clh-subtitle routers">routers</div>
+                                <div class="wifing-area-title-counts-wrap routers">
+                                  <div class="atc hyphen first routers">-</div>
+                                  <div [ngClass]="{'atc-is-zero':wifingJustRouters.length===0}" class="atc found routers">{{wifingJustRouters.length}}</div>
+                                  <div class="atc pipe first routers">|</div>
+                                  <div [ngClass]="{'atc-is-zero':wifingData.routers.selectedRouters.length===0}" class="atc sel routers">{{wifingData.routers.selectedRouters.length}}</div>
+                                  <div class="atc pipe second routers">|</div>
+                                  <div [ngClass]="{'atc-is-zero':wifingRoutersSelFound===0}" class="atc foundsel routers">{{wifingRoutersSelFound}}</div>
+                                  <div *ngIf="wifingDumpNGStarted.ago!==null" class="atc startd-wrap routers">
+                                    <div class="atc hyphen ago routers">-</div>
+                                    <div class="atc startd-txt routers">{{wifingDumpNGStarted.ago}}</div>
+                                  </div>
+                                </div>
+                                <div class="wifing-clh-subtitle-clear-btn-wrapper routers">
+                                  <button (click)="wifingDumpClearSection('routers')" class="wifing-clhs-accordian-btn clearbtn routers">
+                                    <img class="wifing-clhs-accordian-btn-ico clear routers" src="assets/twt-chat-channel-cls-ico.png">
+                                  </button>
+                                </div>
+                                <div class="wifing-clh-subtitle-accordian-btn-wrapper routers">
+                                  <button (click)="wifingDumpSectVizToggle('routers')" class="wifing-clhs-accordian-btn routers">
+                                    <img *ngIf="wifingData.routers.vizTogs.routers==='min'" class="wifing-clhs-accordian-btn-ico expand routers" src="assets/wc-accordian-expand-subheader-ico.png">
+                                    <img *ngIf="wifingData.routers.vizTogs.routers==='max'" class="wifing-clhs-accordian-btn-ico contract routers" src="assets/wc-accordian-contract-subheader-ico.png">
+                                  </button>
+                                </div>
+                              </div>
+                              <div class="wifing-content-data-outter-wrapper routers">
+                                <div class="wifing-content-data-inner-wrapper routers">
+                                  <ion-grid class="wifing-router-data-grid">
+                                    <ion-row class="wrdg-ap-header-row">
+                                      <ion-col size="1" class="wrdg-head-col select cb">
+                                        <div class="wrdg-head-label ap-cb">
+                                          <div class="wrdg-checkbox-head-ico-wrap">
+                                            <img class="wrdg-checkbox-head-ico-img" src="assets/wc-cb-checked-ico.png">
+                                          </div>
+                                        </div>
+                                      </ion-col>
+                                      <ion-col size="3" class="wrdg-head-col ident ap-id">
+                                        <div class="wrdg-head-label ap-id">
+                                          <span class="apcl-field-span ap id">id</span>
+                                        </div>
+                                      </ion-col>
+                                      <ion-col size="1" class="wrdg-head-col ident ap-tx">
+                                        <div class="wrdg-head-label ap-tx">
+                                          <span class="apcl-field-span ap tx">tx</span>
+                                        </div>
+                                      </ion-col>
+                                      <ion-col size="1" class="wrdg-head-col ident ap-ch">
+                                        <div class="wrdg-head-label ap-ch">
+                                          <span class="apcl-field-span ap ch">ch</span>
+                                        </div>
+                                      </ion-col>
+                                      <!-- ------------- -->
+                                      <ion-col size="1" class="wrdg-head-col activity ap-cl">
+                                        <div class="wrdg-head-label ap-cl">
+                                          <span class="apcl-field-span ap bc">cl</span>
+                                        </div>
+                                      </ion-col>
+                                      <ion-col size="1" class="wrdg-head-col activity ap-bc">
+                                        <div class="wrdg-head-label ap-bc">
+                                          <span class="apcl-field-span ap bc">bc</span>
+                                        </div>
+                                      </ion-col>
+                                      <ion-col size="1" class="wrdg-head-col activity ap-pk">
+                                        <div class="wrdg-head-label ap-pk">
+                                          <span class="apcl-field-span ap pk">pk</span>
+                                        </div>
+                                      </ion-col>
+                                      <!-- ------------- -->
+                                      <ion-col size="3" class="wrdg-head-col security ap-sc">
+                                        <div class="wrdg-head-label ap-sc">
+                                          <span class="apcl-field-span ap sc">sc</span>
+                                        </div>
+                                      </ion-col>
+                                    </ion-row>
+                                    <ion-row class="wifing-justrouters-list-row">
+                                      <div class="wifing-justrouters-outside-wrap-div">
+                                        <div class="wifing-justrouters-inside-wrap-div">
+                                          <div *ngIf="wifingDumpNGInProg&&wifingJustRouters.length<1" class="wifing-justrouters-empty-list">no aps found</div>
+                                          <div *ngIf="wifingJustRouters.length>0" class="wifing-justrouters-found-list darkscrolls">
+                                            <div *ngFor="let jR of wifingJustRouters;let ddI=index" [ngClass]="{'selected-router':(routerIsSel(jR))}" (click)="toggleSelectRouter(jR)" class="jr-device-item-outter-wrapper">
+                                              <div class="jr-device-item router-wrapper">
+                                                <div class="wrdg-ap-dev-item-div select ap-dev-cb wifing-colw-1">
+                                                  <div class="wrdg-ap-dev-value ap-dev-cb">
+                                                    <button class="devselect-cb-btn mysubs playlists routerselect">
+                                                      <img [ngStyle]="{'display':(routerIsSel(jR))?'block':'none'}" src="assets/dev-select-checkmark-ico.png" class="devselect-cb-check-ico mysubs playlists routerselect">
+                                                    </button>
+                                                  </div>
+                                                </div>
+                                                <div class="wrdg-ap-dev-item-div ident ap-dev-id wifing-colw-3">
+                                                  <div class="wrdg-ap-dev-value ap-dev-id">
+                                                    <span *ngIf="jR.id!=='-'" class="dvopt-span ap-id name essid">{{(tenMax(jR.id))}}</span>
+                                                    <span *ngIf="jR.id==='-'&&jR.mac!=='-'" class="dvopt-span ap-id name macid">{{(mac2ID(jR.mac))}}</span>
+                                                    <span *ngIf="jR.id==='-'&&jR.mac==='-'" class="dvopt-span ap-id name nkid">Unknown</span>
+                                                  </div>
+                                                  <div *ngIf="(wifingMOPairs[jR.mac]&&wifingMOPairs[jR.mac]!==null)" class="wifing-dev-mac2ouimatch-wrapper routers">
+                                                    <button (click)="wifingToggleMOPairInfo($event,jR.mac)" class="mac2ouimatch-getinfo-btn routers">
+                                                      <img class="mac2ouimatch-ico routers" src="assets/wc-wifing-ouimatch-ico.png">
+                                                    </button>
+                                                    <div [ngStyle]="{'display':wifingMOPairs[jR.mac].showing&&wifingMOPairs[jR.mac].showing===true?'flex':'none'}" (click)="wifingToggleMOPairInfo($event,jR.mac)" class="mac2ouimatch-info routers">
+                                                      <div class="mac2ouimatch-info-part name">{{wifingMOPairs[jR.mac].organization.name}}</div>
+                                                      <div class="mac2ouimatch-info-part cc"><span class="m2om-cc-brack l">(</span><span class="m2om-cc-value">{{wifingMOPairs[jR.mac].organization.address.countryCode}}</span><span class="m2om-cc-brack r">)</span></div>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                                <div class="wrdg-ap-dev-item-div ident ap-dev-tx wifing-colw-1">
+                                                  <div [ngClass]="{'rpi-pb-color-green':jR.tx>-40,'rpi-pb-color-yellow':jR.tx<=-40&&jR.tx>-60,'rpi-pb-color-orange':jR.tx<=-60&&jR.tx>-75,'rpi-pb-color-red':jR.tx<=-75,'wifing-tx-minus1':jR.tx===-1}" class="wrdg-ap-dev-value ap-dev-tx">{{jR.tx}}</div>
+                                                </div>
+                                                <div class="wrdg-ap-dev-item-div ident ap-dev-ch wifing-colw-1">
+                                                  <div class="wrdg-ap-dev-value ap-dev-ch">{{(chanNo(jR.chan))}}</div>
+                                                </div>
+                                                <!-- ------------- -->
+                                                <div class="wrdg-ap-dev-item-div activity ap-dev-cl wifing-colw-1">
+                                                  <div [ngStyle]="{'color':jR.clients.length===1?'#ffffffad':jR.clients.length===2?'#ffc800ad':jR.clients.length>2?'#20c997ad':'#878787'}" class="wrdg-ap-dev-value ap-dev-cl">{{jR.clients.length}}</div>
+                                                </div>
+                                                <div class="wrdg-ap-dev-item-div activity ap-dev-bc wifing-colw-1">
+                                                  <div class="wrdg-ap-dev-value ap-dev-bc">{{(bcDaNo(jR.bcs))}}</div>
+                                                </div>
+                                                <div class="wrdg-ap-dev-item-div activity ap-dev-pk wifing-colw-1">
+                                                  <div class="wrdg-ap-dev-value ap-dev-pk">{{(bcDaNo(jR.data))}}</div>
+                                                </div>
+                                                <!-- ------------- -->
+                                                <div class="wrdg-ap-dev-item-div security ap-dev-sc wifing-colw-3">
+                                                  <div class="wrdg-ap-dev-value ap-dev-sc">
+                                                    <span *ngIf="jR.priv!=='-'&&jR.priv.trim().length>0&&(privStr(jR.priv))" class="dv-part-span sc enc">{{(privStr(jR.priv))}}</span>
+                                                    <span *ngIf="jR.ciph!=='-'&&jR.ciph.trim().length>0&&(ciphStr(jR.ciph))" class="dv-part-split-span">|</span>
+                                                    <span *ngIf="jR.ciph!=='-'&&jR.ciph.trim().length>0&&(ciphStr(jR.ciph))" class="dv-part-span sc cip">{{(ciphStr(jR.ciph))}}</span>
+                                                    <span *ngIf="jR.auth!=='-'&&jR.auth.trim().length>0&&(authStr(jR.auth))" class="dv-part-split-span">|</span>
+                                                    <span *ngIf="jR.auth!=='-'&&jR.auth.trim().length>0&&(authStr(jR.auth))" class="dv-part-span sc auth">{{(authStr(jR.auth))}}</span>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <div [ngStyle]="{'display':jR.clients.length>0?'block':'none'}" class="jr-device-item clients-wrapper">
+                                                <div *ngFor="let jRCl of jR.clients;let ddcI=index" class="jr-client-item" (click)="toggleSelectClient(jRCl)">
+                                                  <div class="wrdg-cl-dev-item-div select cl-dev-cb wifing-colw-1"></div>
+                                                  <div class="wrdg-cl-dev-item-div ident cl-dev-id wifing-colw-3">
+                                                    <div class="wrdg-cl-dev-value cl-dev-id">
+                                                      <span *ngIf="jRCl.mac!=='-'" class="dvopt-span cl-id name macid">{{(mac2ID(jRCl.mac))}}</span>
+                                                      <span *ngIf="!jRCl.mac||jRCl.mac==='-'" class="dvopt-span cl-id name nkid">Unknown</span>
+                                                    </div>
+                                                  </div>
+                                                  <div class="wrdg-cl-dev-item-div ident cl-dev-tx wifing-colw-1">
+                                                    <div [ngClass]="{'rpi-pb-color-green':jRCl.tx>-40,'rpi-pb-color-yellow':jRCl.tx<=-40&&jRCl.tx>-60,'rpi-pb-color-orange':jRCl.tx<=-60&&jRCl.tx>-75,'rpi-pb-color-red':jRCl.tx<=-75,'wifing-tx-minus1':jRCl.tx===-1}" class="wrdg-cl-dev-value cl-dev-tx">{{jRCl.tx}}</div>
+                                                  </div>
+                                                  <div class="wrdg-cl-dev-item-div activity cl-dev-pk wifing-colw-1">
+                                                    <div class="wrdg-cl-dev-value cl-dev-pk">{{(bcDaNo(jRCl.data))}}</div>
+                                                  </div>
+                                                  <div class="wrdg-cl-dev-item-div activity cl-dev-probeids wifing-colw-7">
+                                                    <div class="wrdg-cl-dev-value cl-dev-probeids">
+                                                      <div class="cl-dev-probeid-item" *ngFor="let jRClProbeId of jRCl.probeIDs;let ddcpidsI=index">
+                                                        <span class="cl-dev-probeid-value-span">{{jRClProbeId}}</span><span [ngStyle]="{'display':ddcpidsI===(jRCl.probeIDs.length-1)?'none':'block'}" class="cl-dev-probeid-comma-span">,</span>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </ion-row>
+                                  </ion-grid>
+                                </div>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                          <ion-row [ngStyle]="{'height':wifingData.routers.vizTogs.clients==='min'?'17px':wifingData.routers.vizTogs.routers==='min'?'calc(100% - 17px)':'50%'}" class="wifing-contentarea-row stations clients-list-row">
+                            <ion-col class="wifing-contentarea-col stations clients-list-col">
+                              <div class="wifing-content-list-header clients">
+                                <div class="wifing-clh-subtitle clients">clients</div>
+                                <div class="wifing-area-title-counts-wrap clients">
+                                  <div class="atc hyphen first clients">-</div>
+                                  <div [ngClass]="{'atc-is-zero':wifingJustClients.length===0}" class="atc found clients">{{wifingJustClients.length}}</div>
+                                  <div class="atc pipe first clients">|</div>
+                                  <div [ngClass]="{'atc-is-zero':wifingData.routers.selectedClients.length===0}" class="atc sel clients">{{wifingData.routers.selectedClients.length}}</div>
+                                  <div class="atc pipe second clients">|</div>
+                                  <div [ngClass]="{'atc-is-zero':wifingClientsSelFound===0}" class="atc foundsel clients">{{wifingClientsSelFound}}</div>
+                                  <div *ngIf="wifingDumpNGStarted.ago!==null" class="atc startd-wrap clients">
+                                    <div class="atc hyphen ago clients">-</div>
+                                    <div class="atc startd-txt clients">{{wifingDumpNGStarted.ago}}</div>
+                                  </div>
+                                </div>
+                                <div class="wifing-clh-subtitle-clear-btn-wrapper clients">
+                                  <button (click)="wifingDumpClearSection('routers')" class="wifing-clhs-accordian-btn clearbtn clients">
+                                    <img class="wifing-clhs-accordian-btn-ico clear clients" src="assets/twt-chat-channel-cls-ico.png">
+                                  </button>
+                                </div>
+                                <div class="wifing-clh-subtitle-accordian-btn-wrapper clients">
+                                  <button (click)="wifingDumpSectVizToggle('clients')" class="wifing-clhs-accordian-btn clients">
+                                    <img *ngIf="wifingData.routers.vizTogs.clients==='min'" class="wifing-clhs-accordian-btn-ico expand clients" src="assets/wc-accordian-expand-subheader-ico.png">
+                                    <img *ngIf="wifingData.routers.vizTogs.clients==='max'" class="wifing-clhs-accordian-btn-ico contract clients" src="assets/wc-accordian-contract-subheader-ico.png">
+                                  </button>
+                                </div>
+                              </div>
+                              <div class="wifing-content-data-outter-wrapper clients">
+                                <div class="wifing-content-data-inner-wrapper clients">
+                                  <ion-grid class="wifing-router-data-grid clients">
+                                    <ion-row class="wrdg-ap-header-row clients">
+                                      <ion-col size="1" class="wrdg-head-col select cb clients">
+                                        <div class="wrdg-head-label cl-cb clients">
+                                          <div class="wrdg-checkbox-head-ico-wrap clients">
+                                            <img class="wrdg-checkbox-head-ico-img clients" src="assets/wc-cb-checked-ico.png">
+                                          </div>
+                                        </div>
+                                      </ion-col>
+                                      <ion-col size="3" class="wrdg-head-col ident cl-id clients">
+                                        <div class="wrdg-head-label cl-id clients">
+                                          <span class="apcl-field-span cl id clients">mac</span>
+                                        </div>
+                                      </ion-col>
+                                      <ion-col size="1" class="wrdg-head-col ident cl-tx clients">
+                                        <div class="wrdg-head-label cl-tx clients">
+                                          <span class="apcl-field-span cl tx clients">tx</span>
+                                        </div>
+                                      </ion-col>
+                                      <ion-col size="1" class="wrdg-head-col activity cl-pk clients">
+                                        <div class="wrdg-head-label cl-pk clients">
+                                          <span class="apcl-field-span cl pk clients">pk</span>
+                                        </div>
+                                      </ion-col>
+                                      <ion-col size="1" class="wrdg-head-col assoc cb clients">
+                                        <div class="wrdg-head-label cl-assoc clients">
+                                          <div class="wrdg-assoc-head-ico-wrap clients">
+                                            <img class="wrdg-assoc-head-ico-img clients" src="assets/wc-wifing-clients-assoc-chain-ico.png">
+                                          </div>
+                                        </div>
+                                      </ion-col>
+                                      <ion-col size="5" class="wrdg-head-col probes clients">
+                                        <div class="wrdg-head-label cl-probes clients">
+                                          <span class="apcl-field-span cl probes">probes</span>
+                                        </div>
+                                      </ion-col>
+                                    </ion-row>
+                                    <ion-row class="wifing-justrouters-list-row clients">
+                                      <div class="wifing-justrouters-outside-wrap-div clients">
+                                        <div class="wifing-justrouters-inside-wrap-div clients">
+                                          <div *ngIf="wifingDumpNGInProg&&wifingJustClients.length<1" class="wifing-justrouters-empty-list clients">no clients found</div>
+                                          <div *ngIf="wifingJustClients.length>0" class="wifing-justrouters-found-list clients darkscrolls">
+                                            <div *ngFor="let jC of wifingJustClients;let cdI=index" [ngClass]="{'selected-client':(clientIsSel(jC))}" (click)="toggleSelectClient(jC)" class="jr-device-item-outter-wrapper clients">
+                                              <div class="jr-device-item router-wrapper clients">
+                                                <div class="wrdg-ap-dev-item-div select cl-dev-cb wifing-colw-1 clients">
+                                                  <div class="wrdg-ap-dev-value cl-dev-cb clients">
+                                                    <button class="devselect-cb-btn mysubs playlists routerselect clients">
+                                                      <img [ngStyle]="{'display':(clientIsSel(jC))?'block':'none'}" src="assets/dev-select-checkmark-ico.png" class="devselect-cb-check-ico mysubs playlists routerselect clients">
+                                                    </button>
+                                                  </div>
+                                                </div>
+                                                <div class="wrdg-ap-dev-item-div ident cl-dev-id wifing-colw-3 clients">
+                                                  <div class="wrdg-ap-dev-value cl-dev-id clients">
+                                                    <span [ngStyle]="{'color':'#ff0000'}" *ngIf="jC.mac&&jC.mac.length>0&&jC.mac==='B0:D3:9D:6E:93:72'">OPiTESTClient</span>
+                                                    <span *ngIf="jC.mac&&jC.mac.length>0&&jC.mac!=='-'&&jC.mac!=='B0:D3:9D:6E:93:72'" class="dvopt-span cl-id name macid clients">{{(mac2ID(jC.mac))}}</span>
+                                                    <span *ngIf="(!jC.mac||jC.mac.length<1||jC.mac==='-')&&jC.mac!=='B0:D3:9D:6E:93:72'" class="dvopt-span cl-id name nkid clients">Unknown</span>
+                                                  </div>
+                                                </div>
+                                                <div class="wrdg-ap-dev-item-div ident cl-dev-tx wifing-colw-1 clients">
+                                                  <div [ngClass]="{'rpi-pb-color-green':jC.tx>-40,'rpi-pb-color-yellow':jC.tx<=-40&&jC.tx>-60,'rpi-pb-color-orange':jC.tx<=-60&&jC.tx>-75,'rpi-pb-color-red':jC.tx<=-75,'wifing-tx-minus1':jC.tx===-1}" class="wrdg-ap-dev-value ap-dev-tx clients">{{jC.tx}}</div>
+                                                </div>
+                                                <div class="wrdg-ap-dev-item-div activity cl-dev-pk wifing-colw-1 clients">
+                                                  <div class="wrdg-ap-dev-value cl-dev-pk clients">{{(bcDaNo(jC.data))}}</div>
+                                                </div>
+                                                <div class="wrdg-ap-dev-item-div assoc cl-dev-assoc wifing-colw-1 clients">
+                                                  <img [ngStyle]="{'display':(clIsAssoc(jC.mac))?'block':'none'}" class="wcl-dev-isassoc clients" src="assets/wc-wifing-clients-assoc-chain-ico-green.png">
+                                                  <div [ngStyle]="{'display':(clIsAssoc(jC.mac))?'none':'block'}" class="cl-dev-notassoc-probecount-wrapper">{{jC.probeIDs.length}}</div>
+                                                </div>
+                                                <div class="wrdg-cl-dev-item-div activity cl-dev-probeids wifing-colw-5 clients">
+                                                  <div class="wrdg-cl-dev-value cl-dev-probeids clients">
+                                                    <div class="cl-dev-probeid-item clients" *ngFor="let jCPId of jC.probeIDs;let jcpidI=index">
+                                                      <span class="cl-dev-probeid-value-span clients">{{jCPId}}</span><span [ngStyle]="{'display':jcpidI===(jC.probeIDs.length-1)?'none':'block'}" class="cl-dev-probeid-comma-span clients">,</span>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </ion-row>
+                                  </ion-grid>
+                                </div>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                        </ion-grid>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </div>
+              <!------------------------- DEAUTHS SCREEN ----------------------------->
+              <div *ngIf="(getActScrn('deauths'))" class="wifing-main-scrape-wrapper">
+                <ion-grid class="wc-grid wifing-module-main-grid deauths">
+                  <ion-row class="wc-row wifing-module-main-row deauths">
+                    <ion-col class="wc-col wifing-module-main-col deauths">
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </div>
+              <!------------------------- HANDSHAKES SCREEN ----------------------------->
+              <div *ngIf="(getActScrn('handshakes'))" class="wifing-main-scrape-wrapper">
+                <ion-grid class="wc-grid wifing-module-main-grid handshakes">
+                  <ion-row class="wc-row wifing-module-main-row handshakes">
+                    <ion-col class="wc-col wifing-module-main-col handshakes">
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </div>
+              <!------------------------- CRACKS SCREEN ----------------------------->
+              <div *ngIf="(getActScrn('cracks'))" class="wifing-main-scrape-wrapper">
+                <ion-grid class="wc-grid wifing-module-main-grid cracks">
+                  <ion-row class="wc-row wifing-module-main-row cracks">
+                    <ion-col class="wc-col wifing-module-main-col cracks">
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </div>
+            </div>
+          </div>
+          <!-- //////////////////////////////////////////////// WIFING MODULE ENDS //////////////////////////////////////////////// -->
+          <!-- //////////////////////////////////////////////// YTDL MODULE STARTS //////////////////////////////////////////////// -->
+          <div *ngIf="mTitle==='ytdl'" class="ytdl-module-main-outter-wrapper">
+            <div class="ytdl-module-main-inner-wrapper">
+              <!------------------------- SCRAPE SCREEN ----------------------------->
+              <div *ngIf="(getActScrn('scrape'))" class="ytdl-main-scrape-wrapper">
+                <ion-grid class="wc-grid ytdl-module-main-grid download">
+                  <!-- GET TERMS -->
+                  <ion-row class="wc-row ytdl-module-main-row getterms">
+                    <ion-col class="wc-col ytdl-module-main-col getterms">
+                      <div class="ytdl-main-section-wrapper getterms">
+                        <ion-grid class="wc-grid ytdl-section-grid getterms">
+                          <ion-row [ngClass]="{'ytdl-rowis-sleep':ytdlTermsInfo.state==='idle'}" class="wc-row ytdl-section-row getterms content-row">
+                            <ion-col size="2" class="wc-col ytdl-section-col section-ico-col">
+                              <div [ngStyle]="{'filter':ytdlTermsInfo.state==='stopped'||ytdlTermsInfo.state==='idle'?'brightness(0.75)':'brightness(1.25)'}" class="ytdl-section-ico-wrap getterms">
+                                <img class="ytdl-section-ico-img getterms" src="assets/ytdl-section-head-ico-terms.png">
+                              </div>
+                            </ion-col>
+                            <ion-col size="2" class="wc-col ytdl-section-col status-ico-col">
+                              <div class="ytdl-status-ico-wrap getterms">
+                                <img [ngStyle]="{'display':ytdlTermsInfo.state==='stopped'?'block':'none'}" class="ytdl-status-ico-img getterms stopped" src="assets/ytdl-status-stopped-ico.png">
+                                <img [ngStyle]="{'display':ytdlTermsInfo.state==='inprog'?'block':'none'}" class="ytdl-status-ico-img getterms inprog" src="assets/ytdl-status-inprog-ico.png">
+                                <img [ngStyle]="{'display':ytdlTermsInfo.state==='paused'?'block':'none'}" class="ytdl-status-ico-img getterms paused blinking" src="assets/ytdl-status-paused-ico.png">
+                                <img [ngStyle]="{'display':ytdlTermsInfo.state==='idle'?'block':'none'}" class="ytdl-status-ico-img getterms idle idle-anim" src="assets/ytdl-status-idle-ico.png">
+                                <img [ngStyle]="{'display':ytdlTermsInfo.state==='error'?'block':'none'}" class="ytdl-status-ico-img getterms error blinking" src="assets/ytdl-status-error-ico.png">
+                              </div>
+                            </ion-col>
+                            <ion-col size="5" class="wc-col ytdl-section-col proginfo-col">
+                              <div class="ytdl-terms-type-counts-wrapper">
+                                <div class="ytdl-tt-count-wrap ytt">
+                                  <img class="ytdl-tt-count-ico ytt" src="assets/ytdl-terms-ytt-ico.png">
+                                  <div [ngStyle]="{'opacity':ytdlTermsInfo.counts.actual.ytt>0?'1':'0.48'}" class="ytdl-tt-count-value ytt">{{ytdlTermsInfo.counts.actual.ytt}}</div>
+                                </div>
+                                <div class="ytdl-tt-count-wrap twt">
+                                  <img class="ytdl-tt-count-ico twt" src="assets/ytdl-terms-twt-ico.png">
+                                  <div [ngStyle]="{'opacity':ytdlTermsInfo.counts.actual.twt>0?'1':'0.48'}" class="ytdl-tt-count-value twt">{{ytdlTermsInfo.counts.actual.twt}}</div>
+                                </div>
+                                <div class="ytdl-tt-count-wrap rnd">
+                                  <img class="ytdl-tt-count-ico rnd" src="assets/ytdl-terms-rnd-ico.png">
+                                  <div [ngStyle]="{'opacity':ytdlTermsInfo.counts.actual.rnd>0?'1':'0.48'}" class="ytdl-tt-count-value rnd">{{ytdlTermsInfo.counts.actual.rnd}}</div>
+                                </div>
+                              </div>
+                            </ion-col>
+                            <ion-col size="3" class="wc-col ytdl-section-col corecounts-col">
+                              <div class="ytdl-terms-counts-outter-wrapper">
+                                <div class="ytdl-terms-total-counts-wrapper">
+                                  <div class="ytdl-ttlcount-wrap">
+                                    <div [ngClass]="{'ytdlcount-good':ytdlTermsInfo.counts.actual.ttl===ytdlTermsInfo.counts.max,'ytdlcount-bad':ytdlTermsInfo.counts.actual.ttl<ytdlTermsInfo.counts.min,'ytdlcount-ok':ytdlTermsInfo.counts.actual.ttl>=ytdlTermsInfo.counts.min&&ytdlTermsInfo.counts.actual.ttl<ytdlTermsInfo.counts.max}" class="ytdl-ttlcount-value actual">{{ytdlTermsInfo.counts.actual.ttl}}</div>
+                                    <div class="ytdl-ttlcount-slash">/</div>
+                                    <div class="ytdl-ttlcount-value min">{{ytdlTermsInfo.counts.max}}</div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="ytdl-dur-wrapper terms">
+                                <div class="ytdl-dur-value terms">{{ytdlTermsInfo.dur}}</div>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                          <ion-row class="wc-row ytdl-section-row getterms progress-row">
+                            <ion-col class="wc-col ytdl-section-col progress-col">
+                              <div class="ytdl-section-prog-wrap getterms">
+                                <ion-progress-bar [ngClass]="{'ytdlprog-stopped':ytdlTermsInfo.state==='stopped','ytdlprog-idle':ytdlTermsInfo.state==='idle'||ytdlTermsInfo.state==='error','ytdlprog-inprog':ytdlTermsInfo.state==='inprog'||ytdlTermsInfo.state==='indet','ytdlprog-paused':ytdlTermsInfo.state==='paused'}" class="ytdl-prog getterms" value={{ytdlTermsInfo.prog}} [type]="(ytdlTermsInfo.state==='paused'||ytdlTermsInfo.state==='indet'?'indeterminate':'determinate')"></ion-progress-bar>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                        </ion-grid>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                  <!-- GET VIDS -->
+                  <ion-row [ngClass]="{'ytdl-rowis-sleep':ytdlVidsInfo.state==='idle'}" class="wc-row ytdl-module-main-row getvids">
+                    <ion-col class="wc-col ytdl-module-main-col getvids">
+                      <div class="ytdl-main-section-wrapper getvids">
+                        <ion-grid class="wc-grid ytdl-section-grid getvids">
+                          <ion-row class="wc-row ytdl-section-row getvids content-row">
+                            <ion-col size="2" class="wc-col ytdl-section-col section-ico-col">
+                              <div [ngStyle]="{'filter':ytdlVidsInfo.state==='stopped'||ytdlVidsInfo.state==='idle'?'brightness(0.75)':'brightness(1.25)'}" class="ytdl-section-ico-wrap getvids">
+                                <img class="ytdl-section-ico-img getvids" src="assets/ytdl-section-head-ico-vids.png">
+                              </div>
+                            </ion-col>
+                            <ion-col size="2" class="wc-col ytdl-section-col status-ico-col">
+                              <div class="ytdl-status-ico-wrap getvids">
+                                <img [ngStyle]="{'display':ytdlVidsInfo.state==='stopped'?'block':'none'}" class="ytdl-status-ico-img getvids stopped" src="assets/ytdl-status-stopped-ico.png">
+                                <img [ngStyle]="{'display':ytdlVidsInfo.state==='inprog'?'block':'none'}" class="ytdl-status-ico-img getvids inprog" src="assets/ytdl-status-inprog-ico.png">
+                                <img [ngStyle]="{'display':ytdlVidsInfo.state==='paused'?'block':'none'}" class="ytdl-status-ico-img getvids paused blinking" src="assets/ytdl-status-paused-ico.png">
+                                <img [ngStyle]="{'display':ytdlVidsInfo.state==='idle'?'block':'none'}" class="ytdl-status-ico-img getvids idle idle-anim" src="assets/ytdl-status-idle-ico.png">
+                                <img [ngStyle]="{'display':ytdlVidsInfo.state==='error'?'block':'none'}" class="ytdl-status-ico-img getvids error blinking" src="assets/ytdl-status-error-ico.png">
+                              </div>
+                            </ion-col>
+                            <ion-col size="5" class="wc-col ytdl-section-col proginfo-col">
+                              <div class="ytdl-vids-info-wrapper">
+                                <ion-grid class="wc-grid ytdlcaps-info-grid">
+                                  <ion-row class="wc-row ytdlcaps-info-row">
+                                    <ion-col class="wc-col ytdlcaps-info-col term">
+                                      <div class="ytdlcaps-fileswords-wrapper">
+                                        <div class="wc-caps-term-wrap">{{ytdlVidsInfo.term}}</div>
+                                        <div class="ytdlcaps-fileswords-line infocapsfile">
+                                          <img class="ytdlcaps-fw-ico info" src="assets/ytdl-vids-search-ico.png">
+                                          <div class="ytdlcaps-fw-label info">str:</div>
+                                          <img [ngStyle]="{'opacity':ytdlVidSteps.search?'1':'0'}" class="ytdlcaps-fw-cb-ico checked info" src="assets/wc-twt-findtune-didaction-ico.png">
+                                          <div class="infocapsdivider-wrapper">|</div>
+                                          <img class="ytdlcaps-fw-ico caps" src="assets/ytdl-caps-capsxml-ico.png">
+                                          <div class="ytdlcaps-fw-label caps">inf:</div>
+                                          <img [ngStyle]="{'opacity':ytdlVidSteps.info?'1':'0'}" class="ytdlcaps-fw-cb-ico checked caps" src="assets/wc-twt-findtune-didaction-ico.png">
+                                        </div>
+                                      </div>
+                                    </ion-col>
+                                  </ion-row>
+                                </ion-grid>
+                              </div>
+                            </ion-col>
+                            <ion-col size="3" class="wc-col ytdl-section-col corecounts-col">
+                              <div class="ytdl-terms-counts-outter-wrapper">
+                                <div class="ytdl-terms-total-counts-wrapper">
+                                  <div class="ytdl-ttlcount-wrap">
+                                    <div [ngClass]="{'ytdlcount-good':ytdlVidsInfo.counts.actual===ytdlVidsInfo.counts.target,'ytdlcount-bad':ytdlVidsInfo.counts.actual<(ytdlVidsInfo.counts.target/2),'ytdlcount-ok':ytdlVidsInfo.counts.actual>=(ytdlVidsInfo.counts.target/2)&&ytdlVidsInfo.counts.actual!==ytdlVidsInfo.counts.target}" class="ytdl-ttlcount-value actual">{{ytdlVidsInfo.counts.actual}}</div>
+                                    <div class="ytdl-ttlcount-slash">/</div>
+                                    <div class="ytdl-ttlcount-value min">{{ytdlVidsInfo.counts.target}}</div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="ytdl-dur-wrapper vids">
+                                <div class="ytdl-dur-value vids">{{ytdlVidsInfo.dur}}</div>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                          <ion-row class="wc-row ytdl-section-row getvids progress-row">
+                            <ion-col class="wc-col ytdl-section-col progress-col">
+                              <div class="ytdl-section-prog-wrap getvids">
+                                <ion-progress-bar [ngClass]="{'ytdlprog-stopped':ytdlVidsInfo.state==='stopped','ytdlprog-idle':ytdlVidsInfo.state==='idle'||ytdlVidsInfo.state==='error','ytdlprog-inprog':ytdlVidsInfo.state==='inprog'||ytdlTermsInfo.state==='indet','ytdlprog-paused':ytdlVidsInfo.state==='paused'}" class="ytdl-prog getvids" value={{ytdlVidsInfo.prog}} [type]="(ytdlVidsInfo.state==='paused'||ytdlVidsInfo.state==='indet'?'indeterminate':'determinate')"></ion-progress-bar>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                        </ion-grid>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                  <!-- GET CAPS -->
+                  <ion-row [ngClass]="{'ytdl-rowis-sleep':ytdlCapsInfo.state==='idle'}" class="wc-row ytdl-module-main-row getcaps">
+                    <ion-col class="wc-col ytdl-module-main-col getcaps">
+                      <div class="ytdl-main-section-wrapper getcaps">
+                        <ion-grid class="wc-grid ytdl-section-grid getcaps">
+                          <ion-row class="wc-row ytdl-section-row getcaps content-row">
+                            <ion-col size="2" class="wc-col ytdl-section-col section-ico-col">
+                              <div [ngStyle]="{'filter':ytdlCapsInfo.state==='stopped'||ytdlCapsInfo.state==='idle'?'brightness(0.75)':'brightness(1.25)'}" class="ytdl-section-ico-wrap getcaps">
+                                <img class="ytdl-section-ico-img getcaps" src="assets/ytdl-section-head-ico-caps.png">
+                              </div>
+                            </ion-col>
+                            <ion-col size="2" class="wc-col ytdl-section-col status-ico-col">
+                              <div class="ytdl-status-ico-wrap getcaps">
+                                <img [ngStyle]="{'display':ytdlCapsInfo.state==='stopped'?'block':'none'}" class="ytdl-status-ico-img getcaps stopped" src="assets/ytdl-status-stopped-ico.png">
+                                <img [ngStyle]="{'display':ytdlCapsInfo.state==='inprog'?'block':'none'}" class="ytdl-status-ico-img getcaps inprog" src="assets/ytdl-status-inprog-ico.png">
+                                <img [ngStyle]="{'display':ytdlCapsInfo.state==='paused'?'block':'none'}" class="ytdl-status-ico-img getcaps paused blinking" src="assets/ytdl-status-paused-ico.png">
+                                <img [ngStyle]="{'display':ytdlCapsInfo.state==='idle'?'block':'none'}" class="ytdl-status-ico-img getcaps idle idle-anim" src="assets/ytdl-status-idle-ico.png">
+                                <img [ngStyle]="{'display':ytdlCapsInfo.state==='error'?'block':'none'}" class="ytdl-status-ico-img getcaps error blinking" src="assets/ytdl-status-error-ico.png">
+                              </div>
+                            </ion-col>
+                            <ion-col size="5" class="wc-col ytdl-section-col proginfo-col">
+                              <div class="ytdl-caps-info-wrapper">
+                                <ion-grid class="wc-grid ytdlcaps-info-grid">
+                                  <ion-row class="wc-row ytdlcaps-info-row">
+                                    <ion-col class="wc-col ytdlcaps-info-col term">
+                                      <div class="ytdlcaps-fileswords-wrapper">
+                                        <div class="wc-caps-term-wrap">{{ytdlCapsInfo.term}}</div>
+                                        <div class="ytdlcaps-fileswords-line infocapsfile">
+                                          <img class="ytdlcaps-fw-ico info" src="assets/ytdl-caps-ctrack-ico.png">
+                                          <div class="ytdlcaps-fw-label info">ctr:</div>
+                                          <img [ngStyle]="{'opacity':ytdlCapSteps.ctrack?'1':'0'}" class="ytdlcaps-fw-cb-ico checked info" src="assets/wc-twt-findtune-didaction-ico.png">
+                                          <div class="infocapsdivider-wrapper">|</div>
+                                          <img class="ytdlcaps-fw-ico caps" src="assets/ytdl-caps-capsxml-ico.png">
+                                          <div class="ytdlcaps-fw-label caps">cap:</div>
+                                          <img [ngStyle]="{'opacity':ytdlCapSteps.caption?'1':'0'}" class="ytdlcaps-fw-cb-ico checked caps" src="assets/wc-twt-findtune-didaction-ico.png">
+                                        </div>
+                                        <div class="ytdlcaps-fileswords-line wordcount">
+                                          <img class="ytdlcaps-fw-ico caps" src="assets/ytdl-caps-wordcount-ico.png">
+                                          <div class="ytdlcaps-fw-label caps">words:</div>
+                                          <div class="ytdlcaps-fw-value caps">{{(ytdlCapSteps.words/1000).toFixed(1)}}<span class="lilk">k</span></div>
+                                        </div>
+                                      </div>
+                                    </ion-col>
+                                  </ion-row>
+                                </ion-grid>
+                              </div>
+                            </ion-col>
+                            <ion-col size="3" class="wc-col ytdl-section-col corecounts-col">
+                              <div class="ytdl-terms-counts-outter-wrapper">
+                                <div class="ytdl-terms-total-counts-wrapper">
+                                  <div class="ytdl-ttlcount-wrap">
+                                    <div [ngClass]="{'ytdlcount-good':ytdlCapsInfo.counts.actual===ytdlCapsInfo.counts.target,'ytdlcount-bad':ytdlCapsInfo.counts.actual<(ytdlCapsInfo.counts.target/2),'ytdlcount-ok':ytdlCapsInfo.counts.actual>=(ytdlCapsInfo.counts.target/2)&&ytdlCapsInfo.counts.actual!==ytdlCapsInfo.counts.target}" class="ytdl-ttlcount-value actual">{{ytdlCapsInfo.counts.actual}}</div>
+                                    <div class="ytdl-ttlcount-slash">/</div>
+                                    <div class="ytdl-ttlcount-value min">{{ytdlCapsInfo.counts.target}}</div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="ytdl-dur-wrapper caps">
+                                <div class="ytdl-dur-value caps">{{ytdlCapsInfo.dur}}</div>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                          <ion-row class="wc-row ytdl-section-row getcaps progress-row">
+                            <ion-col class="wc-col ytdl-section-col progress-col">
+                              <div class="ytdl-section-prog-wrap getcaps">
+                                <ion-progress-bar [ngClass]="{'ytdlprog-stopped':ytdlCapsInfo.state==='stopped','ytdlprog-idle':ytdlCapsInfo.state==='idle'||ytdlCapsInfo.state==='error','ytdlprog-inprog':ytdlCapsInfo.state==='inprog'||ytdlCapsInfo.state==='indet','ytdlprog-paused':ytdlCapsInfo.state==='paused'}" class="ytdl-prog getcaps" value={{ytdlCapsInfo.prog}} [type]="(ytdlCapsInfo.state==='paused'||ytdlCapsInfo.state==='indet'?'indeterminate':'determinate')"></ion-progress-bar>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                        </ion-grid>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                  <!-- UPDATE DB -->
+                  <ion-row [ngClass]="{'ytdl-rowis-sleep':ytdlDBInfo.state==='idle'}" class="wc-row ytdl-module-main-row updatedb">
+                    <ion-col class="wc-col ytdl-module-main-col updatedb">
+                      <div class="ytdl-main-section-wrapper updatedb">
+                        <ion-grid class="wc-grid ytdl-section-grid updatedb">
+                          <ion-row class="wc-row ytdl-section-row updatedb content-row">
+                            <ion-col size="2" class="wc-col ytdl-section-col section-ico-col">
+                              <div [ngStyle]="{'filter':ytdlDBInfo.state==='stopped'||ytdlDBInfo.state==='idle'?'brightness(0.75)':'brightness(1.25)'}" class="ytdl-section-ico-wrap updatedb">
+                                <img class="ytdl-section-ico-img updatedb" src="assets/ytdl-section-head-ico-db.png">
+                              </div>
+                            </ion-col>
+                            <ion-col size="2" class="wc-col ytdl-section-col status-ico-col">
+                              <div class="ytdl-status-ico-wrap updatedb">
+                                <img [ngStyle]="{'display':ytdlDBInfo.state==='stopped'?'block':'none'}" class="ytdl-status-ico-img updatedb stopped" src="assets/ytdl-status-stopped-ico.png">
+                                <img [ngStyle]="{'display':ytdlDBInfo.state==='inprog'?'block':'none'}" class="ytdl-status-ico-img updatedb inprog" src="assets/ytdl-status-inprog-ico.png">
+                                <img [ngStyle]="{'display':ytdlDBInfo.state==='paused'?'block':'none'}" class="ytdl-status-ico-img updatedb paused blinking" src="assets/ytdl-status-paused-ico.png">
+                                <img [ngStyle]="{'display':ytdlDBInfo.state==='idle'?'block':'none'}" class="ytdl-status-ico-img updatedb idle idle-anim" src="assets/ytdl-status-idle-ico.png">
+                                <img [ngStyle]="{'display':ytdlDBInfo.state==='error'?'block':'none'}" class="ytdl-status-ico-img updatedb error blinking" src="assets/ytdl-status-error-ico.png">
+                              </div>
+                            </ion-col>
+                            <ion-col size="5" class="wc-col ytdl-section-col proginfo-col">
+                              <div class="ytdl-db-info-wrapper">
+                                <div class="db-info-vididwrap">{{ytdlDBInfo.term}}</div>
+                                <div class="db-info-convertadd-wrap">
+                                  <img class="ytdlcaps-fw-ico info" src="assets/ytdl-db-convert-ico.png">
+                                  <div class="ytdlcaps-fw-label info">cvt:</div>
+                                  <img [ngStyle]="{'opacity':ytdlDBSteps.convert?'1':'0'}" class="ytdlcaps-fw-cb-ico checked info" src="assets/wc-twt-findtune-didaction-ico.png">
+                                  <div class="infocapsdivider-wrapper">|</div>
+                                  <img class="ytdlcaps-fw-ico caps" src="assets/ytdl-db-add-ico.png">
+                                  <div class="ytdlcaps-fw-label caps">row:</div>
+                                  <img [ngStyle]="{'opacity':ytdlDBSteps.add?'1':'0'}" class="ytdlcaps-fw-cb-ico checked caps" src="assets/wc-twt-findtune-didaction-ico.png">
+                                </div>
+                                <div class="ytdlcaps-fileswords-line wordcount">
+                                  <img class="ytdlcaps-fw-ico caps" src="assets/ytdl-caps-wordcount-ico.png">
+                                  <div class="ytdlcaps-fw-label caps">items:</div>
+                                  <div class="ytdlcaps-fw-value caps">{{(ytdlDBItemCount/1000).toFixed(2)}}<span class="lilk">k</span></div>
+                                </div>
+                              </div>
+                            </ion-col>
+                            <ion-col size="3" class="wc-col ytdl-section-col corecounts-col">
+                              <div class="ytdl-terms-counts-outter-wrapper">
+                                <div class="ytdl-terms-total-counts-wrapper">
+                                  <div class="ytdl-ttlcount-wrap">
+                                    <div [ngClass]="{'ytdlcount-good':ytdlDBInfo.counts.actual===ytdlDBInfo.counts.target,'ytdlcount-bad':ytdlDBInfo.counts.actual<(ytdlDBInfo.counts.target/2),'ytdlcount-ok':ytdlDBInfo.counts.actual>=(ytdlDBInfo.counts.target/2)&&ytdlDBInfo.counts.actual!==ytdlDBInfo.counts.target}" class="ytdl-ttlcount-value actual">{{ytdlDBInfo.counts.actual}}</div>
+                                    <div class="ytdl-ttlcount-slash">/</div>
+                                    <div class="ytdl-ttlcount-value min">{{ytdlDBInfo.counts.target}}</div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="ytdl-dur-wrapper updatedb">
+                                <div class="ytdl-dur-value updatedb">{{ytdlDBInfo.dur}}</div>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                          <ion-row class="wc-row ytdl-section-row updatedb progress-row">
+                            <ion-col class="wc-col ytdl-section-col progress-col">
+                              <div class="ytdl-section-prog-wrap updatedb">
+                                <ion-progress-bar [ngClass]="{'ytdlprog-stopped':ytdlDBInfo.state==='stopped','ytdlprog-idle':ytdlDBInfo.state==='idle'||ytdlDBInfo.state==='error','ytdlprog-inprog':ytdlDBInfo.state==='inprog'||ytdlDBInfo.state==='indet','ytdlprog-paused':ytdlDBInfo.state==='paused'}" class="ytdl-prog updatedb" value={{ytdlDBInfo.prog}} [type]="(ytdlDBInfo.state==='paused'||ytdlDBInfo.state==='indet'?'indeterminate':'determinate')"></ion-progress-bar>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                        </ion-grid>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </div>
+              <!------------------------- SEARCH SCREEN ------------------------------->
+              <div *ngIf="(getActScrn('search'))" class="ytdl-main-search-wrapper">
+                <ion-grid class="wc-grid ytdl-module-main-grid search">
+                  <ion-row class="wc-row ytdl-module-main-row search search-input-row">
+                    <ion-col class="wc-col ytdl-module-main-col search search-input-col">
+                      <div class="ytdl-search-searchinput-wrapper outter">
+                        <div class="ytdl-search-searchinput-wrapper inner">
+                          <div class="ytdl-search-searchinput-inputcls-wrap">
+                            <input #ytdlSearchInput [value]="" class="ytdl-search-input" (click)="ytdlSearchInputFn('click',$event,ytdlSearchInput.value)" (keydown)="ytdlSearchInputFn('kd',$event,ytdlSearchInput.value)" (keyup)="ytdlSearchInputFn('ku',$event,ytdlSearchInput.value)" (focus)="ytdlSearchInputFn('f',$event,ytdlSearchInput.value)" [disabled]="ytdlSearchStage==='inprog'">
+                            <button (click)="ytdlSearchInputFn('cls',$event,null)" [ngStyle]="{'opacity':!ytdlSTOK||ytdlSearchInput.value.length<1?'0':'1'}" [disabled]="!ytdlSTOK||ytdlSearchInput.value.length<1||ytdlSearchStage==='inprog'" class="ytdl-searchinput-btn clear">
+                              <img class="ytdl-searchinput-btn-ico clear" src="assets/twt-chat-channel-cls-ico.png">
+                            </button>
+                          </div>
+                          <div class="ytdl-searchinput-gobtn-wrapper">
+                            <button [ngStyle]="{'display':ytdlSearchStage==='inprog'?'none':'flex'}" (click)="ytdlSearchInputFn('go',$event,ytdlSearchInput.value)" [disabled]="!ytdlSTOK||ytdlSearchStage==='inprog'" class="ytdl-searchinput-btn go">
+                              <img [ngStyle]="{'display':!ytdlSTOK?'block':'none'}" class="ytdl-searchinput-btn-ico go bad" src="assets/ytdl-search-inputbtnico-go-red.png">
+                              <img [ngStyle]="{'display':ytdlSTOK&&ytdlSearchStage!=='inprog'?'block':'none'}" class="ytdl-searchinput-btn-ico go ok" src="assets/ytdl-search-inputbtnico-go-878787.png">
+                              <img [ngStyle]="{'display':ytdlSTOK&&ytdlSearchStage==='inprog'?'block':'none'}" class="ytdl-searchinput-btn-ico go inprog" src="assets/ytdl-search-inputbtnico-go-green.png">
+                            </button>
+                            <div [ngStyle]="{'display':ytdlSearchStage==='inprog'?'flex':'none'}" class="ytdl-search-loader-wrapper">
+                              <div *ngIf="sSIP===1" class="ytdl-loader1"></div>
+                              <div *ngIf="sSIP===2" class="ytdl-loader2"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row class="wc-row ytdl-module-main-row search search-results-row">
+                    <ion-col class="wc-col ytdl-module-main-col search search-results-col">
+                      <div class="ytdl-search-searchresults-wrapper outter">
+                        <div *ngIf="ytdlSearchStage==='inprog'" class="ytdl-mdb-mongomatches outter-wrapper">
+                          <div class="ytdl-mdb-mongomatches inner-wrapper">
+                            <div class="ytdl-mdb-mongomatches counts-header-outter-wrapper">
+                              <div class="ytdl-mdb-mongomatches counts-header-inner-wrapper">
+                                <div class="mdb-mm-ch found-label">found:</div>
+                                <div [ngStyle]="{'color':ytdlMDBMonMatches.length<1?'#646464':'#20c997'}" class="mdb-mm-ch found-value">{{ytdlMDBMonMatches.length}}</div>
+                                <div class="mdb-mm-ch sep slash">/</div>
+                                <div class="mdb-mm-ch ttl-value">{{ytdlMDBDocsCount.toLocaleString()}}</div>
+                                <div class="mdb-mm-ch sep in">in</div>
+                                <div class="mdb-mm-ch logo-wrap"><img class="mdb-mm-ch-db-logo-img" src="assets/wc-ytdl-mdb-header-txt-logo.png"></div>
+                                <div *ngIf="ytdlMDBMonMatches.length>1" class="mdb-mm-ch range-wrap"><span class="mdb-mm-span-brack left">(</span><span class="mdb-mm-rangeid start">{{ytdlMDBMonMatches[ytdlMDBMonMatches.length-1].db_id}}</span><span class="mdb-mm-rangeid hyphen">-</span><span class="mdb-mm-rangeid end">{{ytdlMDBMonMatches[0].db_id}}</span><span class="mdb-mm-span-brack right">)</span></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div *ngIf="ytdlSearchStage==='finished'||ytdlSearchStage==='error'" class="ytdl-search-searchresults-wrapper inner">
+                          <div class="ytdl-search-searchresults-header">
+                            <div *ngIf="ytdlSearchStage==='error'&&ytdlData.selectedItems.length<1" class="srh-item indic">
+                              <img [ngStyle]="{'display':ytdlData.searchItems.length>0&&ytdlSearchStage!=='error'?'block':'none'}" class="srh-result-ico gotresults" src="assets/wc-twt-findtune-didaction-ico.png">
+                              <img [ngStyle]="{'display':ytdlData.searchItems.length<1&&ytdlSearchStage!=='error'?'block':'none'}" class="srh-result-ico noresults" src="assets/wc-twt-findtune-close-ico.png">
+                              <img [ngStyle]="{'display':ytdlSearchStage==='error'?'block':'none'}" class="srh-result-ico noresults" src="assets/ytdl-status-error-ico.png">
+                            </div>
+                            <div *ngIf="ytdlSearchStage==='error'&&ytdlData.selectedItems.length<1" class="srh-error-info">Error - Search Failed</div>
+                            <div *ngIf="ytdlSearchStage==='finished'&&ytdlData.selectedItems.length<1" class="srh-item info">
+                              <div class="srh-item info jword found">found</div>
+                              <div class="srh-item counts mentions"><span [ngStyle]="{'color':ytdlSRCounts.hits>0?'#20c997':'#FA5252'}" class="srh-item value mentions">{{ytdlSRCounts.hits}}</span><span class="srh-item label mentions">hits</span></div>
+                              <div class="srh-item info jword in">in</div>
+                              <div class="srh-item counts items"><span [ngStyle]="{'color':ytdlSRCounts.caps>0?'#20c997':'#FA5252'}" class="srh-item value items">{{ytdlSRCounts.caps}}</span><span class="srh-item label items">caps</span></div>
+                              <div class="srh-item info jword after">after</div>
+                              <div class="srh-item counts time"><span class="srh-item value time">{{ytdlSRCounts.time.ttl.str}}</span></div>
+                            </div>
+                            <div class="srh-item showall-btn-wrap">
+                              <button (click)="ytdlToggleHideZeroHits()" [ngClass]="{'hidezeroactivated':ytdlHideZeroHits}" class="srh-item showall-btn">Zs</button>
+                            </div>
+                            <div *ngIf="ytdlSearchStage==='finished'&&ytdlData.selectedItems.length>0" class="srh-item selected-items-wrap">
+                              <div class="selected-items-div-line">|</div>
+                              <img src="assets/ytdl-item-selected-cb-ico.png" class="selected-items-ico">
+                              <div class="srh-item info jword found">Selected</div>
+                              <div class="srh-selected-count-wrap">
+                                <div class="srh-selected-count hits">{{ytdlSelectedCounts.hits}}</div>
+                                <div class="srh-selected-count slash">/</div>
+                                <div class="srh-selected-count caps">{{ytdlSelectedCounts.caps}}</div>
+                                <div class="srh-selected-count hyphen">-</div>
+                                <div class="srh-selected-count dur">{{ytdlSelectedCounts.dur.str}}</div>
+                              </div>
+                              <div class="srh-item selectallnone-btn-wrap">
+                                <button (click)="ytdlSelectAllNone('all')" [disabled]="(ytdlHideZeroHits&&ytdlSelectedCounts.caps===(ytdlSRCounts.caps-this.ytdlZeroHits))||(!ytdlHideZeroHits&&ytdlSelectedCounts.caps===ytdlSRCounts.caps)" class="srh-item selectall-btn">All</button>
+                                <button (click)="ytdlSelectAllNone('none')" [disabled]="ytdlSelectedCounts.caps===0" class="srh-item selectnone-btn">None</button>
+                                <button (click)="ytdlSendBatchToDL()" [disabled]="ytdlSelectedCounts.caps<1" class="srh-item send2dl-btn">
+                                  <div class="srh-item-btn-label-wrap send2dl">
+                                    <div class="srh-item-btn-label-txt send2dl">DLs</div>
+                                    <img src="assets/ytdl-search-send2dl-ico-878787.png" class="srh-item-btn-ico send2dl">
+                                  </div>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                          <div *ngIf="ytdlSearchStage!=='error'" class="ytdl-search-searchresults-list darkscrolls">
+                            <div (click)="ytdlSelectSRItem(srMatch)" *ngFor="let srMatch of ytdlData.searchItems;index as srmI" [ngClass]="{'failmatchclass':srMatch.matches.length===0&&ytdlHideZeroHits,'sr-is-selected':ytdlSRIsSelected(srMatch.vId)}" class="ytdl-search-searchresults-item">
+                              <div class="sri-wrap vid">
+                                <div class="sri-label vid">id:</div>
+                                <div class="sri-value vid">{{srMatch.vId}}</div>
+                              </div>
+                              <div class="sri-jbit pipe">|</div>
+                              <div class="sri-wrap hits">
+                                <div class="sri-label hits">h:</div>
+                                <div class="sri-value hits">{{srMatch.matches.length}}</div>
+                              </div>
+                              <div *ngIf="srMatch.matches.length>0" class="sri-wrap firstmatch">
+                                <div class="sri-jbit pipe">|</div>
+                                <div class="sri-label firstmatch">m:</div>
+                                <div class="sri-value firstmatch">
+                                  <div class="sri-sub-label firstmatch transline">l:</div>
+                                  <div class="sri-sub-value firstmatch transline">{{(srMatch.matches[0].transIndex+1)}}</div>
+                                  <div class="sri-sub-label firstmatch transtimedur">d:</div>
+                                  <div class="sri-sub-value firstmatch transtimedur">{{srMatch.matches[0].transTime.dur.toFixed(1)}}</div>
+                                  <div class="sri-sub-label firstmatch transtext">t:</div>
+                                  <div class="sri-sub-value firstmatch transtext">
+                                    <span *ngFor="let matchWord of srMatch.matches[0].transText.arr;index as mwtti"class="fm-ttext-word" [ngClass]="{'matchgroup':mwtti===srMatch.matches[0].transText.b}">{{matchWord}}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </div>
+              <!------------------------- DL SCREEN ------------------------------->
+              <div *ngIf="(getActScrn('download'))" class="ytdl-main-dl-wrapper">
+                <ion-grid class="wc-grid ytdl-module-main-grid dl">
+                  <ion-row class="wc-row ytdl-module-main-row dl">
+                    <ion-col class="wc-col ytdl-module-main-col dl">
+                      <div class="ytdl-dl-col-wrapper">
+                        <div class="ytdl-dl-progress-topper-wrapper-outter">
+                          <div class="ytdl-dl-progress-topper-wrapper-inner">
+                            <div class="ptop-progress-strip-wrap batch">
+                              <div class="ptop-counts-wrap batch">
+                                <img class="ptop-counts-ico batch" src="assets/ytdl-batch-folder-ico.png">
+                                <div class="ptop-counts-vals-wrap">
+                                  <div class="ptop-counts-countvalue batch">{{ytdlBatchProg.batches.c}}</div>
+                                  <div class="ptop-counts-slash batch">/</div>
+                                  <div class="ptop-counts-ttlvalue batch">{{ytdlBatchProg.batches.t}}</div>
+                                </div>
+                              </div>
+                              <div class="ptop-pbar-wrap batch">
+                                <div class="ptop-pbar-inner batch">
+                                  <ion-progress-bar class="ytdl-dl-prog batch" value={{ytdlBatchProg.batches.p}}></ion-progress-bar>
+                                </div>
+                              </div>
+                              <div class="ptop-perc-wrap batch">
+                                <div class="ptop-perc-value batch">{{(ytdlBatchProg.batches.p*100).toFixed(0)}}<span class="ptop-perc-sign">%</span></div>
+                              </div>
+                            </div>
+                            <div class="ptop-progress-strip-wrap item">
+                              <div class="ptop-counts-wrap item">
+                                <img class="ptop-counts-ico item" src="assets/ytdl-item-cc-ico.png">
+                                <div class="ptop-counts-vals-wrap">
+                                  <div class="ptop-counts-countvalue item">{{ytdlBatchProg.items.c}}</div>
+                                  <div class="ptop-counts-slash item">/</div>
+                                  <div class="ptop-counts-ttlvalue item">{{ytdlBatchProg.items.t}}</div>
+                                </div>
+                              </div>
+                              <div class="ptop-pbar-wrap item">
+                                <div class="ptop-pbar-inner item">
+                                  <ion-progress-bar class="ytdl-dl-prog item" value={{ytdlBatchProg.items.p}}></ion-progress-bar>
+                                </div>
+                              </div>
+                              <div class="ptop-perc-wrap item">
+                                <div class="ptop-perc-value item">{{(ytdlBatchProg.items.p*100).toFixed(0)}}<span class="ptop-perc-sign">%</span></div>
+                              </div>
+                            </div>
+                            <div class="ptop-progress-strip-wrap match">
+                              <div class="ptop-counts-wrap match">
+                                <img class="ptop-counts-ico match" src="assets/ytdl-match-line-ico.png">
+                                <div class="ptop-counts-vals-wrap">
+                                  <div class="ptop-counts-countvalue match">{{ytdlBatchProg.matches.c}}</div>
+                                  <div class="ptop-counts-slash match">/</div>
+                                  <div class="ptop-counts-ttlvalue match">{{ytdlBatchProg.matches.t}}</div>
+                                </div>
+                              </div>
+                              <div class="ptop-pbar-wrap match">
+                                <div class="ptop-pbar-inner match">
+                                  <ion-progress-bar class="ytdl-dl-prog match" value={{ytdlBatchProg.matches.p}}></ion-progress-bar>
+                                </div>
+                              </div>
+                              <div class="ptop-perc-wrap match">
+                                <div class="ptop-perc-value match">{{(ytdlBatchProg.matches.p*100).toFixed(0)}}<span class="ptop-perc-sign">%</span></div>
+                              </div>
+                            </div>
+                            <div class="ptop-progress-strip-wrap file">
+                              <div class="ptop-counts-wrap file">
+                                <img class="ptop-counts-ico file" src="assets/ytdl-video-file-ico.png">
+                                <div class="ptop-counts-vals-wrap">
+                                  <div class="ptop-counts-countvalue file">1</div>
+                                  <div class="ptop-counts-slash file">/</div>
+                                  <div class="ptop-counts-ttlvalue file">1</div>
+                                </div>
+                              </div>
+                              <div class="ptop-pbar-wrap file">
+                                <div class="ptop-pbar-inner file">
+                                  <ion-progress-bar class="ytdl-dl-prog file" value={{ytdlBatchProg.file}}></ion-progress-bar>
+                                </div>
+                              </div>
+                              <div class="ptop-perc-wrap file">
+                                <div class="ptop-perc-value file">{{(ytdlBatchProg.file*100).toFixed(0)}}<span class="ptop-perc-sign">%</span></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row class="wc-row ytdl-module-main-row dl-row dl-files-list-row">
+                    <ion-col class="wc-col ytdl-module-main-col dl-col dl-files-list-col">
+                      <div class="ytdl-dl-col-wrapper dl-files-list-wrapper-outter">
+                        <div class="ytdl-dl-col-wrapper dl-files-list-wrapper-inner darkscrolls">
+                          <div *ngFor="let dlS of this.ytdlData.finSessions;index as dlsi" class="dlf-session-wrapper">
+                            <div class="dlf-header-wrapper session">
+                              <button (click)="openExplorer(dlS.sessionPath)" class="dlf-header-btn openexplorer session">
+                                <img src="assets/ytdl-sessiontimedir-ico.png" class="dlf-header-ico session">
+                                <div class="dlf-header-id session">{{dlS.sessionId}}</div>
+                                <div class="dlf-header-counts session"><span class="dlf-header-brack session">(</span>{{dlS.batches.length}}<span class="dlf-header-brack session">)</span></div>
+                              </button>
+                              <div class="dlf-header-hyphen session">-</div>
+                              <div class="dlf-header-time session">{{dlS.time.str}}</div>
+                              <div class="dlf-item-ctrl-btns-wrapper-outter sessionctrl">
+                                <div class="dlf-item-ctrl-btns-wrapper-inner sessionctrl">
+                                  <button (click)="delFinSessionData(dlS)" class="dlf-item-ctrl-btn delsessiondata">X</button>
+                                  <button (click)="resumeFinSession(dlS.sessionId)" class="dlf-item-ctrl-btn resumesession">R</button>
+                                  <button (click)="finishClsBatches()" class="dlf-item-ctrl-btn resumesession">F</button>
+                                </div>
+                              </div>
+                            </div>
+                            <div *ngFor="let dlB of dlS.batches;index as dlbi" class="dlf-batch-wrapper">
+                              <div class="dlf-header-wrapper batch">
+                                <button (click)="openExplorer(dlB.batchPath)" class="dlf-header-btn openexplorer batch">
+                                  <img src="assets/ytdl-batch-folder-ico.png" class="dlf-header-ico batch">
+                                  <div class="dlf-header-id batch">{{dlB.batchId}}</div>
+                                  <div class="dlf-header-counts batch"><span class="dlf-header-brack batch">(</span>{{dlB.items.length}}<span class="dlf-header-brack batch">)</span></div>
+                                </button>
+                                <div class="dlf-header-hyphen batch">-</div>
+                                <div class="dlf-header-time batch">{{dlB.term}}</div>
+                              </div>
+                              <div *ngFor="let dlI of dlB.items;index as dlii" class="dlf-item-wrapper">
+                                <ion-grid class="dlf-item-grid">
+                                  <ion-row class="dlf-item-row details-row">
+                                    <ion-col class="dlf-item-col details-col">
+                                      <div class="dlf-item-details-wrapper-outter">
+                                        <div class="dlf-item-details-wrapper-inner">
+                                          <img class="dlfidetails-ico" src="assets/ytdl-video-file-ico.png">
+                                          <div class="dlfidetails filename"><span class="fnparts iprefix">I</span><span class="fnparts ivalue">{{dlI.itemIndex}}</span><span class="fnparts mprefix">M</span><span class="fnparts mvalue">{{dlI.matchIndex}}</span><span class="fnparts hyphen">-</span><span class="fnparts vidvalue">{{dlI.vId}}</span><span class="fnparts extvalue">.mp4</span></div>
+                                          <div class="dlfidetails filesize">{{dlI.file.size.str}}</div>
+                                          <div class="dlfidetails filedur">{{dlI.file.dur.str}}</div>
+                                        </div>
+                                      </div>
+                                      <div class="dlf-item-ctrl-btns-wrapper-outter">
+                                        <div class="dlf-item-ctrl-btns-wrapper-inner">
+                                          <button (click)="openExplorer(dlI.file.path)" class="dlf-item-ctrl-btn explorer">E</button>
+                                          <button (click)="deleteFile(dlI.file.path)" class="dlf-item-ctrl-btn delete">D</button>
+                                          <button (click)="previewFile(dlI.file.path)" class="dlf-item-ctrl-btn">P</button>
+                                        </div>
+                                      </div>
+                                    </ion-col>
+                                  </ion-row>
+                                </ion-grid>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </div>
+              <!------------------------- FN4 SCREEN ------------------------------->
+              <div *ngIf="(getActScrn('fn4'))" class="ytdl-main-fn4-wrapper">
+                <ion-grid class="wc-grid ytdl-module-main-grid fn4">
+                  <ion-row class="wc-row ytdl-module-main-row fn4">
+                    <ion-col class="wc-col ytdl-module-main-col fn4">
+                      <div class="ytdl-fn4-col-wrapper"></div>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row class="wc-row ytdl-module-main-row fn4">
+                    <ion-col class="wc-col ytdl-module-main-col fn4">
+                      <div class="ytdl-fn4-col-wrapper"></div>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row class="wc-row ytdl-module-main-row fn4">
+                    <ion-col class="wc-col ytdl-module-main-col fn4">
+                      <div class="ytdl-fn4-col-wrapper"></div>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </div>
+              <!----------------------- MYDAILY SCREEN ------------------------------>
+              <div *ngIf="(getActScrn('mydaily'))" class="ytdl-main-mydaily-wrapper">
+                <ion-grid class="wc-grid ytdl-module-main-grid mydaily">
+                  <ion-row class="wc-row ytdl-module-main-row header-row mydaily">
+                    <ion-col class="wc-col ytdl-module-main-col header-col mydaily">
+                      <div class="ytdl-mydaily-header-col-wrapper">
+                        <div class="mydaily-header-inner-wrapper">
+                          <div class="mydaily-header-title-wrap">
+                            <img (click)="doTest()" src="assets/ytdl-mydaily-header-logo.png" class="mydaily-header-img">
+                          </div>
+                        </div>
+                      </div>
+                    </ion-col>
+                    <ion-col class="wc-col ytdl-module-main-col header-col mydaily">
+                      <div [ngStyle]="{'display':(getCtrlBtnState('play'))?'flex':'none'}" [ngClass]="{'blinking':(getCtrlBtnState('pause'))}" class="mydaily-cycle-header-cycle-info-outter-wrapper">
+                        <div class="mydaily-cycle-header-cycle-info-inner-wrapper">
+                          <div class="md-headinfo-wrap nextcheck">
+                            <img [ngStyle]="{'display':nextCheckIco()==='low'?'block':'none'}" src="assets/ytdl-mydaily-headinfo-nextcheck-low-ico.png" class="md-headinfo-ico nextcheck low">
+                            <img [ngStyle]="{'display':nextCheckIco()==='medium'?'block':'none'}" src="assets/ytdl-mydaily-headinfo-nextcheck-medium-ico.png" class="md-headinfo-ico nextcheck medium">
+                            <img [ngStyle]="{'display':nextCheckIco()==='high'?'block':'none'}" src="assets/ytdl-mydaily-headinfo-nextcheck-high-ico.png" class="md-headinfo-ico nextcheck high">
+                            <div class="md-headinfo-txt nextcheck">{{ytdlHeadUpdCycleInfo.nextCheck.str}}</div>
+                          </div>
+                          <div class="md-headinfo-wrap lastchecked">
+                            <img src="assets/ytdl-mydaily-headinfo-lastchecked-ico.png" class="md-headinfo-ico lastchecked">
+                            <div class="md-headinfo-txt lastchecked">{{ytdlHeadUpdCycleInfo.lastChecked.str}}</div>
+                          </div>
+                          <div class="md-headinfo-wrap lastchange">
+                            <img src="assets/ytdl-mydaily-headinfo-lastchange-ico.png" class="md-headinfo-ico lastchange">
+                            <div class="md-headinfo-txt lastchange">
+                              <span *ngIf="ytdlHeadUpdLastChange<1" class="md-headinfo-lastchange-txt nochange">=</span>
+                              <span *ngIf="ytdlHeadUpdLastChange>0" class="md-headinfo-lastchange-txt addedx">+{{ytdlHeadUpdLastChange}}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div [ngStyle]="{'display':ytdlYTAPIInputShowing?'flex':'none'}" class="mydaily-header-col-wrapper right">
+                        <div class="ytapi-input-popup-input-wrapper">
+                          <input #ytapiInput type="text" value="" (keydown)="ytdlYTAPIInputPop($event,'kd',ytapiInput.value)" (keyup)="ytdlYTAPIInputPop($event,'poke',ytapiInput.value)" (blur)="ytdlYTAPIInputPop($event,'poke',ytapiInput.value)" (mouseenter)="ytdlYTAPIInputPop($event,'poke',ytapiInput.value)" (focus)="ytdlYTAPIInputPop($event,'poke',ytapiInput.value)" (mouseleave)="ytdlYTAPIInputPop($event,'poke',ytapiInput.value)" class="ytapi-input-input">
+                        </div>
+                        <div class="ytapi-input-popup-btn-wrapper">
+                          <button (click)="ytdlYTAPIInputPop($event,'cancel',ytapiInput.value)" class="ytapi-input-popup-btn cancel">
+                            <img src="assets/ytdl-inputbtn-cancel-btn-ico.png" class="ytdlinput-btn-ico cancel">
+                          </button>
+                          <button #ytapiOKBtn (click)="ytdlYTAPIInputPop($event,'ok',ytapiInput.value)" class="ytapi-input-popup-btn ok">
+                            <img src="assets/ytdl-inputbtn-ok-btn-ico.png" class="ytdlinput-btn-ico ok">
+                          </button>
+                          <button (click)="ytdlYTAPIInputPop($event,'show',ytapiInput.value)" class="ytapi-input-popup-btn show">
+                            <img src="assets/ytdl-inputbtn-hidden-ico.png" class="ytdlinput-btn-ico show">
+                          </button>
+                        </div>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row class="wc-row ytdl-module-main-row content-row mydaily">
+                    <ion-col class="wc-col ytdl-module-main-col content-col mydaily">
+                      <div class="ytdl-mydaily-content-col-wrapper">
+                        <div class="mydaily-content-inner-wrapper">
+                          <!-- -------------------------------------- -->
+                          <!-- SUBSCRIPTIONS -->
+                          <!-- -------------------------------------- -->
+                          <div class="mydaily-content-section-wrapper subs" [ngClass]="{'mdcselected':ytdlMyDailySection==='subs'}">
+                            <!-- HEADER ----------------------------- -->
+                            <div (click)="toggleMyDailySection('subs')" class="mydaily-counts-summary subs">
+                              <div class="mdcs-section-title-wrapper subs">
+                                subscriptions
+                              </div>
+                              <div class="ytdl-subs-refresh-btn-outter-wrapper">
+                                <div class="ytdl-subs-refresh-btn-inner-wrapper">
+                                  <button (click)="ytdlGetPooCubeSubs(null,true)" [disabled]="ytdlMDSubsUpdateInProg" class="ytdl-subs-refresh-btn"><img src="assets/ytdl-subs-refresh-btn-ico.png" class="ytdl-subs-refresh-btn-ico"></button>
+                                </div>
+                              </div>
+                              <div class="ytdl-subs-refresh-btn-outter-wrapper reorder">
+                                <div class="ytdl-subs-refresh-btn-inner-wrapper reorder">
+                                  <button (click)="ytdlToggleReorder()" [disabled]="ytdlMDSubsUpdateInProg" class="ytdl-subs-refresh-btn reorder">
+                                    <img *ngIf="!ytdlSubsReorderActive" src="assets/ytdl-subs-reorder-btn-ico.png" class="ytdl-subs-refresh-btn-ico reorder">
+                                    <img *ngIf="ytdlSubsReorderActive" src="assets/wc-twt-findtune-didaction-ico.png" class="ytdl-subs-refresh-btn-ico reorder-done">
+                                  </button>
+                                </div>
+                              </div>
+                              <div [ngClass]="{'ytdl-subsupdate-inprog-counts':ytdlMDSubsUpdateInProg}" class="mdcs-section-counts-wrapper subs">
+                                <div class="mdcs-pair"><span class="mdcs-lbl">Ttl:</span><span class="mdcs-val stotal">{{ytdlMDCounts.subs.t}}</span></div>
+                                <div class="mdcs-pair"><span class="mdcs-lbl">★:</span><span class="mdcs-val sstar">{{ytdlMDCounts.subs.star}}</span></div>
+                                <div class="mdcs-pair"><span class="mdcs-lbl">zZ:</span><span class="mdcs-val ssleep">{{ytdlMDCounts.subs.sleep}}</span></div>
+                                <div class="mdcs-pair"><span class="mdcs-lbl">Upd:</span><span class="mdcs-val supd">{{ytdlMDCounts.subs.updated.str}}</span></div>
+                              </div>
+                            </div>
+                            <!-- PROGRESS --------------------------- -->
+                            <div [ngStyle]="{'display':ytdlMDSubsUpdateInProg?'flex':'none'}" class="ytdl-subs-progress-bar-wrapper-outter">
+                              <div class="ytdl-subs-progress-bar-wrapper-inner">
+                                <ion-progress-bar class="ytdl-subs-progressbar" [mode]="'md'" [type]="'determinate'" value={{ytdlMDCounts.subs.p}}></ion-progress-bar>
+                              </div>
+                            </div>
+                            <!-- CONTENT ----------------------------- -->
+                            <div class="md-mysubs-list-outter-wrapper">
+                              <!-- SPINNER ----------------------------- -->
+                              <div *ngIf="ytdlMDSubsUpdateInProg" class="mdaily-history-loading-wrapper mysubs">
+                                <div class="wc-childw-spinner-wrap list-spinner">
+                                  <ion-spinner duration="400" class="childw-data-loading list-spinner" name="dots"></ion-spinner>
+                                </div>
+                              </div>
+                              <div *ngIf="!ytdlMDSubsUpdateInProg" class="md-mysubs-list-inner-wrapper">
+                                <ion-grid class="wc-grid md-mysubs-list-grid">
+                                  <ion-row class="wc-row md-mysubs-list-row">
+                                    <ion-col class="wc-col md-mysubs-list-col subs-list-col">
+                                      <div class="md-mysubs-reorder-list-wrapper">
+                                        <ion-list class="ytdl-mysubs-reorder-list darkscrolls">
+                                          <ion-reorder-group class="ytdl-md-mysubs-reorder-group" [disabled]="!ytdlSubsReorderActive" (ionItemReorder)="ytdlReorderSubs($any($event))">
+                                            <ion-reorder *ngFor="let mySub of ytdlData.myDaily.mySubs; let msI=index" class="ytdl-mdmysub-reorder-wrap">
+                                              <ion-item class="ytdl-md-mysub-item">
+                                                <div [ngClass]="{'sub-is-selected':mySub.selected&&mySub.selected===true}" [ngClass]="{'updatesubrot':ytdlUpdateSubIndex===msI}" class="ytdl-md-mysub-item-outter-wrapper">
+                                                  <ion-grid class="ytdl-md-mysub-item-grid">
+                                                    <ion-row class="ytdl-md-mysub-item-row">
+                                                      <ion-col class="ytdl-md-mysub-item-col select-col">
+                                                        <div class="devselect-cb-btn-wrapper mysubs">
+                                                          <button (click)="ytdlToggleSubPty('selected',mySub,msI)" class="devselect-cb-btn mysubs">
+                                                            <img [ngStyle]="{'display':mySub.selected&&mySub.selected===true?'block':'none'}" src="assets/dev-select-checkmark-ico.png" class="devselect-cb-check-ico mysubs">
+                                                          </button>
+                                                        </div>
+                                                      </ion-col>
+                                                      <ion-col class="ytdl-md-mysub-item-col starsleep-col">
+                                                        <div class="starssleep-toggles-wrapper">
+                                                          <div class="sstogwrap star-toggle-wrap">
+                                                            <button (click)="ytdlToggleSubPty('isStar',mySub,msI)" class="starssleeptog-btn star-btn" [ngClass]="{'sub-is-star':mySub.isStar}">
+                                                              <img src="assets/ytdl-mysubs-isstar-ico.png" class="starssleeptog-btn-ico star">
+                                                            </button>
+                                                          </div>
+                                                          <div class="sstogwrap sleep-toggle-wrap" [ngClass]="{'sub-issleep':mySub.isSleep}">
+                                                            <button (click)="ytdlToggleSubPty('isSleep',mySub,msI)" class="starssleeptog-btn sleep-btn" [ngClass]="{'sub-is-sleep':mySub.isSleep}">
+                                                              <img src="assets/ytdl-mysubs-issleep-ico.png" class="starssleeptog-btn-ico sleep">
+                                                            </button>
+                                                          </div>
+                                                        </div>
+                                                      </ion-col>
+                                                      <ion-col class="ytdl-md-mysub-item-col thumb-col">
+                                                        <div class="ytdl-md-mysubs-thumb-wrap">
+                                                          <img class="ytdl-md-mysubs-thumb-img" [src]="ytdlGetSubThumb(mySub)">
+                                                        </div>
+                                                      </ion-col>
+                                                      <ion-col class="ytdl-md-mysub-item-col subinfo-col">
+                                                        <div class="ytdl-md-mysubs-info-outter-wrapper">
+                                                          <div class="ytdl-md-mysubs-info-line1-wrap">
+                                                            <div class="mysubs-info-pair chan-title">
+                                                              <img class="mysubs-info-ico chan-title" src="assets/ytdl-mysubs-chan-title-ico.png">
+                                                              <div class="mysubs-info-value chan-title">{{mySub.sub.snippet.channelTitle||mySub.sub.snippet.title}}</div>
+                                                            </div>
+                                                            <div class="mysubs-info-pair uploads-ttl">
+                                                              <img class="mysubs-info-ico uploads-ttl" src="assets/ytdl-mysubs-uploads-ttl-ico.png">
+                                                              <div class="mysubs-info-value uploads-ttl">{{mySub.sub.contentDetails.totalItemCount}}</div>
+                                                            </div>
+                                                            <div class="mysubs-info-pair uploads-new">
+                                                              <img class="mysubs-info-ico uploads-new" src="assets/ytdl-mysubs-uploads-new-ico.png">
+                                                              <div class="mysubs-info-value uploads-new">{{mySub.sub.contentDetails.newItemCount}}</div>
+                                                            </div>
+                                                          </div>
+                                                        </div>
+                                                      </ion-col>
+                                                    </ion-row>
+                                                  </ion-grid>
+                                                </div>
+                                              </ion-item>
+                                            </ion-reorder>
+                                          </ion-reorder-group>
+                                        </ion-list>
+                                      </div>
+                                    </ion-col>
+                                  </ion-row>
+                                </ion-grid>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- -------------------------------------- -->
+                          <!-- DOWNLOADS -->
+                          <!-- -------------------------------------- -->
+                          <div class="mdaily-content-section-wrapper dls" [ngClass]="{'mdcselected':ytdlMyDailySection==='dls'}">
+                            <!-- HEADER ----------------------------- -->
+                            <div (click)="toggleMyDailySection('dls')" class="mydaily-counts-summary dls">
+                              <div class="mdcs-section-title-wrapper dls">
+                                down/uploads
+                              </div>
+                              <div class="ytdl-subs-refresh-btn-outter-wrapper dls">
+                                <div class="ytdl-subs-refresh-btn-inner-wrapper dls">
+                                  <button (click)="doDownUpPLVids()" [disabled]="ytdlMDDLsInProgress||ytdlMDUShowing" class="ytdl-subs-refresh-btn dls"><img src="assets/ytdl-subs-refresh-btn-ico.png" class="ytdl-subs-refresh-btn-ico dls"></button>
+                                </div>
+                              </div>
+                              <div class="ytdl-subs-refresh-btn-outter-wrapper uplclose">
+                                <div class="ytdl-subs-refresh-btn-inner-wrapper uplclose">
+                                  <button (click)="clearMDUploadsTab()" [disabled]="!ytdlMDUShowing" class="ytdl-subs-refresh-btn dls uplclose"><img src="assets/compz-launcher-npfnval-false-ico.png" class="ytdl-subs-refresh-btn-ico dls uplclose"></button>
+                                </div>
+                              </div>
+                              <div [ngStyle]="{'display':ytdlMDCounts.dls.p!==0&&ytdlMDCounts.dls.p!==100?'flex':'none'}" class="ytdl-subs-progress-perc-wrap-outter">
+                                <div class="ytdl-subs-progress-perc-wrap-inner">{{(ytdlMDCounts.dls.p)}}<span class="ytdl-subs-prog-perc-suffix">%</span></div>
+                              </div>
+                              <div class="mdcs-section-counts-wrapper dls">
+                                <div class="mdcs-pair"><span class="mdcs-val dlc">{{ytdlMDCounts.dls.c}}</span></div>
+                                <div class="mdcs-pair"><span class="mdcs-val dlt">{{ytdlMDCounts.dls.t}}</span></div>
+                                <div class="mdcs-pair"><span class="mdcs-lbl">Size:</span><span class="mdcs-val dls">{{ytdlMDCounts.dls.size.str}}</span></div>
+                                <div class="mdcs-pair"><span class="mdcs-lbl">Time:</span><span class="mdcs-val dlt">{{ytdlMDCounts.dls.time.e}}</span></div>
+                              </div>
+                            </div>
+                            <!-- -------------------------------------- -->
+                            <div class="md-mydls-list-outter-wrapper">
+                              <!-- UP -->
+                              <div [ngStyle]="{'display':ytdlMDUShowing?'flex':'none'}" class="md-mydls-list-inner-wrapper uploads" [ngClass]="{'ytdl-uploads-win-out':ytdlMDUWinOut}">
+                                <ion-grid class="wc-grid md-uploads-grid">
+                                  <ion-row class="wc-row md-upload-row kodi-row" [ngClass]="{'upload-step-in-prog':ytdlMDUploads.kodi.inProg}">
+                                    <ion-col size="2" class="wc-col md-upload-col kodi-col ico-col">
+                                      <div class="md-upload-col-wrapper kodi ico">
+                                        <img class="md-upload-ico kodi" src="assets/wc-kodiplayer-ico.png">
+                                      </div>
+                                    </ion-col>
+                                    <ion-col size="10" class="wc-col md-upload-col kodi-col progress-col">
+                                      <div class="md-upload-col-wrapper kodi progress">
+                                        <div class="md-upload-kodi-status-wrapper">
+                                          <div class="md-upload-kodi-filelistheader">
+                                            <div class="mdu-kodi-head-stage-part">
+                                              <span *ngIf="ytdlMDUploads.kodi.inProg" class="mdu-kodi-head-stage inprog">running</span>
+                                              <span *ngIf="!ytdlMDUploads.kodi.inProg" class="mdu-kodi-head-stage finished">finished</span>
+                                            </div>
+                                            <div class="mdu-kodi-head-details-part">
+                                              <span *ngIf="ytdlMDUploads.kodi.inProg" class="mdu-kodi-head-details inprog">...</span>
+                                              <span *ngIf="!ytdlMDUploads.kodi.inProg" class="mdu-kodi-head-details finished filesno">{{ytdlMDUploads.kodi.status.length}}</span>
+                                              <span *ngIf="!ytdlMDUploads.kodi.inProg" class="mdu-kodi-head-details finished fileslabel">files</span>
+                                            </div>
+                                          </div>
+                                          <div class="md-upload-kodi-fileslist-wrapper darkscrolls">
+                                            <div *ngFor="let mduKodiFile of ytdlMDUploads.kodi.status" class="mdu-kodi-file-wrap">
+                                              <div class="mdu-kodi-file-part fname">{{mduKodiFile.fileName}}</div>
+                                              <div class="mdu-kodi-file-part fsize">{{mduKodiFile.fileSize}}</div>
+                                              <div class="mdu-kodi-file-part uspeed">{{mduKodiFile.uplSpeed}}</div>
+                                              <div class="mdu-kodi-file-part uperc">{{mduKodiFile.uplPerc}}</div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </ion-col>
+                                  </ion-row>
+                                  <ion-row class="wc-row md-upload-row conv-row" [ngClass]="{'upload-step-in-prog':ytdlMDUploads.conv.inProg}">
+                                    <ion-col size="2" class="wc-col md-upload-col conv-col ico-col">
+                                      <div class="md-upload-col-wrapper conv ico">
+                                        <img class="md-upload-ico conv" src="assets/wc-uploads-mp423-convert-ico.png">
+                                      </div>
+                                    </ion-col>
+                                    <ion-col size="8" class="wc-col md-upload-col conv-col progress-col">
+                                      <div class="md-upload-col-wrapper conv progress">
+                                        <div class="mdu-progtext-wrapper conv">
+                                          <span *ngIf="!ytdlMDUploads.conv.inProg&&ytdlMDUploads.conv.prog.listProg.p===0" class="mdu-progtext-text def">waiting</span>
+                                          <span *ngIf="!ytdlMDUploads.conv.inProg&&ytdlMDUploads.conv.prog.listProg.p===1" class="mdu-progtext-text def">finished</span>
+                                          <span *ngIf="ytdlMDUploads.conv.inProg&&(ytdlMDUploads.conv.list.length===0||ytdlMDUploads.conv.prog.listProg.c===0)" class="mdu-progtext-text def">converting</span>
+                                          <span *ngIf="ytdlMDUploads.conv.inProg&&(ytdlMDUploads.conv.list.length>0&&ytdlMDUploads.conv.prog.listProg.c>0)" class="mdu-progtext-text conv">{{ytdlMDUConvName()}}</span>
+                                        </div>
+                                        <div class="mdu-progbar-outter-wrapper conv">
+                                          <div class="mdu-progbar-wrap list conv">
+                                            <ion-progress-bar class="ytdl-uploads list conv" [mode]="'md'" [type]="'determinate'" value={{ytdlMDUploads.conv.prog.listProg.p}}></ion-progress-bar>
+                                          </div>
+                                          <div class="mdu-progbar-wrap item conv">
+                                            <ion-progress-bar class="ytdl-uploads item conv" [mode]="'md'" [type]="'determinate'" value={{ytdlMDUploads.conv.prog.itemProg.p}}></ion-progress-bar>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </ion-col>
+                                    <ion-col size="2" class="wc-col md-upload-col conv-col counts-col">
+                                      <div class="md-upload-col-wrapper conv counts">
+                                        <div class="mdu-counts-wrapper conv">
+                                          <div class="mdu-counts-l1 conv">
+                                            <span class="mduc-val c conv">{{ytdlMDUploads.conv.prog.listProg.c}}</span><span class="mduc-split conv">/</span><span class="mduc-val t conv">{{ytdlMDUploads.conv.prog.listProg.t}}</span>
+                                          </div>
+                                          <div class="mdu-counts-l2 conv">
+                                            <span class="mduc-val p conv">{{ytdlMDUploads.conv.prog.listProg.s}}</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </ion-col>
+                                  </ion-row>
+                                  <ion-row class="wc-row md-upload-row phone-row" [ngClass]="{'upload-step-in-prog':ytdlMDUploads.phone.inProg}">
+                                    <ion-col size="2" class="wc-col md-upload-col phone-col ico-col">
+                                      <div class="md-upload-col-wrapper phone ico">
+                                        <img class="md-upload-ico phone" src="assets/wc-uploads-phone-ico.png">
+                                      </div>
+                                    </ion-col>
+                                    <ion-col size="8" class="wc-col md-upload-col phone-col progress-col">
+                                      <div class="mdu-progtext-wrapper phone">
+                                        <span *ngIf="!ytdlMDUploads.phone.inProg&&ytdlMDUploads.phone.prog.listProg.p===0" class="mdu-progtext-text def">waiting</span>
+                                        <span *ngIf="!ytdlMDUploads.phone.inProg&&ytdlMDUploads.phone.prog.listProg.p===1" class="mdu-progtext-text def">finished</span>
+                                        <span *ngIf="ytdlMDUploads.phone.inProg&&(ytdlMDUploads.phone.list.length===0||ytdlMDUploads.phone.prog.listProg.c===0)" class="mdu-progtext-text def">uploading</span>
+                                        <span *ngIf="ytdlMDUploads.phone.inProg&&(ytdlMDUploads.phone.list.length>0&&ytdlMDUploads.phone.prog.listProg.c>0)" class="mdu-progtext-text phone">{{ytdlMDUPhoneName()}}</span>
+                                      </div>
+                                      <div class="mdu-progbar-outter-wrapper phone">
+                                        <div class="mdu-progbar-wrap list phone">
+                                          <ion-progress-bar class="ytdl-uploads list phone" [mode]="'md'" [type]="'determinate'" value={{ytdlMDUploads.phone.prog.listProg.p}}></ion-progress-bar>
+                                        </div>
+                                        <div class="mdu-progbar-wrap item phone">
+                                          <ion-progress-bar class="ytdl-uploads item phone" [mode]="'md'" [type]="'determinate'" value={{ytdlMDUploads.phone.prog.itemProg.p}}></ion-progress-bar>
+                                        </div>
+                                      </div>
+                                    </ion-col>
+                                    <ion-col size="2" class="wc-col md-upload-col phone-col counts-col">
+                                      <div class="md-upload-col-wrapper phone counts">
+                                        <div class="mdu-counts-wrapper phone">
+                                          <div class="mdu-counts-l1 phone">
+                                            <span class="mduc-val c phone">{{ytdlMDUploads.phone.prog.listProg.c}}</span><span class="mduc-split phone">/</span><span class="mduc-val t phone">{{ytdlMDUploads.phone.prog.listProg.t}}</span>
+                                          </div>
+                                          <div class="mdu-counts-l2 phone">
+                                            <span class="mduc-val p phone">{{ytdlMDUploads.phone.prog.listProg.s}}</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </ion-col>
+                                  </ion-row>
+                                </ion-grid>
+                              </div>
+                              <!-- DOWN -->
+                              <!-- -------------------------------------- -->
+                              <div [ngStyle]="{'display':!ytdlMDUShowing?'flex':'none'}" class="md-mydls-list-inner-wrapper">
+                                <div [ngStyle]="{'display':ytdlMDDLsFinished?'flex':'none'}" class="ytdl-mydls-allcompleted-wrapper">
+                                  <div class="ytdl-mydls-allcompleted-imglabel">
+                                    <img src="assets/ytdl-alldlscompleted-ico.png" class="mydls-allcompleted-img">
+                                    <div class="mydls-allcompleted-txt">finished</div>
+                                  </div>
+                                </div>
+                                <div [ngStyle]="{'display':!ytdlMDDLsFinished&&ytdlMDVideoDLsList.length>0?'block':'none'}" class="md-mydls-list-wrap darkscrolls">
+                                  <div *ngFor="let myDL of ytdlMDVideoDLsList;let dlI=index" class="ytdl-md-mydl-item">
+                                    <ion-grid [ngClass]="{'dl-is-active':ytdlMDVIDIsDL&&ytdlMDVIDIsDL===myDL.vId}" class="wc-grid ytdl-md-mydl-item-grid">
+                                      <ion-row class="wc-row ytdl-md-mydl-item-row info-row">
+                                        <ion-col size="1" class="wc-col ytdl-md-mydl-item-col icon-col">
+                                          <div class="mydl-col-wrapper ico">
+                                            <img src="assets/ytdl-video-file-ico.png" class="mydl-item-ico">
+                                          </div>
+                                        </ion-col>
+                                        <ion-col size="4" class="wc-col ytdl-md-mydl-item-col vtitle-col">
+                                          <div class="mydl-col-wrapper vtitle">{{myDL.vTitle}}</div>
+                                        </ion-col>
+                                        <ion-col size="2" class="wc-col ytdl-md-mydl-item-col ctitle-col">
+                                          <div class="mydl-col-wrapper ctitle">{{myDL.cTitle}}</div>
+                                        </ion-col>
+                                        <ion-col size="5" class="wc-col ytdl-md-mydl-item-col dlprog-col">
+                                          <div *ngIf="ytdlMDVIDIsDL&&ytdlMDVIDIsDL!==myDL.vId&&myDL.dlDone" class="mydl-col-wrapper dlprog completed">completed</div>
+                                          <div *ngIf="ytdlMDVIDIsDL&&ytdlMDVIDIsDL!==myDL.vId&&!myDL.dlDone" class="mydl-col-wrapper dlprog pending">pending</div>
+                                          <div *ngIf="ytdlMDVIDIsDL&&ytdlMDVIDIsDL===myDL.vId" class="mydl-col-wrapper dlprog inprog">
+                                            <div class="mydl-dlprog-wrap time">
+                                              <div class="mydl-prog-val rem">
+                                                <span *ngIf="ytdlMDDLItemCounts&&ytdlMDDLItemCounts.r&&ytdlMDDLItemCounts.r.str">{{ytdlMDDLItemCounts.r.str}}</span>
+                                                <span *ngIf="!ytdlMDDLItemCounts||!ytdlMDDLItemCounts.r||!ytdlMDDLItemCounts.r.str">-</span>
+                                              </div>
+                                            </div>
+                                            <div class="mydl-dlprog-wrap bytes">
+                                              <div class="mydl-prog-val dl">
+                                                <span *ngIf="ytdlMDDLItemCounts&&ytdlMDDLItemCounts.d&&ytdlMDDLItemCounts.d.str">{{ytdlMDDLItemCounts.d.str}}</span>
+                                                <span *ngIf="!ytdlMDDLItemCounts||!ytdlMDDLItemCounts.d||!ytdlMDDLItemCounts.d.str">-</span>
+                                              </div>
+                                              <div class="mydl-prog-split bytes">/</div>
+                                              <div class="mydl-prog-val ttl">
+                                                <span *ngIf="ytdlMDDLItemCounts&&ytdlMDDLItemCounts.t&&ytdlMDDLItemCounts.t.str">{{ytdlMDDLItemCounts.t.str}}</span>
+                                                <span *ngIf="!ytdlMDDLItemCounts||!ytdlMDDLItemCounts.t||!ytdlMDDLItemCounts.t.str">-</span>
+                                              </div>
+                                            </div>
+                                            <div class="mydl-dlprog-wrap perc">
+                                              <div class="mydl-prog-val perc">
+                                                <span *ngIf="ytdlMDDLItemCounts&&ytdlMDDLItemCounts.p&&ytdlMDDLItemCounts.p.str">{{ytdlMDDLItemCounts.p.str}}</span>
+                                                <span *ngIf="!ytdlMDDLItemCounts||!ytdlMDDLItemCounts.p||!ytdlMDDLItemCounts.p.str">-</span>
+                                              </div>
+                                              <div class="mydl-prog-suffix perc">%</div>
+                                            </div>
+                                          </div>
+                                        </ion-col>
+                                      </ion-row>
+                                      <ion-row [ngStyle]="{'display':ytdlMDVIDIsDL&&ytdlMDVIDIsDL===myDL.vId?'flex':'none'}" class="wc-row ytdl-md-mydl-item-row pbar-row">
+                                        <ion-col class="wc-col ytdl-md-mydl-item-col pbar-col">
+                                          <div [ngStyle]="{'display':ytdlMDDLItemCounts&&ytdlMDDLItemCounts.p&&ytdlMDDLItemCounts.p.no?'flex':'none'}"  class="ytdl-subs-progress-bar-wrapper-inner dl-item">
+                                            <ion-progress-bar class="ytdl-subs-progressbar dl-item" [mode]="'md'" [type]="'determinate'" value={{ytdlMDDLItemCounts.p.no}}></ion-progress-bar>
+                                          </div>
+                                        </ion-col>
+                                      </ion-row>
+                                    </ion-grid>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- -------------------------------------- -->
+                          <!-- PLAYLISTS -->
+                          <!-- -------------------------------------- -->
+                          <div class="mdaily-content-section-wrapper plists" [ngClass]="{'mdcselected':ytdlMyDailySection==='plists'}">
+                            <!-- HEADER ----------------------------- -->
+                            <div (click)="toggleMyDailySection('plists')" class="mydaily-counts-summary plists">
+                              <div class="mdcs-section-title-wrapper plists">
+                                playlists
+                              </div>
+                              <div class="ytdl-subs-refresh-btn-outter-wrapper downloads">
+                                <div class="ytdl-subs-refresh-btn-inner-wrapper downloads">
+                                  <button (click)="doUpdateYTDLPLData()" [disabled]="ytdlMDPLUpdateInProg" class="ytdl-subs-refresh-btn downloads"><img src="assets/ytdl-subs-refresh-btn-ico.png" class="ytdl-subs-refresh-btn-ico downloads"></button>
+                                </div>
+                              </div>
+                              <div class="ytdl-subs-refresh-btn-outter-wrapper reorder kodiupload">
+                                <div class="ytdl-subs-refresh-btn-inner-wrapper reorder kodiupload">
+                                  <button (click)="addUpdateMDKodiPlaylist()" [disabled]="ytdlMDUpdKodiInProg" class="ytdl-subs-refresh-btn reorder kodiupload">
+                                    <img src="assets/ytdl-upload-kodi-ico.png" class="ytdl-subs-refresh-btn-ico reorder kodiupload">
+                                  </button>
+                                </div>
+                              </div>
+                              <div class="ytdl-subs-refresh-btn-outter-wrapper reorder phoneupload">
+                                <div class="ytdl-subs-refresh-btn-inner-wrapper reorder phoneupload">
+                                  <button (click)="doMDSleepPhoneUpload()" [disabled]="ytdlMDUploads.phone.inProg" class="ytdl-subs-refresh-btn reorder phoneupload">
+                                    <img src="assets/ytdl-upload-phone-ico.png" class="ytdl-subs-refresh-btn-ico reorder phoneupload">
+                                  </button>
+                                </div>
+                              </div>
+                              <div class="ytdl-subs-refresh-btn-outter-wrapper reorder phoneplay">
+                                <div class="ytdl-subs-refresh-btn-inner-wrapper reorder phoneplay">
+                                  <button (click)="doMDSleepPhonePlay()" class="ytdl-subs-refresh-btn reorder phoneplay">
+                                    <img src="assets/ytdl-play-phone-ico.png" class="ytdl-subs-refresh-btn-ico reorder phoneplay">
+                                  </button>
+                                </div>
+                              </div>
+                              <div [ngStyle]="{'display':ytdlProgressPerc!==0&&ytdlProgressPerc!==100?'flex':'none'}" class="ytdl-subs-progress-perc-wrap-outter">
+                                <div class="ytdl-subs-progress-perc-wrap-inner">{{ytdlProgressPerc}}<span class="ytdl-subs-prog-perc-suffix">%</span></div>
+                              </div>
+                              <div [ngStyle]="{'display':ytdlProgressPerc===0||ytdlProgressPerc===100?'flex':'none'}" class="mdcs-section-counts-wrapper plists">
+                                <div class="mdcs-pair"><span class="mdcs-lbl">PLs:</span><span class="mdcs-val">{{ytdlMDCounts.plists.c}}</span></div>
+                                <div class="mdcs-pair"><span class="mdcs-lbl">Vids:</span><span class="mdcs-val">{{ytdlMDCounts.plists.ttlVids}}</span></div>
+                                <div class="mdcs-pair"><span class="mdcs-lbl">Dur:</span><span class="mdcs-val">{{ytdlMDCounts.plists.ttlDur.str}}</span></div>
+                              </div>
+                            </div>
+                            <!-- PROGRESS --------------------------- -->
+                            <div [ngStyle]="{'display':ytdlMDPLUpdateInProg?'flex':'none'}" class="ytdl-subs-progress-bar-wrapper-outter playlists">
+                              <div class="ytdl-subs-progress-bar-wrapper-inner playlists">
+                                <ion-progress-bar class="ytdl-subs-progressbar playlists" [mode]="'md'" [type]="'determinate'" [value]="(ytdlProgressPerc/100)"></ion-progress-bar>
+                              </div>
+                            </div>
+                            <!-- CONTENT ---------------------------- -->
+                            <div class="md-mysubs-list-outter-wrapper playlists">
+                              <!-- SPINNER ---------------------------- -->
+                              <div *ngIf="ytdlMDPLUpdateInProg" class="mdaily-history-loading-wrapper playlists">
+                                <div class="wc-childw-spinner-wrap list-spinner">
+                                  <ion-spinner duration="400" class="childw-data-loading list-spinner" name="dots"></ion-spinner>
+                                </div>
+                              </div>
+                              <!-- ------------------------------------ -->
+                              <div *ngIf="!ytdlMDPLUpdateInProg" class="md-mysubs-list-inner-wrapper playlists">
+                                <ion-grid class="wc-grid md-mysubs-list-grid playlists">
+                                  <ion-row class="wc-row md-mysubs-list-row playlists">
+                                    <ion-col class="wc-col md-mysubs-list-col subs-list-col playlists">
+                                      <div class="md-mysubs-reorder-list-wrapper playlists">
+                                        <ion-list class="ytdl-mysubs-reorder-list darkscrolls playlists">
+                                          <ion-item *ngFor="let myPL of ytdlData.myDaily.myKodi.playlists; let plI=index" class="ytdl-md-mysub-item playlists">
+                                            <div [ngClass]="{'sub-is-selected':myPL.selected&&myPL.selected===true}" class="ytdl-md-mysub-item-outter-wrapper playlists">
+                                              <ion-grid class="ytdl-md-mysub-item-grid playlists">
+                                                <ion-row class="ytdl-md-mysub-item-row playlists playlist-item-row">
+                                                  <ion-col class="ytdl-md-mysub-item-col select-col playlists">
+                                                    <div class="devselect-cb-btn-wrapper mysubs playlists">
+                                                      <button (click)="ytdlTogglePLPty('selected',myPL,plI)" class="devselect-cb-btn mysubs playlists">
+                                                        <img [ngStyle]="{'display':myPL.selected&&myPL.selected===true?'block':'none'}" src="assets/dev-select-checkmark-ico.png" class="devselect-cb-check-ico mysubs playlists">
+                                                      </button>
+                                                    </div>
+                                                  </ion-col>
+                                                  <ion-col class="ytdl-md-mysub-item-col thumb-col playlists">
+                                                    <div class="ytdl-md-mysubs-thumb-wrap playlists" [ngClass]="{'is-today':isTodayPL(myPL)}">
+                                                      {{myPL.date}}
+                                                    </div>
+                                                  </ion-col>
+                                                  <ion-col class="ytdl-md-mysub-item-col subinfo-col playlists">
+                                                    <div class="ytdl-md-mysubs-info-outter-wrapper playlists">
+                                                      <div class="mysubs-info-pair chan-title playlists ors">
+                                                        <img class="mysubs-info-ico chan-title playlists ors" src="assets/ytdl-mysubs-ors-ico.png">
+                                                        <div class="mysubs-info-value chan-title playlists ors">
+                                                          <div class="pl-item-count-wrap ors">{{myPL.ors.length}}<span class="pl-item-count-suffix ors">items</span></div>
+                                                          <div class="pl-item-spacer">|</div>
+                                                          <div class="pl-item-dur-wrap ors">{{(ytdlGetPLDurStr(myPL.ors))}}</div>
+                                                        </div>
+                                                      </div>
+                                                      <div class="mysubs-info-pair uploads-ttl playlists star">
+                                                        <img class="mysubs-info-ico uploads-ttl playlists star" src="assets/ytdl-mysubs-isstar-ico.png">
+                                                        <div class="mysubs-info-value chan-title playlists star">
+                                                          <div class="pl-item-count-wrap star">{{myPL.star.length}}<span class="pl-item-count-suffix star">items</span></div>
+                                                          <div class="pl-item-spacer">|</div>
+                                                          <div class="pl-item-dur-wrap star">{{(ytdlGetPLDurStr(myPL.star))}}</div>
+                                                        </div>
+                                                      </div>
+                                                      <div class="mysubs-info-pair uploads-ttl playlists sleep">
+                                                        <img class="mysubs-info-ico uploads-ttl playlists sleep" src="assets/ytdl-mysubs-issleep-ico.png">
+                                                        <div class="mysubs-info-value chan-title playlists sleep">
+                                                          <div class="pl-item-count-wrap sleep">{{myPL.sleep.length}}<span class="pl-item-count-suffix sleep">items</span></div>
+                                                          <div class="pl-item-spacer">|</div>
+                                                          <div class="pl-item-dur-wrap sleep">{{(ytdlGetPLDurStr(myPL.sleep))}}</div>
+                                                        </div>
+                                                      </div>
+                                                    </div>
+                                                  </ion-col>
+                                                </ion-row>
+                                                <ion-row [ngStyle]="{'display':myPL.selected?'flex':'none'}" class="ytdl-md-mysub-item-row playlists video-items-row">
+                                                  <ion-col class="ytdl-md-mysub-item-col video-items-list-col">
+                                                    <div class="ytdl-md-mysub-item-col video-items-list-wrapper darkscrolls">
+                                                      <div *ngFor="let plVideoItem of myPL.all; let plVI=index" [ngClass]="{'isstar':plVideoItem.plCats.includes('star'),'issleep':plVideoItem.plCats.includes('sleep')}" (click)="openExtMDHistVideo('https://www.youtube.com/watch?v='+plVideoItem.vId)" class="mypls-video-item-wrapper">
+                                                        <ion-grid class="wc-grid mypls-video-item-grid">
+                                                          <ion-row class="wc-row mypls-video-item-row">
+                                                            <ion-col class="wc-col mypls-video-item-col ico-col">
+                                                              <div class="mypls-video-col-wrap ico">
+                                                                <img class="mypls-video-ico-img" src="assets/ytdl-video-file-ico.png">
+                                                              </div>
+                                                            </ion-col>
+                                                            <ion-col class="wc-col mypls-video-item-col vtitle-col">
+                                                              <div class="mypls-video-col-wrap vtitle">
+                                                                {{plVideoItem.vTitle}}
+                                                              </div>
+                                                            </ion-col>
+                                                            <ion-col class="wc-col mypls-video-item-col ctitle-col">
+                                                              <div class="mypls-video-col-wrap ctitle">
+                                                                {{plVideoItem.cTitle}}
+                                                              </div>
+                                                            </ion-col>
+                                                            <ion-col class="wc-col mypls-video-item-col dur-col">
+                                                              <div class="mypls-video-col-wrap dur">
+                                                                {{(s2T(plVideoItem.dur))}}
+                                                              </div>
+                                                            </ion-col>
+                                                            <ion-col class="wc-col mypls-video-item-col dl-col">
+                                                              <div class="mypls-video-col-wrap dl">
+                                                                <img [ngStyle]="{'display':!plVideoItem.dlDone&&plVideoItem.vPath.startsWith('http')?'block':'none'}" class="mypls-video-dl-img notdl" src="assets/ytdl-search-inputbtnico-go-blue.png">
+                                                                <img [ngStyle]="{'display':!plVideoItem.dlDone&&plVideoItem.vPath==='null'?'block':'none'}" class="mypls-video-dl-img notdl" src="assets/ytdl-search-inputbtnico-go-red.png">
+                                                                <img [ngStyle]="{'display':plVideoItem.dlDone?'block':'none'}" class="mypls-video-dl-img isdl" src="assets/ytdl-search-inputbtnico-go-green.png">
+                                                              </div>
+                                                            </ion-col>
+                                                          </ion-row>
+                                                        </ion-grid>
+                                                      </div>
+                                                    </div>
+                                                  </ion-col>
+                                                </ion-row>
+                                              </ion-grid>
+                                            </div>
+                                          </ion-item>
+                                        </ion-list>
+                                      </div>
+                                    </ion-col>
+                                  </ion-row>
+                                </ion-grid>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- -------------------------------------- -->
+                          <!-- HISTORY -->
+                          <!-- -------------------------------------- -->
+                          <div class="mdaily-content-section-wrapper history" [ngClass]="{'mdcselected':ytdlMyDailySection==='history'}">
+                            <div (click)="toggleMyDailySection('history')" class="mydaily-counts-summary history">
+                              <div class="mdcs-section-title-wrapper history">
+                                history
+                              </div>
+                              <div class="mdcs-mode-wrapper">
+                                <button (click)="toggleMDHistoryMode('a')" [ngClass]="{'mdhistmode-selected':mdHistoryMode==='a'}" class="mdcs-mode-btn a-all">a</button>
+                                <div class="mdcs-mode-div-wrap"><div class="mdcs-mode-div-line"></div></div>
+                                <button (click)="toggleMDHistoryMode('m')" [ngClass]="{'mdhistmode-selected':mdHistoryMode==='m'}" class="mdcs-mode-btn a-all">m</button>
+                                <div class="mdcs-mode-div-wrap"><div class="mdcs-mode-div-line"></div></div>
+                                <button (click)="toggleMDHistoryMode('w')" [ngClass]="{'mdhistmode-selected':mdHistoryMode==='w'}" class="mdcs-mode-btn a-all">w</button>
+                                <div class="mdcs-mode-div-wrap"><div class="mdcs-mode-div-line"></div></div>
+                                <button (click)="toggleMDHistoryMode('d')" [ngClass]="{'mdhistmode-selected':mdHistoryMode==='d'}" class="mdcs-mode-btn a-all">d</button>
+                                <div class="mdcs-mode-div-wrap"><div class="mdcs-mode-div-line"></div></div>
+                              </div>
+                              <div class="mdcs-dragdrop-toggle-wrapper">
+                                <button (click)="toggleHistDragDrop()" class="mdcs-dragdrop-btn">
+                                  <img class="mdcs-drag-drop-toggle-ico" src="assets/wc-ytdl-history-dragdrop-btn-ico.png">
+                                </button>
+                              </div>
+                            </div>
+                            <div class="mdaily-history-list-outter-wrapper">
+                              <div *ngIf="!mdHistModeListReady" class="mdaily-history-loading-wrapper">
+                                <div class="wc-childw-spinner-wrap list-spinner">
+                                  <ion-spinner duration="400" class="childw-data-loading list-spinner" name="dots"></ion-spinner>
+                                </div>
+                              </div>
+                              <div *ngIf="mdHistModeListReady&&mdHistModeList&&mdHistModeList.length>0" class="mdaily-history-list-inner-wrapper darkscrolls">
+                                <ion-grid class="wc-grid mdaily-history-list-grid">
+                                  <ion-row class="wc-row mdaily-history-list-header-row">
+                                    <ion-col class="wc-col mdaily-history-list-header-col vtitle-col">
+                                      <div class="rhist-header-label vtitle">video</div>
+                                    </ion-col>
+                                    <ion-col class="wc-col mdaily-history-list-header-col time-col">
+                                      <div class="rhist-header-label time">start</div>
+                                    </ion-col>
+                                    <ion-col class="wc-col mdaily-history-list-header-col dur-col">
+                                      <div class="rhist-header-label dur">dur</div>
+                                    </ion-col>
+                                  </ion-row>
+                                  <div *ngIf="!ytdlDDProcessing&&mdHistModeList&&mdHistModeList.length>0" class="ytdl-history-list-outter-wrapper-div">
+                                    <ion-row *ngFor="let rhItem of mdHistModeList;index as rhI" class="wc-row mdaily-history-list-item-row">
+                                      <ion-col class="wc-col mdaily-history-list-item-col vtitle-col">
+                                        <div *ngIf="rhItem.vTitle" class="rhist-item-value vtitle">{{rhItem.vTitle}}</div>
+                                      </ion-col>
+                                      <ion-col class="wc-col mdaily-history-list-item-col time-col">
+                                        <div *ngIf="rhItem.date.s" class="rhist-item-value time">{{rhItem.date.s}}</div>
+                                      </ion-col>
+                                      <ion-col class="wc-col mdaily-history-list-item-col dur-col">
+                                        <div *ngIf="rhItem.dur&&rhItem.dur.str&&rhItem.dur.str.length>2" class="rhist-item-value dur">{{rhItem.dur.str}}</div>
+                                        <div *ngIf="!rhItem.dur||!rhItem.dur.str||rhItem.dur.str.length<3" class="rhist-item-value dur">-</div>
+                                      </ion-col>
+                                    </ion-row>
+                                  </div>
+                                </ion-grid>
+                              </div>
+                              <div [ngStyle]="{'display':ytdlHistDragDropShowing?'flex':'none'}" class="md-history-dragdropzone-outter-wrapper">
+                                <div [ngStyle]="{'display':ytdlDDProcessing?'flex':'none'}" class="md-history-dragdrop-processing">
+                                  <div class="ddprocessing-wrap">
+                                    <ion-spinner duration="400" class="childw-data-loading ddp" name="dots"></ion-spinner>
+                                  </div>
+                                </div>
+                                <div [ngStyle]="{'display':!ytdlDDProcessing?'flex':'none'}" class="md-history-dragdropzone-inner-wrapper">
+                                  <div id="mdhdz" class="mdhdd-dropzone">
+                                    <img src="assets/wc-ytdl-history-dragdrop-zone-img.png" class="mdhdd-dropzone-img">
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </div>
+              <!------------------------- END SCREENS ------------------------------->
+            </div>
+          </div>
+          <!-- //////////////////////////////////////////////// YTDL MODULE ENDS //////////////////////////////////////////////// -->
+        </ion-col>
+      </ion-row>
+      <ion-row class="mw-footer-row">
+        <ion-col size="8" class="wc-col mw-col mw-footer-col left">
+          <div *ngIf="!ytdlMDBCMDMon.showing" [ngClass]="{'hide-status-bar':sBar.type===null||sBar.msg===null}" class="sBarbar-content">
+            <div class="sBar-type-ico-wrapper">
+              <img *ngIf="sBar.type==='ok'" src="assets/wcc-status-green-led.png" class="sBarbar-type-ico ok">
+              <img *ngIf="sBar.type==='info'" src="assets/wcc-status-yellow-led.png" class="sBarbar-type-ico info">
+              <img *ngIf="sBar.type==='error'" src="assets/wcc-status-red-led.png" class="sBarbar-type-ico error">
+            </div>
+            <div class="sBarbar-msg">{{sBar.msg}}</div>
+          </div>
+          <div *ngIf="mTitle==='ytdl'&&ytdlMDBCMDMon.showing" class="ytdl-mdb-cmdmon outter-wrapper">
+            <div class="ytdl-mdb-cmdmon inner-wrapper">
+              <div class="ytdl-mdb-cmdmon data">
+                <ion-grid class="mdb-cmdmon-event-data grid">
+                  <ion-row class="mdb-cmdmon-event-data row">
+                    <ion-col class="mdb-cmdmon-event-data col reqid">
+                      <div class="mdb-cmdmon-event-label rid">rid:</div>
+                      <div *ngIf="ytdlMDBCMDMon.event&&ytdlMDBCMDMon.event.requestId" class="mdb-cmdmon-event-data value reqid hasv">{{ytdlMDBCMDMon.event.requestId}}</div>
+                      <div *ngIf="!ytdlMDBCMDMon.event||!ytdlMDBCMDMon.event.requestId" class="mdb-cmdmon-event-data value reqid nov">-</div>
+                    </ion-col>
+                    <ion-col class="mdb-cmdmon-event-data col commname">
+                      <div class="mdb-cmdmon-event-label cmd">cmd:</div>
+                      <div *ngIf="ytdlMDBCMDMon.event&&ytdlMDBCMDMon.event.commandName" class="mdb-cmdmon-event-data value commname hasv">{{ytdlMDBCMDMon.event.commandName}}</div>
+                      <div *ngIf="ytdlMDBCMDMon.event&&ytdlMDBCMDMon.event.commandName" class="mdb-cmdmon-event-data value commname nov"></div>
+                    </ion-col>
+                    <ion-col class="mdb-cmdmon-event-data col stage-type">
+                      <div class="mdb-cmdmon-event-label ev">ev:</div>
+                      <div class="mdb-cmdmon-event-data value stage-type">
+                        <span *ngIf="ytdlMDBCMDMon.type==='failed'" [ngStyle]="{'color':'#fa52527a'}" class="mdb-st-span failed">failed</span>
+                        <span *ngIf="ytdlMDBCMDMon.type==='succeeded'" [ngStyle]="{'color':'#20c9977a'}" class="mdb-st-span failed">success</span>
+                        <span *ngIf="ytdlMDBCMDMon.type==='started'" [ngStyle]="{'color':'#ffc8007a'}" class="mdb-st-span failed">started</span>
+                      </div>
+                    </ion-col>
+                    <ion-col class="mdb-cmdmon-event-data col elapsed-dur">
+                      <div class="mdb-cmdmon-event-data value elapsed-dur">{{ytdlMDBCMDMonDur.elapsed}}</div>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </div>
+            </div>
+          </div>
+        </ion-col>
+        <ion-col size="4" class="wc-col mw-col mw-footer-col right">
+          <!-- -------------------------------------------- -->
+          <div *ngIf="mTitle==='ytdl'" class="mw-footer-right-wrapper ytdl">
+            <div class="ytdl-footer-stats-wrapper outter">
+              <div class="ytdl-footer-stats-wrapper inner">
+                <div class="indic-icos-wrapper mysqlindic">
+                  <img [ngStyle]="{'display':ytdlMSQLRunning?'block':'none'}" src="assets/ytdl-mysql-indic-ico.png" class="ytdl-sb-indic-ico mysql">
+                  <img [ngStyle]="{'display':!ytdlMSQLRunning?'block':'none'}" src="assets/ytdl-mysql-indic-bad-ico.png" class="ytdl-sb-indic-ico mysql">
+                </div>
+                <div class="ytdl-fs-wrap ttls mysql">
+                  <div [ngStyle]="{'display':((ytdlDBStats.ttlCaps/1000)<1000)?'flex':'none'}" [ngClass]="{'fschange':ytdlStatsChange}" class="ytdl-fs-value ttlcaps">{{(ytdlDBStats.ttlCaps/1000).toFixed(1)}}k</div>
+                  <div [ngStyle]="{'display':((ytdlDBStats.ttlCaps/1000)>=1000)?'flex':'none'}" [ngClass]="{'fschange':ytdlStatsChange}" class="ytdl-fs-value ttlcaps">{{(ytdlDBStats.ttlCaps/1000/1000).toFixed(2)}}m</div>
+                </div>
+                <div class="ytdl-footer-indics-sep-div"></div>
+                <div class="indic-icos-wrapper mdbindic">
+                  <img [ngStyle]="{'display':ytdlMDBIsConn?'block':'none'}" src="assets/wc-ytdl-mongodb-status-good-ico.png" class="ytdl-sb-indic-ico mdbconn good">
+                  <img [ngStyle]="{'display':!ytdlMDBIsConn?'block':'none'}" src="assets/wc-ytdl-mongodb-status-bad-ico.png" class="ytdl-sb-indic-ico mdbconn bad">
+                </div>
+                <div *ngIf="ytdlMDBDocsCount>0" class="ytdl-fs-wrap ttls mdb">
+                  <div [ngStyle]="{'display':((ytdlMDBDocsCount/1000)<1000)?'flex':'none'}" class="ytdl-fs-value ttlcaps">{{(ytdlMDBDocsCount/1000).toFixed(1)}}k</div>
+                  <div [ngStyle]="{'display':((ytdlMDBDocsCount/1000)>=1000)?'flex':'none'}" class="ytdl-fs-value ttlcaps">{{(ytdlMDBDocsCount/1000/1000).toFixed(2)}}m</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- -------------------------------------------- -->
+          <div *ngIf="mTitle==='wifing'" class="mw-footer-right-wrapper wifing">
+            <div *ngIf="(getActScrn('routers'))&&wifingDumpNGInProg" class="wifing-footer-section dumpng">
+              <div [ngStyle]="{'display':sHeadScreenBtns.wifing[0].ctrlFns.pause.state?'flex':'none'}" class="wifing-footer-section-dumpng-timer-wrapper paused">
+                <img class="wfsdtico paused" src="assets/twt-plyr-dopause-mo-ico.png">
+              </div>
+              <div [ngStyle]="{'display':!sHeadScreenBtns.wifing[0].ctrlFns.pause.state?'flex':'none'}" class="wifing-footer-section-dumpng-timer-wrapper notpaused">
+                <ion-spinner [ngStyle]="{'display':wifingDumpNGTimerIndic==='wait'?'block':'none'}" duration="999" class="wifing-mon-mode-loading dumpngtimer" name="circular"></ion-spinner>
+                <img [ngStyle]="{'display':wifingDumpNGTimerIndic==='dump'?'block':'none'}" class="wfsdtico dumping" src="assets/wc-wifing-footer-dumping-ico.png">
+                <div [ngStyle]="{'display':wifingDumpNGTimerIndic==='time'?'block':'none'}" class="footer-dump-time-value">{{wifingDumpNGTimerTime}}</div>
+              </div>
+              <div class="wifing-footer-section-sepbar dumpng"></div>
+            </div>
+            <div *ngIf="(getActScrn('routers'))" class="wifing-footer-section ouidb">
+              <ion-spinner [ngStyle]="{'display':wifingOUIDBLoading?'block':'none'}" duration="999" class="wifing-ouidb-loading" name="circular"></ion-spinner>
+              <img [ngStyle]="{'display':!wifingOUIDBLoading&&wifingOUIDBStatus==='new'?'block':'none'}" class="wifing-footer-indic-ico ouidb-ico new" src="assets/wc-wifing-ouidb-new-ico.png">
+              <button (click)="wifingUpdateOUIDB()" [ngStyle]="{'display':!wifingOUIDBLoading&&wifingOUIDBStatus==='old'?'block':'none'}" class="wifing-footer-ouidb-refreshbtn ifold">
+                <img class="wifing-footer-indic-ico ouidb-ico old" src="assets/wc-wifing-ouidb-old-ico.png">
+              </button>
+              <button (click)="wifingUpdateOUIDB()" [ngStyle]="{'display':!wifingOUIDBLoading&&wifingOUIDBStatus==='none'?'block':'none'}" class="wifing-footer-ouidb-refreshbtn ifnone">
+                <img class="wifing-footer-indic-ico ouidb-ico none" src="assets/wc-wifing-ouidb-none-ico.png">
+              </button>
+              <div class="wifing-footer-section-sepbar ouidb"></div>
+            </div>
+            <div *ngIf="(getActScrn('routers'))" class="wifing-footer-section monmode wlan1">
+              <ion-spinner [ngStyle]="{'display':wifingMonModeLoading.wlan1?'block':'none'}" duration="999" class="wifing-mon-mode-loading wlan1" name="circular"></ion-spinner>
+              <button (click)="wifingToggleMonMode('stop','wlan1')" [ngStyle]="{'display':wifingMonModeOn.wlan1&&!wifingMonModeLoading.wlan1?'flex':'none'}" class="wifing-footer-monmode-btn wlan1 ifon">
+                <img  class="wifing monmode-ico on wlan1" src="assets/wc-wifing-stations-monmode2-on-ico.png">
+              </button>
+              <button (click)="wifingToggleMonMode('start','wlan1')" [ngStyle]="{'display':!wifingMonModeOn.wlan1&&!wifingMonModeLoading.wlan1?'flex':'none'}" class="wifing-footer-monmode-btn wlan1 ifoff">
+                <img class="wifing monmode-ico off wlan1" src="assets/wc-wifing-stations-monmode2-off-ico.png">
+              </button>
+              <div class="wifing-footer-section-sepbar wlans"></div>
+            </div>
+            <div *ngIf="(getActScrn('routers'))" class="wifing-footer-section monmode wlan0">
+              <ion-spinner [ngStyle]="{'display':wifingMonModeLoading.wlan0?'block':'none'}" duration="999" class="wifing-mon-mode-loading wlan0" name="circular"></ion-spinner>
+              <button (click)="wifingToggleMonMode('stop','wlan0')" [ngStyle]="{'display':wifingMonModeOn.wlan0&&!wifingMonModeLoading.wlan0?'flex':'none'}" class="wifing-footer-monmode-btn wlan0 ifon">
+                <img class="wifing monmode-ico on wlan0" src="assets/wc-wifing-stations-monmode-on-ico.png">
+              </button>
+              <button (click)="wifingToggleMonMode('start','wlan0')" [ngStyle]="{'display':!wifingMonModeOn.wlan0&&!wifingMonModeLoading.wlan0?'flex':'none'}" class="wifing-footer-monmode-btn wlan0 ifoff">
+                <img class="wifing monmode-ico off wlan0" src="assets/wc-wifing-stations-monmode-off-ico.png">
+              </button>
+            </div>
+          </div>
+          <!-- -------------------------------------------- -->
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</div>

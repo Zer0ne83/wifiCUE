@@ -1,0 +1,126 @@
+<div *ngIf="popType!=='color'" class="compzpopover-outter-wrapper">
+  <div class="compzpopover-inner-wrapper">
+    <ion-grid [ngStyle]="{'display':popReady?'block':'none'}" class="compz-grid compzpopover-grid">
+      <ion-row class="compz-row compzpopover-row header-row">
+        <ion-col size="1" class="compz-col compzpopover-col header-col header-logo-col">
+          <div class="compzpopover-logo-wrapper">
+            <img class="compzpopover-logo-img" src="assets/popover-default-ico.png">
+          </div>
+        </ion-col>
+        <ion-col size="10" class="compz-col compzpopover-col header-col header-title-col">
+          <div class="compzpopover-header-title-wrapper">
+            <div class="compzpopover-header-title-txt">{{popTitle}}</div>
+          </div>
+        </ion-col>
+        <ion-col size="1" class="compz-col compzpopover-col header-col header-help-col">
+          <div class="compzpopover-helpbtn-wrapper">
+            <button #helpBtn disabled={{popHelpDisabled}} (click)="toggleHelp()" class="compzpopoverhelpbtn">
+              <div class="compzpopoverhelpbtn-inner-wrap">
+                <img class="compzpopover-help-btn-ico" src="assets/popover-help-ico.png">
+              </div>
+            </button>
+          </div>
+        </ion-col>
+      </ion-row>
+      <ion-row class="compz-row compzpopover-row content-row">
+        <ion-col size="2" class="compz-col compzpopover-col content-col content-actionicon-col">
+          <div class="compzpopover-actionicon-wrapper">
+            <img class="compzpopover-actionicon-img" src={{popIco}}>
+          </div>
+        </ion-col>
+        <ion-col size="10" class="compz-col compzpopover-col content-col content-body-col">
+          <div class="compzpopover-content-body-colwrapper">
+            <div class="compzpopover-content-body message-wrapper darkscrolls">
+              <div class="compzpopover-content-body message-txt">
+                <div *ngIf="!popMsgIsList" class="compzpopover-content-body-message-txt notlist">{{popMsg}}</div>
+                <div *ngIf="popMsgIsList" class="compzpopover-content-body-message-txt islist">
+                  <div *ngFor="let msgItem of popMsg;let mi=index" class="msgitem-wrapper msgitem{{mi}}">
+                    <ion-grid class="ion-grid popover-item-grid msgitem{{mi}}">
+                      <ion-row *ngIf="!msgItem.isHeader" class="ion-grid popover-item-row msgitem{{mi}}">
+                        <ion-col size="6" class="ion-grid popover-item-col label-col msgitem{{mi}}">
+                          <div class="msgitem-txt-wrapper label-wrap msgitem{{mi}}">{{msgItem.label}}</div>
+                        </ion-col>
+                        <ion-col size="6" class="ion-grid popover-item-col value-col msgitem{{mi}}">
+                          <div class="msgitem-txt-wrapper value-wrap msgitem{{mi}}">{{msgItem.value}}</div>
+                        </ion-col>
+                      </ion-row>
+                      <ion-row *ngIf="msgItem.isHeader" class="ion-grid popover-header-row msgitem{{mi}}">
+                        <ion-col size="12" class="ion-grid popover-header-col msgitem{{mi}}">
+                          <div class="msgheader-wrapper header-wrap msgitem{{mi}}">{{msgItem.label}}</div>
+                        </ion-col>
+                      </ion-row>
+                    </ion-grid>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="popType==='input'" class="compzpopover-content-body input-outter-wrapper">
+              <div class="compzpopover-content-body input-label-wrapper">
+                <div [ngStyle]="{'color':popInputFocus?'#aaa':'#646464'}" class="compzpopover-content-body input-label-txt">{{popInputLabel}}:</div>
+              </div>
+              <div class="compzpopover-content-body input-wrapper">
+                <input #compzPopoverInput value='' placeholder={{popInputPH}} (change)="inputEvent('ch',$event,compzPopoverInput.value)" (focusin)="inputEvent('fi',$event,compzPopoverInput.value)" (focusout)="inputEvent('fo',$event,compzPopoverInput.value)" (keydown)="inputEvent('kd',$event,compzPopoverInput.value)" (keyup)="inputEvent('ku',$event,compzPopoverInput.value)" class="compzpopover-input">
+              </div>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+      <ion-row class="compz-row compzpopover-row footer-row">
+        <ion-col *ngIf="popType!=='btnquery'" size="6" class="compz-col compzpopover-col compzpopover-footer-col">
+          <div *ngIf="popType==='input'&&popInputValue.length>0" class="compzpopover-footervalidation-outter-wrapper">
+            <div class="compzpopover-footervalidation-inner-wrapper">
+              <img *ngIf="popInputValid!==null&&popInputValid===true" class="compzpopover-valid-ico true-ico" src="assets/compz-launcher-npfnval-true-ico.png">
+              <img *ngIf="popInputValid!==null&&popInputValid===false" class="compzpopover-valid-ico false-ico" src="assets/compz-launcher-npfnval-false-ico.png">
+              <div *ngIf="popInputValid!==null&&popInputValid===false&&popInputInvalidTxt!==null&&popInputInvalidTxt.length>0" class="compzpopover-valid-error-txt">{{popInputInvalidTxt}}</div>
+            </div>
+          </div>
+        </ion-col>
+        <ion-col [size]="popType==='btnquery'?'12':'6'" class="compz-col compzpopover-col compzpopover-footer-col">
+          <!-- QUERY BTNS -->
+          <div *ngIf="popType==='btnquery'&&popBtnQueryBtns.length>0" class="compzpopover-footerbtns-outter-wrapper">
+            <div class="compzpopover-footerbtns-inner-wrapper">
+              <div *ngFor="let qBtn of popBtnQueryBtns;let qbi=index" class="compzpopover-btn-wrap btnquerybtn">
+                <button tabindex="0" (click)="queryActionBtn(qBtn.action,qBtn.role)" class="compzpopover-action-btn btnquerybtn">
+                  <div class="compzpopover-action-btn-inner-wrap btnquerybtn">
+                    <div class="compzpopover-action-btn-txt btnquerybtn">{{qBtn.label}}</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- STANDARD BTNS -->
+          <div *ngIf="popType!=='btnquery'" class="compzpopover-footerbtns-outter-wrapper">
+            <div class="compzpopover-footerbtns-inner-wrapper">
+              <div class="compzpopover-btn-wrap cancel">
+                <button #cancelActionBtn tabindex="0" (click)="actionBtn('cancel')" class="compzpopover-action-btn cancel">
+                  <div class="compzpopover-action-btn-inner-wrap cancel">
+                    <div class="compzpopover-action-btn-txt cancel">{{popCancelBtnTxt}}</div>
+                  </div>
+                </button>
+              </div>
+              <div class="compzpopover-btn-wrap ok">
+                <button #okActionBtn tabindex="0" [disabled]="false" (click)="actionBtn('ok')" class="compzpopover-action-btn ok">
+                  <div class="compzpopover-action-btn-inner-wrap ok">
+                    <div class="compzpopover-action-btn-txt ok">{{popOKBtnTxt}}</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</div>
+<!-- ////////////////////////////////////////////// -->
+<div *ngIf="popType==='color'&&startRGBColor!==null" class="wc-color-popover-outter-wrapper">
+  <div class="wc-color-popover-inner-wrapper">
+    <color-sketch [color]="startRGBColor" [disableAlpha]="true" (onChangeComplete)="handleNewColor($event)"></color-sketch>
+    <div class="wc-color-popover-buttons-outter-wrapper">
+      <div class="wc-color-popover-buttons-inner-wrapper">
+        <div class="wc-color-pop-btn-wrapper cancel"><button (click)="handleColorDismiss('cancel')" class="wc-color-pick-btn cancel">Cancel</button></div>
+        <div class="wc-color-pop-btn-wrapper ok"><button (click)="handleColorDismiss('ok')" class="wc-color-pick-btn ok">Set Color</button></div>
+      </div>
+    </div>
+  </div>
+</div>

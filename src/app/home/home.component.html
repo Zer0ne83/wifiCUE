@@ -1,0 +1,1881 @@
+<div #homeWrap (click)="pDOM('skip')" [ngStyle]="{'border-top-left-radius':wcData.wcWinSizePos&&(wcData.wcWinSizePos.snaps.top||wcData.wcWinSizePos.snaps.left)?'0px':'8px','border-top-right-radius':wcData.wcWinSizePos&&(wcData.wcWinSizePos.snaps.top||wcData.wcWinSizePos.snaps.right)?'0px':'8px','border-bottom-right-radius':wcData.wcWinSizePos&&(wcData.wcWinSizePos.snaps.bottom||wcData.wcWinSizePos.snaps.right)?'0px':'8px','border-bottom-left-radius':wcData.wcWinSizePos&&(wcData.wcWinSizePos.snaps.bottom||wcData.wcWinSizePos.snaps.left)?'0px':'8px'}" [ngClass]="{'wcmainwindow-shadow':!winSet.trans&&!wcData.syncStates.audioSync}" class="wificue-mainpagewrapper home">
+  <div #myKodiProg [ngStyle]="{'display':kodiProgOn&&!wcData.isSleep?'block':'none'}" class="wc-kodiplayer-controls-wrapper kodi">
+    <div class="wc-kodi-prog-inner-wrapper">
+      <div class="wc-kodi-prog-details-wrap">
+        <div *ngIf="kodiPlyr&&kodiVolMute" class="wc-kodi-player-info">
+          <ion-grid class="wificue-grid kodi-player-grid">
+            <ion-row class="wificue-row kodi-player-row">
+              <ion-col class="wificue-col kodi-player-col plyrico"><img src="assets/wc-kodiplayer-ico.png" class="wc-kodiplayer-ico"></ion-col>
+              <ion-col class="wificue-col kodi-player-col controls-col">
+                <ion-grid class="wificue-grid kodi-player-grid controls-grid">
+                  <ion-row class="wificue-row kodi-player-row playinginfo-row">
+                    <ion-col class="wificue-col kodi-player-col playinginfo-col">
+                      <div id="kodi-info-container" (mousedown)="kodiInfoHandler($event)" class="kodiplayer-playinginfo-outter-wrapper">
+                        <div id="kodi-info-wrap" (mouseenter)="kodiScroll('stop')" (mouseleave)="kodiScroll('start')" class="kodiplayer-playinginfo-inner-wrapper">
+                          <div *ngFor="let kodiPIItem of kodiPlayingInfo;index as kpii" class="pi-kvitem" id="pikv{{kpii}}">
+                            <div class="pi-label">{{kodiPIItem.l}}</div>
+                            <div class="pi-colon">:</div>
+                            <div class="pi-value">{{kodiPIItem.v}}</div>
+                            <div [ngStyle]="{'display':kpii<(kodiPlayingInfo.length-1)?'flex':'none'}" class="pi-sep">|</div>
+                          </div>
+                        </div>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row class="wificue-row kodi-player-row controls-row">
+                    <ion-col class="wificue-col kodi-player-col volmute-col">
+                      <div class="kp-volmute-wrapper">
+                        <div class="kp-volmute-data ico">
+                          <button (click)="kodiAction('toggleMute')" class="kp-ctrl-btn mute-button">
+                            <img *ngIf="kodiVolMute.muted" src="assets/home-player-muted-red-ico.png" class="kp-volmute-ico muted">
+                            <img *ngIf="!kodiVolMute.muted" src="assets/wc-kodiplayer-vol-ico.png" class="kp-volmute-ico notmuted">
+                          </button>
+                        </div>
+                        <div class="kp-volmute-data value">
+                          <span *ngIf="kodiVolMute.muted" class="kp-volmute-value muted">-</span>
+                          <span *ngIf="!kodiVolMute.muted" class="kp-volmute-value notmuted">{{kodiVolMute.volume}}%</span>
+                        </div>
+                      </div>
+                    </ion-col>
+                    <ion-col class="wificue-col kodi-player-col status-col">
+                      <div class="kp-status-wrapper">
+                        <button (click)="kodiAction('togglePause')" (dblclick)="kodiAction('doStop')" class="kp-ctrl-btn status-button">
+                          <div class="kp-status-data ico">
+                            <img *ngIf="kodiPlyr.status==='stopped'" src="assets/wc-kodiplayer-playing.png" class="kp-status-ico stopped">
+                            <img *ngIf="kodiPlyr.status==='paused'" src="assets/wc-kodiplayer-playing.png" class="kp-status-ico paused">
+                            <img *ngIf="kodiPlyr.status==='loading'" src="assets/wc-kodiplayer-loading.png" class="kp-status-ico loading">
+                            <img *ngIf="kodiPlyr.status==='playing'" src="assets/wc-kodiplayer-paused.png" class="kp-status-ico playing">
+                          </div>
+                        </button>
+                      </div>
+                    </ion-col>
+                    <ion-col class="wificue-col kodi-player-col prog-col">
+                      <div [ngStyle]="{'display':kodiPlyr.status!=='stopped'?'flex':'none'}" class="kp-player-prog-outter-wrapper">
+                        <div (mouseenter)="kodiSeekSel('me',$event,null)" (mouseleave)="kodiSeekSel('ml',$event,null)" (mousemove)="kodiSeekSel('mm',$event,null)" (click)="kodiSeekSel('click',$event,null)" id="kprogwrap" class="kp-progress-wrapper bar">
+                          <ion-progress-bar [ngClass]="{'bar-paused':kodiPlyr.status==='paused','bar-indet':kodiPlyrBarType==='indeterminate'}" type={{kodiPlyrBarType}} [mode]="'md'" value={{kodiPlyr.pos.perc}} class="kodiplayer-progress"></ion-progress-bar>
+                          <div id="kseek-wrap" [ngStyle]="{'display':kodiSeekLine.mouseIn?'block':'none','left':kodiSeekLine.left.toString()+'px'}" class="kodi-progbar-pos-selectbar outter">
+                            <div id="kseek-head" class="kodi-progbar-pos-selectbar inner"></div>
+                          </div>
+                        </div>
+                        <div class="kp-progress-wrapper time">
+                          <div [ngStyle]="{'display':kodiSeekLine.mouseIn?'flex':'none'}" class="kp-prog-time-value seek">
+                            {{kodiSeekLine.posV}}
+                          </div>
+                          <div [ngClass]="{'blinking':kodiPlyr.status==='paused'}" [ngStyle]="{'display':kodiSeekLine.mouseIn?'none':'flex'}" class="kp-prog-time-value">
+                            {{kodiTimeStr}}
+                          </div>
+                        </div>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ion-grid [ngStyle]="{'height':kodiProgOn?'calc(100% - 36px)':'100%'}" class="wificue-grid main-page-grid home">
+    <ion-row class="wificue-row main-page-row home titlebar-row">
+      <ion-col class="wificue-col main-page-col home titlebar-col">
+        <ion-grid class="wificue-grid titlebar-grid">
+          <ion-row class="wificue-row titlebar-row">
+            <ion-col [ngStyle]="{'background':winSet.trans?'transparent':'url(assets/noise.png) #373737'}" class="wificue-col titlebar-col left">
+              <div [ngClass]="{'detached-btn-radius-left':wcData.wcWinSizePos&&(!wcData.wcWinSizePos.snaps.top&&!wcData.wcWinSizePos.snaps.left&&!wcData.syncStates.audioSync)}" class="wificue-winset-outter-wrapper">
+                <div class="wificue-winset-inner-wrapper">
+                  <div class="wificue-winset-wrap settings-btn">
+                    <button (click)="toggleSettings()" [ngClass]="{'detached-btn-radius-left':wcData.wcWinSizePos&&(!wcData.wcWinSizePos.snaps.top&&!wcData.wcWinSizePos.snaps.left&&!wcData.syncStates.audioSync),'trans-tb-btn':winSet.trans}" class="wificue-winset-btn settings-btn">
+                      <img *ngIf="!settingsMode" src="assets/wc-winbtn-settings-ico.png" class="wificue-winsetbtn-ico settings-btn">
+                      <img *ngIf="settingsMode" src="assets/wc-winbtn-back-yellow-ico.png" class="wificue-winsetbtn-ico back-btn">
+                    </button>
+                  </div>
+                  <div class="wificue-winset-wrap refresh-btn">
+                    <button (click)="doRefreshAll()" [disabled]="settingsMode||networkMode" [ngClass]="{'trans-tb-btn':winSet.trans}" class="wificue-winset-btn refresh-btn">
+                      <img src="assets/wc-winbtn-refresh-ico.png" class="wificue-winsetbtn-ico refresh-btn">
+                    </button>
+                  </div>
+                  <div class="wificue-winset-wrap about-btn">
+                    <button (click)="toggleNetwork()" [ngClass]="{'trans-tb-btn':winSet.trans}" class="wificue-winset-btn about-btn">
+                      <img *ngIf="!networkMode" src="assets/wc-winbtn-network-ico.png" class="wificue-winsetbtn-ico about-btn">
+                      <img *ngIf="networkMode" src="assets/wc-winbtn-back-yellow-ico.png" class="wificue-winsetbtn-ico back-btn">
+                    </button>
+                  </div>
+                  <div class="wificue-winset-wrap trans-btn">
+                    <button (click)="doWinSetBtn('trans')" [ngClass]="{'trans-tb-btn':winSet.trans}" class="wificue-winset-btn trans-btn">
+                      <img src="assets/wc-winbtn-trans-ico.png" class="wificue-winsetbtn-ico trans-btn">
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="titlebar-title-wrapper wifi">
+                <img class="titlebar-title-img-wifi" src="assets/wc-titlebar-title-wifi.png">
+              </div>
+            </ion-col>
+            <ion-col class="wificue-col titlebar-col center">
+              <div class="titlebar-center-icon-outter-wrapper">
+                <div [ngStyle]="{'background':winSet.trans?'transparent':'url(assets/wc-titlebar-logohole.png)'}" class="titlebar-center-icon-inner-wrapper">
+                    <img (contextmenu)="toggleKnobFn($event)" *ngIf="!knobFnIsOn" #wcMainLogo [ngClass]="{'titlebar-logo-anim':!footerNetStatus}" src="assets/wcicon.png" class="titlebar-center-icon-img">
+                    <div (contextmenu)="toggleKnobFn($event)" *ngIf="knobFnIsOn" id="knobfndiv" class="titlebar-center-knobfb-wrapper">
+                      <img src="assets/wc-knobfn-ico.png" class="titlebar-center-knob-fn-ico">
+                    </div>
+                </div>
+              </div>
+            </ion-col>
+            <ion-col [ngStyle]="{'background':winSet.trans?'transparent':'url(assets/noise.png) #373737'}" class="wificue-col titlebar-col right">
+              <div class="titlebar-title-wrapper cue">
+                <img class="titlebar-title-img-cue" src="assets/wc-titlebar-title-cue.png">
+              </div>
+              <div [ngClass]="{'detached-btn-radius-right':wcData.wcWinSizePos&&(!wcData.wcWinSizePos.snaps.top&&!wcData.wcWinSizePos.snaps.right)}" class="wificue-winbtn-outter-wrapper">
+                <div class="wificue-winbtn-inner-wrapper">
+                  <div class="wificue-winbtn-wrap min-btn">
+                    <button [ngClass]="{'trans-tb-btn':winSet.trans}" (click)="doSendWinCtrlBtn('min')" class="wificue-winbtn min-btn">
+                      <img src="assets/wc-winbtn-min-ico.png" class="wifi-cue-winbtn-ico min-btn">
+                    </button>
+                  </div>
+                  <div class="wificue-winbtn-wrap exit-btn">
+                    <button [ngClass]="{'trans-tb-btn':winSet.trans}" (click)="doSendWinCtrlBtn('exit')" class="wificue-winbtn exit-btn">
+                      <img src="assets/wc-winbtn-exit-ico.png" class="wifi-cue-winbtn-ico exit-btn">
+                    </button>
+                  </div>
+                  <div class="wificue-winbtn-wrap close-btn">
+                    <button (click)="doSendWinCtrlBtn('close')" [ngClass]="{'detached-btn-radius-right':wcData.wcWinSizePos&&(!wcData.wcWinSizePos.snaps.top&&!wcData.wcWinSizePos.snaps.right),'trans-tb-btn':winSet.trans}"  class="wificue-winbtn close-btn">
+                      <img src="assets/wc-winbtn-close-ico.png" class="wifi-cue-winbtn-ico close-btn">
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-col>
+    </ion-row>
+    <!-- ------------------------------------ -->
+    <!-- NETWORK/CLIENTS -------------------- -->
+    <!-- ------------------------------------ -->
+    <ion-row id="network-mode-row" [ngClass]="{'nm-in-networkrow-anim':networkMode}" [ngStyle]="{'background':winSet.trans?'rgb(0 0 0 / 1%)':'url(assets/noise.png) #282828'}" class="wificue-row main-page-row network content-row">
+      <ion-col size="12" class="wificue-col main-page-col network content-col">
+        <div class="wificue-main-contentwrapper network outter">
+          <div class="wificue-main-contentwrapper network inner darkscrolls">
+            <ion-grid class="wificue-grid network-main-grid">
+              <ion-row class="wificue-row network-main-row header-row networkinfo-header-row">
+                <ion-col size="12" class="wificue-col network-header-col networkinfo-header-col">
+                  <div class="wificue-network-header-wrapper networkinfo">
+                    <div class="wcnh-ico-wrap info">
+                      <img class="wificue-network-header-ico-img info" src="assets/wc-network-header-ico-svr.png">
+                    </div>
+                    <div class="wcnh-headertxt-wrap info">
+                      <img class="wificue-network-header-img networkinfo-network-img" src="assets/wc-main-network-header.png">
+                      <img class="wificue-network-subheader-img networkinfo-info-img" src="assets/wc-main-server-header.png">
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row class="wificue-row network-main-row content-row networkinfo-content-row">
+                <ion-col class="wificue-col network-main-col content-col networkinfo-content-col">
+                  <div class="wificue-network-info-main-outter-wrapper">
+                    <div *ngIf="netInfo&&wledTreeReady" class="wificue-network-info-main-inner-wrapper">
+                      <ion-grid class="wificue-grid netinfo-grid">
+                        <ion-row class="wificue-row netinfo-row pc-row">
+                          <ion-col size="2" class="netinfo-col pc-ico-col">
+                            <div class="netinfo-pc-ico-wrapper">
+                              <img class="netinfo-pc-ico-img" src="assets/wc-winbtn-network-ico.png">
+                            </div>
+                          </ion-col>
+                          <ion-col size="10" class="netinfo-col pc-os-col">
+                            <div class="netinfo-machine-values-wrapper os">
+                              <div class="netinfo-machine-value os-pcname"><span class="net-hlg-label">machine:</span>{{netInfo.info.pc}}</div>
+                              <div class="netinfo-machine-value os-osname">{{netInfo.info.os.name}}</div>
+                              <div class="netinfo-machine-value os-osversion">
+                                <div class="os-osversion number">{{netInfo.info.os.version}}</div>
+                                <div class="ni-div-line">|</div>
+                                <div class="os-os-version arch">{{netInfo.info.os.arch}}</div>
+                              </div>
+                            </div>
+                          </ion-col>
+                        </ion-row>
+                        <ion-row class="wificue-row netinfo-row interface-row">
+                          <ion-col size="2" class="wificue-col netinfo-col interface-ico-col">
+                            <div class="netinfo-interface-ico-wrapper">
+                              <img class="netinfo-interface-ico-img" src="assets/wc-netinfo-interface-ico.png">
+                            </div>
+                          </ion-col>
+                          <ion-col size="10" class="wificue-col netinfo-col iface-col">
+                            <div class="netinfo-machine-values-wrapper iface">
+                              <div class="netinfo-machine-value iface-nametype">
+                                <div class="nimv-val ifname"><span class="net-hlg-label">network:</span>{{netInfo.info.name}}</div>
+                                <div class="ni-div-line">|</div>
+                                <div class="nimv-val iftype">{{netInfo.info.type}}</div>
+                              </div>
+                            </div>
+                            <div class="netinfo-machine-value iface-status">
+                              <div class="nimv-val ifactive">
+                                <div class="nimv-val-label active">active:</div>
+                                <img *ngIf="netInfo.info.active" class="nimv-val-indic isactive" src="assets/wcc-status-green-led.png">
+                                <img *ngIf="!netInfo.info.active" class="nimv-val-indic isactive" src="assets/wcc-status-red-led.png">
+                              </div>
+                              <div class="ni-div-line">|</div>
+                              <div class="nimv-val ifip4">
+                                <div class="nimv-val-label ip4">IPv4:</div>
+                                <img *ngIf="netInfo.info.ip4Conn==='Disconnected'" class="nimv-val-indic disc" src="assets/wcc-status-red-led.png">
+                                <img *ngIf="netInfo.info.ip4Conn==='NoTraffic'" class="nimv-val-indic notraffic" src="assets/wcc-status-yellow-led.png">
+                                <img *ngIf="netInfo.info.ip4Conn!=='Disconnected'&&netInfo.info.ip4Conn!=='NoTraffic'" class="nimv-val-indic conn" src="assets/wcc-status-green-led.png">
+                              </div>
+                              <div class="ni-div-line">|</div>
+                              <div class="nimv-val ifip6">
+                                <div class="nimv-val-label ip6">IPv6:</div>
+                                <img *ngIf="netInfo.info.ip6Conn==='Disconnected'" class="nimv-val-indic disc" src="assets/wcc-status-red-led.png">
+                                <img *ngIf="netInfo.info.ip6Conn==='NoTraffic'" class="nimv-val-indic notraffic" src="assets/wcc-status-yellow-led.png">
+                                <img *ngIf="netInfo.info.ip6Conn!=='Disconnected'&&netInfo.info.ip6Conn!=='NoTraffic'" class="nimv-val-indic conn" src="assets/wcc-status-green-led.png">
+                              </div>
+                            </div>
+                            <div class="netinfo-machine-value iface-ips">
+                              <div class="nimv-val ifips">@ {{netInfo.info.ip}} (via {{netInfo.info.gateway}})</div>
+                            </div>
+                          </ion-col>
+                        </ion-row>
+                        <ion-row class="wificue-row netinfo-row wcsvr-row">
+                          <ion-col size="2" class="wificue-col netinfo-col wcsvr-ico-col">
+                            <div class="netinfo-wcsvr-ico-wrapper">
+                              <img class="netinfo-wcsvr-ico-img" src="assets/wc-netinfo-svr-ico.png">
+                            </div>
+                          </ion-col>
+                          <ion-col size="10" class="wificue-col netinfo-col wcsvr-col">
+                            <div class="netinfo-machine-value wcsvr-endpoint">
+                              <div class="wcsvrendpointtxt"><span class="net-hlg-label">service:</span>Websockets:6969</div>
+                            </div>
+                            <div class="netinfo-machine-value wcsvr-islisten">
+                              <div class="nimv-val-label islisten">listening:</div>
+                              <img *ngIf="netInfo.isListen" class="nimv-val-indic isl" src="assets/wcc-status-green-led.png">
+                              <img *ngIf="!netInfo.isListen" class="nimv-val-indic notl" src="assets/wcc-status-red-led.png">
+                            </div>
+                          </ion-col>
+                        </ion-row>
+                        <ion-row class="wificue-row netinfo-row zconf-row">
+                          <ion-col size="2" class="wificue-col netinfo-col zconf-ico-col">
+                            <div class="netinfo-zconf-ico-wrapper">
+                              <img class="netinfo-zconf-ico-img" src="assets/wc-netinfo-zeroconf-ico.png">
+                            </div>
+                          </ion-col>
+                          <ion-col size="10" class="wificue-col netinfo-col zconf-col">
+                            <div class="netinfo-machine-value zconf-name">
+                              <div class="zconfnametxt"><span class="net-hlg-label">service:</span>ZeroConf:9696</div>
+                            </div>
+                            <div class="netinfo-machine-value zconf-published">
+                              <div class="nimv-val-label published">published:</div>
+                              <img *ngIf="netInfo.zConf.isUp" class="nimv-val-indic isp" src="assets/wcc-status-green-led.png">
+                              <img *ngIf="!netInfo.zConf.isUp" class="nimv-val-indic notp" src="assets/wcc-status-red-led.png">
+                            </div>
+                          </ion-col>
+                        </ion-row>
+                        <ion-row class="wificue-row netinfo-row sdk-row">
+                          <ion-col size="2" class="wificue-col netinfo-col sdk-ico-col">
+                            <div class="netinfo-sdk-ico-wrapper">
+                              <img class="netinfo-sdk-ico-img" src="assets/wc-netinfo-sdk-ico.png">
+                            </div>
+                          </ion-col>
+                          <ion-col size="10" class="wificue-col netinfo-col sdk-col">
+                            <div class="icuesdkmainlabel-wrapper"><span class="net-hlg-label">service:</span>iCUE SDK</div>
+                            <div *ngIf="sdkStatus!==null" class="netinfo-machine-value sdk-vers">
+                              <div class="sdkverstxt">{{sdkStatus.versions.clientVersion}}</div>
+                              <div class="ni-div-line">/</div>
+                              <div class="sdkverstxt">{{sdkStatus.versions.serverVersion}}</div>
+                              <div class="ni-div-line">/</div>
+                              <div class="sdkverstxt">{{sdkStatus.versions.serverHostVersion}}</div>
+                            </div>
+                            <div *ngIf="sdkStatus!==null" class="netinfo-machine-value sdk-status">
+                              <div class="nimv-val-label init">initiated:</div>
+                              <img *ngIf="sdkStatus.session.code===6" class="nimv-val-indic isp" src="assets/wcc-status-green-led.png">
+                              <img *ngIf="sdkStatus.session.code!==6" class="nimv-val-indic notp" src="assets/wcc-status-red-led.png">
+                            </div>
+                          </ion-col>
+                        </ion-row>
+                        <ion-row *ngFor="let wledServ of wledTree" class="wificue-row netinfo-row wled-row">
+                          <ion-col size="2" class="wificue-col netinfo-col wled-ico-col">
+                            <div class="netinfo-wled-ico-wrapper">
+                              <img class="netinfo-wled-ico-img" src="assets/wc-netinfo-wled-ico.png">
+                            </div>
+                          </ion-col>
+                          <ion-col size="10" class="wificue-col netinfo-col wled-col">
+                            <div class="icuesdkmainlabel-wrapper"><span class="net-hlg-label">service:</span>WLED API</div>
+                            <div class="netinfo-machine-value wled-vers">
+                              <div class="wledinfotxt">{{wledServ.info.version}}</div>
+                              <div class="ni-div-line">/</div>
+                              <div class="wledinfotxt">{{wledServ.info.arch}}</div>
+                              <div class="ni-div-line">/</div>
+                              <div class="wledinfotxt">{{wledServ.info.mac}}</div>
+                            </div>
+                            <div class="netinfo-machine-value wled-moreinfo">
+                              <div class="wledinfotxt">{{wledServ.info['ip']}}</div>
+                              <div class="ni-div-line">/</div>
+                              <div class="wledinfotxt">{{wledServ.info.name}}</div>
+                              <div class="ni-div-line">/</div>
+                              <div class="nimv-val-label devicecount">D:</div>
+                              <div class="wledinfotxt">{{wledServ.info.wsConnectedCount}}</div>
+                              <div class="ni-div-line">/</div>
+                              <div class="nimv-val-label devicecount">L:</div>
+                              <div class="wledinfotxt">{{wledServ.info.leds.count}}</div>
+                            </div>
+                            <div class="netinfo-machine-value wled-status">
+                              <div class="nimv-val-label init">initiated:</div>
+                              <img *ngIf="wledServ.info.uptime>0" class="nimv-val-indic isinit" src="assets/wcc-status-green-led.png">
+                              <img *ngIf="wledServ.info.uptime===0" class="nimv-val-indic notinit" src="assets/wcc-status-red-led.png">
+                            </div>
+                          </ion-col>
+                        </ion-row>
+                      </ion-grid>
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row class="wificue-row network-main-row header-row networkclients-header-row">
+                <ion-col size="12" class="wificue-col network-header-col networkclients-header-col">
+                  <div class="wificue-network-header-wrapper networkclients">
+                    <div class="wcnh-ico-wrap clients">
+                      <img class="wificue-network-header-ico-img clients" src="assets/wc-network-header-ico-client.png">
+                    </div>
+                    <img class="wificue-network-header-img networkclients-network-img" src="assets/wc-main-network-header.png">
+                    <img class="wificue-network-subheader-img networkclients-clients-img" src="assets/wc-main-clients-header.png">
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row class="wificue-row network-main-row content-row networkclients-content-row">
+                <ion-col class="wificue-col network-main-col content-col networkclients-content-col">
+                  <div class="wificue-network-clients-main-outter-wrapper">
+                    <div class="wificue-network-clients-main-inner-wrapper">
+                      <div *ngIf="wledTreeReady&&netInfo&&grantsList!==null" class="netclients-list-wrapper darkscrolls" [ngClass]="{'netclients-list-trans':winSet.trans}">
+                        <div *ngFor="let netClient of netInfo.clients" class="netclients-list-item-div">
+                          <div *ngIf="netClientsRefreshing" class="netclients-refresh-item-spinner-wrapper">
+                            <ion-spinner duration="400" class="list-loading-spinner netclient" name="dots"></ion-spinner>
+                          </div>
+                          <ion-grid *ngIf="!netClientsRefreshing" class="wificue-grid netclients-list-item-grid">
+                            <!-- ----------------- -->
+                            <!-- NOT AUTH -->
+                            <!-- ----------------- -->
+                            <ion-row *ngIf="!(isAuthClient(netClient.mac))" class="wificue-row netclients-list-item-row main-row notauth">
+                              <ion-col class="wificue-col netclients-list-item-col name-col">
+                                <div class="netclients-list-item-iconame-wrapper notauth">
+                                  <img *ngIf="!(isBanClient(netClient.mac))&&!(isWLEDDevice(netClient))&&netClient.name!=='Kodi Server'&&!(isMSensorDevice(netClient))" class="netclient-list-item-ico std" src="assets/wc-netclients-list-ico-std.png">
+                                  <img *ngIf="(isBanClient(netClient.mac))" class="netclient-list-item-ico std" src="assets/wc-netclients-list-ico-banned.png">
+                                  <img *ngIf="(isWLEDDevice(netClient))" class="netclient-list-item-ico std" src="assets/wc-network-clients-wled-ico.png">
+                                  <img *ngIf="netClient.name==='Kodi Server'" class="netclient-list-item-ico std" src="assets/wc-netclients-list-ico-kodi.png">
+                                  <img *ngIf="(isMSensorDevice(netClient))" class="netclient-list-item-ico std" src="assets/wc-netclients-list-ico-pirsensor.png">
+                                  <div [ngClass]="{'isbannedclient-name':(isBanClient(netClient.mac)),'iswledclient':(isWLEDDevice(netClient))}" class="netclients-list-item-name">
+                                    <span *ngIf="!(isMSensorDevice(netClient))&&!(isWLEDDevice(netClient))" [ngClass]="{'iskodi-server-class':netClient.name==='Kodi Server'}">{{netClient.name}}</span>
+                                    <span *ngIf="(isWLEDDevice(netClient))">WLED Service</span>
+                                    <span class="is-motion-sensor-device" *ngIf="(isMSensorDevice(netClient))">PIR Sensor {{netClient.ip.charAt((netClient.ip.length-1))}}</span>
+                                  </div>
+                                </div>
+                              </ion-col>
+                              <ion-col class="wificue-col netclients-list-item-col ip-col">
+                                <div [ngClass]="{'isbannedclient-ip':(isBanClient(netClient.mac)),'iswledclient':(isWLEDDevice(netClient)),'iskodi-server-class':netClient.name==='Kodi Server','is-motion-sensor-device':(isMSensorDevice(netClient))}" class="netclients-list-item-ip">{{netClient.ip}}</div>
+                              </ion-col>
+                              <ion-col class="wificue-col netclients-list-item-col btns-col">
+                                <div *ngIf="!(isWLEDDevice(netClient))&&!(isMSensorDevice(netClient))&&netClient.name!=='Kodi Server'" class="netclients-list-item-btns">
+                                  <button (click)="doBanClient(netClient)" [ngStyle]="{'display':!(isBanClient(netClient.mac))?'flex':'none'}" class="netclients-btn ban-btn">
+                                    <img src="assets/wc-clientlist-ban-btn-ico.png" class="clientlist-action-ico ban">
+                                  </button>
+                                  <button (click)="doUnbanClient(netClient)" [ngStyle]="{'display':(isBanClient(netClient.mac))?'flex':'none'}" class="netclients-btn unban-btn">
+                                    <img src="assets/wc-clientlist-unban-btn-ico.png" class="clientlist-action-ico unban">
+                                  </button>
+                                </div>
+                              </ion-col>
+                            </ion-row>
+                            <!-- ----------------- -->
+                            <!-- IS AUTH -->
+                            <!-- ----------------- -->
+                            <ion-row *ngIf="(isAuthClient(netClient.mac))" class="wificue-row netclients-list-item-row main-row auth">
+                              <ion-col class="wificue-col netclients-list-item-col name-col">
+                                <div class="netclients-list-item-iconame-wrapper isauth">
+                                  <img class="netclient-list-item-ico auth" src="assets/wc-netclients-list-ico-auth.png">
+                                  <div class="netclients-list-item-name">{{(checkAuthName(netClient))}}</div>
+                                </div>
+                              </ion-col>
+                              <ion-col class="wificue-col netclients-list-item-col ip-col">
+                                <div class="netclients-list-item-ip">{{netClient.ip}}</div>
+                              </ion-col>
+                              <ion-col class="wificue-col netclients-list-item-col btns-col">
+                                <div class="netclients-list-item-btns">
+                                  <button (click)="doDeAuthClient(netClient)" class="netclients-btn deauth-btn"><img src="assets/compz-launcher-npfnval-false-ico.png" class="clientlist-action-ico deauth"></button>
+                                  <button (click)="doBanClient(netClient)" [ngStyle]="{'display':!(isBanClient(netClient.mac))?'flex':'none'}" class="netclients-btn ban-btn">
+                                    <img src="assets/wc-clientlist-ban-btn-ico.png" class="clientlist-action-ico ban">
+                                  </button>
+                                  <button (click)="doUnbanClient(netClient)" [ngStyle]="{'display':(isBanClient(netClient.mac))?'flex':'none'}" class="netclients-btn unban-btn">
+                                    <img src="assets/wc-clientlist-unban-btn-ico.png" class="clientlist-action-ico unban">
+                                  </button>
+                                </div>
+                              </ion-col>
+                            </ion-row>
+                          </ion-grid>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="netclients-refresh-bottom-bar-outter-wrapper">
+                    <div class="netclients-refresh-bottom-bar-inner-wrapper">
+                      <div *ngIf="!netClientsRefreshing" class="netclients-refresh-lastchecked-date-wrapper">
+                        <div class="netclients-refresh-time-label-wrap">
+                          <img src="assets/wc-time-ico.png" class="netclients-refresh-time-ico-img">
+                          <div [ngClass]="{'newtimescolor':netClientsNewTime}" class="netclients-refresh-time-label">{{netClientsTime}}</div>
+                        </div>
+                      </div>
+                      <div class="netclients-refresh-btn-wrapper">
+                        <button (click)="doRefreshNetClients()" [disabled]="netClientsRefreshing" class="netclients-refresh-btn">
+                          <div class="nc-refresh-btn-label-wrap">
+                            <img [ngClass]="{'basic-rotate-infinite':netClientsRefreshing}" class="nc-refresh-btn-ico-img" src="assets/wc-winbtn-refresh-ico.png">
+                            <div class="nc-refresh-btn-txt">refresh</div>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </div>
+        </div>
+      </ion-col>
+    </ion-row>
+    <!-- ------------------------------------ -->
+    <!-- SETTINGS --------------------------- -->
+    <!-- ------------------------------------ -->
+    <ion-row id="settings-mode-row" [ngClass]="{'sm-in-settingsrow-anim':settingsMode}" [ngStyle]="{'background':winSet.trans?'rgb(0 0 0 / 1%)':'url(assets/noise.png) #282828'}" class="wificue-row main-page-row settings content-row">
+      <ion-col size="12" class="wificue-col main-page-col settings content-col">
+        <div class="wificue-main-contentwrapper settings outter">
+          <div class="wificue-main-contentwrapper settings inner darkscrolls">
+            <ion-grid class="wificue-grid settings-main-grid">
+              <ion-row class="wificue-row settings-main-row header-row">
+                <ion-col size="12" class="wificue-col settings-header-col">
+                  <div class="wificue-settings-header-wrapper">
+                    <img class="wificue-settings-header-img" src="assets/wc-main-settings-header.png">
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row class="wificue-row settings-cat-row control-requests-row">
+                <ion-col size="12" class="wificue-col settings-cat-header-col">
+                  <div class="settings-cat-header-wrap">
+                    <img class="settings-cat-header-ico" src="assets/wc-settings-controlrequests-ico.png">
+                    <div class="settings-cat-header-label">Control Requests</div>
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row class="wificue-row settings-opt-row autoresponder">
+                <ion-col size="5" class="wificue-col settings-opt-header-col">
+                  <div class="settings-opt-header-wrap">
+                    <img class="settings-opt-header-ico autoapp" src="assets/wc-settings-controlrequests-autoapprove-ico.png">
+                    <div class="settings-opt-header-label">Auto-Responder</div>
+                  </div>
+                </ion-col>
+                <ion-col size="2" class="wificue-col settings-opt-select-col toggle">
+                  <div class="settings-opt-select-wrap autoresp toggle">
+                    <ion-toggle mode="ios" #ctrlReqsAutoResponderToggle [enableOnOffLabels]="false" [checked]="wcData.settings.controlRequests.autoResponder.isOn" (ionChange)="settingsOpt('ctrlReqs','autoResponderOnOff',ctrlReqsAutoResponderToggle.checked)" class="wificue-toggle settings-opt-toggle"></ion-toggle>
+                  </div>
+                </ion-col>
+                <ion-col size="5" class="wificue-col settings-opt-select-col grantdenycbs">
+                  <div class="settings-opt-select-wrap autoresp grantdenycbs">
+                    <div class="wificue-settings-opt-btn-wrap autoresp-approve">
+                      <button (click)="settingsOpt('ctrlReqs','autoResponderRespond','grant')" [disabled]="wcData.settings.controlRequests.autoResponder.response==='grant'||!wcData.settings.controlRequests.autoResponder.isOn" [ngClass]="{'isseloptbtn':wcData.settings.controlRequests.autoResponder.response==='grant'}" class="settings-opt-btn autoresp-approve-btn">
+                        <div class="wcs-cb-label">Grant</div>
+                      </button>
+                    </div>
+                    <div class="wificue-settings-opt-btn-wrap autoresp-deny">
+                      <button (click)="settingsOpt('ctrlReqs','autoResponderRespond','deny')" [disabled]="wcData.settings.controlRequests.autoResponder.response==='deny'||!wcData.settings.controlRequests.autoResponder.isOn" [ngClass]="{'isseloptbtn':wcData.settings.controlRequests.autoResponder.response==='deny'}" class="settings-opt-btn autoresp-deny-btn">
+                        <div class="wcs-cb-label">Deny</div>
+                      </button>
+                    </div>
+                    <div class="disabled-setting-area" *ngIf="!wcData.settings.controlRequests.autoResponder.isOn"></div>
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row class="wificue-row settings-opt-row timeout">
+                <ion-col size="5" class="wificue-col settings-opt-header-col">
+                  <div [ngStyle]="{'opacity':wcData.settings.controlRequests.autoResponder.isOn?'0.5':'1'}" class="settings-opt-header-wrap">
+                    <img class="settings-opt-header-ico" src="assets/wc-settings-timeout-ico.png">
+                    <div class="settings-opt-header-label">G/D Timeout</div>
+                  </div>
+                </ion-col>
+                <ion-col size="7" class="wificue-col settings-opt-select-col">
+                  <div class="settings-opt-select-wrap">
+                    <div class="wificue-settings-range-wrap timeout">
+                      <ion-range class="settings-response-to-range" [disabled]="wcData.settings.controlRequests.autoResponder.isOn" mode="ios" #ctrlReqsResponseTimeoutRange [step]="5" [snaps]="true" [min]="0" [max]="60" [pin]="false" [ticks]="false" [value]="wcData.settings.controlRequests.timeout" (ionChange)="settingsOpt('ctrlReqs','timeout',ctrlReqsResponseTimeoutRange.value)"></ion-range>
+                      <div class="wcs-range-label-wrap">
+                        <div class="wcs-range-label-value">{{wcData.settings.controlRequests.timeout}}</div>
+                        <div class="wcs-range-label-suffix">s</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="disabled-setting-area" *ngIf="wcData.settings.controlRequests.autoResponder.isOn"></div>
+                </ion-col>
+              </ion-row>
+              <ion-row class="wificue-row settings-cat-row timedfunctions-row">
+                <ion-col size="12" class="wificue-col settings-cat-header-col">
+                  <div class="settings-cat-header-wrap">
+                    <img class="settings-cat-header-ico" src="assets/wc-settings-time-fn-ico.png">
+                    <div class="settings-cat-header-label">Timed Functions</div>
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row class="wificue-row settings-opt-row recurring-chime">
+                <ion-col size="5" class="wificue-col settings-opt-header-col">
+                  <div class="settings-opt-header-wrap">
+                    <img class="settings-opt-header-ico" src="assets/wc-settings-timedfunctions-recurringchime-ico.png">
+                    <div class="settings-opt-header-label">Recurring Chime</div>
+                  </div>
+                </ion-col>
+                <ion-col size="2" class="wificue-col settings-opt-select-col toggle">
+                  <div class="settings-opt-select-wrap reccuringchime toggle">
+                    <ion-toggle mode="ios" #timedFnsRecurringChimeToggle [enableOnOffLabels]="false" [checked]="wcData.settings.timedFunctions.recurringChime.isOn" (ionChange)="settingsOpt('timedFns','recurringChimeOnOff',timedFnsRecurringChimeToggle.checked)" class="wificue-toggle settings-opt-toggle"></ion-toggle>
+                  </div>
+                </ion-col>
+                <ion-col size="5" class="wificue-col settings-opt-select-col recurringchime">
+                  <div [ngStyle]="{'opacity':wcData.settings.timedFunctions.recurringChime.isOn?'1':'0.5'}" class="settings-opt-select-wrap recurringchime">
+                    <div class="recurringchime-inner-wrapper">
+                      <div class="recurringchime-label every">every</div>
+                      <input #timedFnsRecurringChimeInterval (wheel)="settingsOpt('timedFns','recurringChimeIntervalWheel',{v:timedFnsRecurringChimeInterval.value,e:$event})" (keyup)="settingsOpt('timedFns','recurringChimeIntervalKeyUp',{v:timedFnsRecurringChimeInterval.value,e:$event})" (blur)="settingsOpt('timedFns','recurringChimeInterval',timedFnsRecurringChimeInterval.value)" [disabled]="!wcData.settings.timedFunctions.recurringChime.isOn" type="number" min="15" max="60" step="15" value={{wcData.settings.timedFunctions.recurringChime.interval}} class="recurringchime-interval-input">
+                      <div class="recurringchime-label mins">m</div>
+                    </div>
+                    <div [ngStyle]="{'opacity':wcData.settings.timedFunctions.recurringChime.isOn?'1':'0.5'}" class="settings-opt-now-btn chime">
+                      <div class="autosleepwake-donow-btn-wrapper chime">
+                        <button (click)="doChime(-1)" [disabled]="!wcData.settings.timedFunctions.recurringChime.isOn" class="autosleepwake-donow-btn chime">now</button>
+                      </div>
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row class="wificue-row settings-opt-row sleepwake">
+                <ion-col size="5" class="wificue-col settings-opt-header-col">
+                  <div class="settings-opt-header-wrap">
+                    <img class="settings-opt-header-ico" src="assets/wc-settings-timedfunctions-sleepwake-ico.png">
+                    <div class="settings-opt-header-label">Auto-Sleep</div>
+                  </div>
+                </ion-col>
+                <ion-col size="2" class="wificue-col settings-opt-select-col toggle">
+                  <div class="settings-opt-select-wrap autosleepwake toggle">
+                    <ion-toggle mode="ios" #timedFnsAutoSleepWakeToggle [enableOnOffLabels]="false" [checked]="wcData.settings.timedFunctions.autoSleepWake.isOn" (ionChange)="settingsOpt('timedFns','autoSleepWakeOnOff',timedFnsAutoSleepWakeToggle.checked)" class="wificue-toggle settings-opt-toggle"></ion-toggle>
+                  </div>
+                </ion-col>
+                <ion-col size="5" class="wificue-col settings-opt-select-col autosleepwake">
+                  <div class="settings-opt-select-wrap autosleepwake sleep">
+                    <div class="autosleepwake-label-wrap-outter sleep">
+                      <div class="autosleepwake-label-wrap-inner sleep">
+                        <img class="autosleepwake-label-ico-img sleep" src="assets/wc-settings-timedfns-autosleep-ico.png">
+                        <div class="autosleepwake-label-txt sleep">sleep</div>
+                      </div>
+                    </div>
+                    <div class="autosleepwake-input-wrap sleep">
+                      <input type="time" step="60" id="open-aswpop-sleep" #aSleepWakeSleepInput (change)="settingsOpt('timedFns','autoSleepWakeTimeSleep',aSleepWakeSleepInput.value)" (blur)="settingsOpt('timedFns','autoSleepWakeTimeSleep',aSleepWakeSleepInput.value)" [disabled]="!wcData.settings.timedFunctions.autoSleepWake.isOn" class="autosleepwake-input sleep" [value]="aSleepWakeSleepTime">
+                    </div>
+                    <div class="autosleepwake-donow-btn-wrapper sleep">
+                      <button (click)="doASleep()" [disabled]="wcData.isSleep" class="autosleepwake-donow-btn sleep">now</button>
+                    </div>
+                  </div>
+                  <div class="settings-opt-select-wrap autosleepwake wake">
+                    <div class="autosleepwake-label-wrap-outter wake">
+                      <div class="autosleepwake-label-wrap-inner wake">
+                        <img class="autosleepwake-label-ico-img wake" src="assets/wc-settings-timedfns-autowake-ico.png">
+                        <div class="autosleepwake-label-txt wake">wake</div>
+                      </div>
+                    </div>
+                    <div class="autosleepwake-input-wrap wake">
+                      <input type="time" step="60" id="open-aswpop-wake" #aSleepWakeWakeInput (change)="settingsOpt('timedFns','autoSleepWakeTimeWake',aSleepWakeWakeInput.value)" (blur)="settingsOpt('timedFns','autoSleepWakeTimeWake',aSleepWakeWakeInput.value)" [disabled]="!wcData.settings.timedFunctions.autoSleepWake.isOn" class="autosleepwake-input wake" [value]="aSleepWakeWakeTime">
+                    </div>
+                    <div class="autosleepwake-donow-btn-wrapper wake">
+                      <button (click)="doAWake(false)" [disabled]="!wcData.isSleep" class="autosleepwake-donow-btn wake">now</button>
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row class="wificue-row settings-cat-row led-animations-row">
+                <ion-col size="12" class="wificue-col settings-cat-header-col">
+                  <div class="settings-cat-header-wrap">
+                    <img class="settings-cat-header-ico" src="assets/wc-settings-sshotsync-header-ico.png">
+                    <div class="settings-cat-header-label">Screenshot Sync</div>
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row class="wificue-row settings-opt-row animations-row">
+                <ion-col size="5" class="wificue-col settings-opt-header-col">
+                  <div class="settings-opt-header-wrap">
+                    <img class="settings-opt-header-ico anim" src="assets/wc-settings-sshotsync-samplerate-ico.png">
+                    <div class="settings-opt-header-label">Sample Rate</div>
+                  </div>
+                </ion-col>
+                <ion-col size="7" class="wificue-col settings-opt-select-col">
+                  <div class="settings-opt-select-wrap">
+                    <div class="wificue-settings-range-wrap samplerate">
+                      <ion-range class="settings-response-to-range samplerate" mode="ios" #syncAnimsSShotSyncTimeRange [step]="1" [snaps]="true" [min]="1" [max]="10" [pin]="false" [ticks]="false" [value]="wcData.settings.syncAnimations.sshotSyncTime" (ionChange)="settingsOpt('syncAnims','sshotSyncTime',syncAnimsSShotSyncTimeRange.value)"></ion-range>
+                      <div class="wcs-range-label-wrap">
+                        <div class="wcs-range-label-value">{{wcData.settings.syncAnimations.sshotSyncTime}}</div>
+                      </div>
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row class="wificue-row settings-cat-row led-animations-row">
+                <ion-col size="12" class="wificue-col settings-cat-header-col">
+                  <div class="settings-cat-header-wrap">
+                    <img class="settings-cat-header-ico" src="assets/wc-settings-sshotsync-header-ico.png">
+                    <div class="settings-cat-header-label">Audio Sync</div>
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row class="wificue-row settings-opt-row animations-row">
+                <ion-col size="5" class="wificue-col settings-opt-header-col">
+                  <div class="settings-opt-header-wrap">
+                    <img class="settings-opt-header-ico anim" src="assets/wc-settings-sshotsync-samplerate-ico.png">
+                    <div class="settings-opt-header-label">Sample Rate</div>
+                  </div>
+                </ion-col>
+                <ion-col size="7" class="wificue-col settings-opt-select-col">
+                  <div class="settings-opt-select-wrap">
+                    <div class="wificue-settings-range-wrap samplerate">
+                      <ion-range class="settings-response-to-range samplerate" mode="ios" #syncAnimsAudioSyncTimeRange [step]="1" [snaps]="true" [min]="1" [max]="10" [pin]="false" [ticks]="false" [value]="wcData.settings.syncAnimations.audioSyncTime" (ionChange)="settingsOpt('syncAnims','sshotSyncTime',syncAnimsAudioSyncTimeRange.value)"></ion-range>
+                      <div class="wcs-range-label-wrap">
+                        <div class="wcs-range-label-value">{{wcData.settings.syncAnimations.audioSyncTime}}</div>
+                      </div>
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </div>
+        </div>
+      </ion-col>
+    </ion-row>
+    <!-- ------------------------------------ -->
+    <!-- DEVICES LIST -->
+    <!-- ------------------------------------ -->
+    <ion-row [ngClass]="{'sm-in-homerow-anim':settingsMode||networkMode}" [ngStyle]="{'background':winSet.trans?'rgb(0 0 0 / 1%)':'url(assets/noise.png) #121212'}" class="wificue-row main-page-row home content-row">
+      <ion-col size="12" class="wificue-col main-page-col home content-col">
+        <div class="wificue-main-contentwrapper home outter">
+          <div class="wificue-main-contentwrapper home inner">
+            <div class="wificue-devices-list-wrapper">
+              <ion-grid class="device-list-main-grid">
+                <ion-row class="main-grid-title-row devices">
+                  <ion-col class="main-grid-title-col devices">
+                    <div (click)="doTest()" class="main-grid-title-wrapper devices">
+                      <img class="wc-main-header devices" src="assets/wc-main-devices-header.png">
+                    </div>
+                    <div *ngIf="wcData.tree&&wcData.tree.length>0&&wledTree&&wledTree.length>0&&wcData.pirStates" class="main-grid-title-wrapper ttlcounts">
+                      <div class="main-devices-title-counts-wrap ttl">
+                        <img class="mdtcw-ico ttl" src="assets/wc-allcount-header-ico-ccc.png">
+                        <div class="mdtcw ttl">{{(getAllWLEDLEDCount()+getTTLICUELedCount()+getTTLPirsCount())}}</div>
+                      </div>
+                      <div class="main-devices-title-counts-wrap leds">
+                        <img class="mdtcw-ico ttl" src="assets/wc-ledcount-header-ico-ccc.png">
+                        <div class="mdtcw ttl">{{(getAllWLEDLEDCount()+getTTLICUELedCount())}}</div>
+                      </div>
+                      <div class="main-devices-title-counts-wrap pirs">
+                        <img class="mdtcw-ico ttl" src="assets/wc-pircount-header-ico-ccc.png">
+                        <div class="mdtcw ttl">{{(getTTLPirsCount())}}</div>
+                      </div>
+                    </div>
+                  </ion-col>
+                </ion-row>
+                <ion-row class="wc-hwinfo-main-row">
+                  <ion-col class="wc-hwinfo-main-col">
+                    <div class="wc-hwinfo-main-outter-wrapper">
+                      <div class="wc-hwinfo-main-inner-wrapper">
+                        <ion-grid class="wc-hwinfo-grid">
+                          <ion-row class="hwinfo-row section-subtitle-header-row">
+                            <ion-col class="hwinfo-col section-subtitle-header-col">
+                              <div class="main-grid-subtitle-wrapper other-computers">
+                                <div class="devices-subtitle-label-wrapper other-computers">
+                                  <img class="wc-main-subheader-ico ocs" src="assets/wc-hwinfo-subheader-ico.png">
+                                  <div class="wc-main-subheader-txt ocs">HWInfo</div>
+                                </div>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                          <ion-row *ngIf="!hwInfo||!siInfo||!siInfo.dfSize||!siInfo.netStats" class="hwinfo-row hwinfo-loading-row">
+                            <ion-col class="hwinfo-col hwinfo-loading-col">
+                              <div class="hwinfo-div hwinfo-loading-outter-wrapper">
+                                <div class="hwinfo-div hwinfo-loading-inner-wrapper">
+                                  <ion-progress-bar class="hwinfo-loading-bar" [mode]="'md'" [type]="'indeterminate'"></ion-progress-bar>
+                                </div>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                          <ion-row *ngIf="hwInfo&&siInfo&&siInfo.dfSize&&siInfo.netStats" [ngClass]="{'waitload':!hwInfo}" class="hwinfo-row hwinfo-data-row motherboard-cpu-row">
+                            <ion-col class="hwinfo-col hwinfo-data-col motherboard-col">
+                              <div class="hwi-section-wrapper mb">
+                                <div class="hwi-section-header mb">
+                                  <img class="hwi-section-header-ico mb" src="assets/wc-hwi-mboard-cat-ico.png">
+                                  <div class="hwi-section-header-txt mb">mbd</div>
+                                </div>
+                                <div class="hwi-section-circ-wrapper outter mb">
+                                  <div class="hwi-section-circ-wrapper inner mb">
+                                    <div class="hwi-section-circ-shadow mb">
+                                      <circle-progress class="hwi-circ mb temp" [percent]="hwInfo.mb.temp.v" [outerStrokeColor]="(getCircBarCol(hwInfo.mb.temp.v))" [outerStrokeGradientStopColor]="(getCircBarCol(hwInfo.mb.temp.v))"></circle-progress>
+                                      <div class="hwi-data-values-wrapper mb">
+                                        <div class="hwi-data-value-wrap mb temp">
+                                          <img class="hwi-dv-ico mb temp" src="assets/wc-hwi-temp-std-ico.png">
+                                          <div class="hwi-dv-txt mb temp"><span [ngClass]="{'rpi-pb-color-green':hwInfo.mb.temp.v<50,'rpi-pb-color-yellow':hwInfo.mb.temp.v>=50&&hwInfo.mb.temp.v<65,'rpi-pb-color-orange':hwInfo.mb.temp.v>=65&&hwInfo.mb.temp.v<80,'rpi-pb-color-red':hwInfo.mb.temp.v>=80}" class="hw-dv-v">{{hwInfo.mb.temp.v.toFixed(0)}}</span><span class="hw-dv-fx">{{hwInfo.mb.temp.fx}}</span></div>
+                                        </div>
+                                        <div class="hwi-data-value-wrap mb fan">
+                                          <img class="hwi-dv-ico mb fan" src="assets/wc-hwi-fan-282828-ico.png">
+                                          <div class="hwi-dv-txt mb fan"><span [ngClass]="{'rpi-pb-color-green':((hwInfo.mb.fan.v/3000)*100)<50,'rpi-pb-color-yellow':((hwInfo.mb.fan.v/3000)*100)>=50&&((hwInfo.mb.fan.v/3000)*100)<65,'rpi-pb-color-orange':((hwInfo.mb.fan.v/3000)*100)>=65&&((hwInfo.mb.fan.v/3000)*100)<80,'rpi-pb-color-red':((hwInfo.mb.fan.v/3000)*100)>=80}" class="hw-dv-v">{{((hwInfo.mb.fan.v/3000)*100).toFixed(0)}}</span><span class="hw-dv-fx">%</span></div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </ion-col>
+                            <ion-col size="4" class="hwinfo-col hwinfo-data-col gpu-col">
+                              <div class="hwi-section-wrapper gpu">
+                                <div class="hwi-section-header gpu">
+                                  <img class="hwi-section-header-ico gpu" src="assets/wc-hwi-gpu-cat-ico.png">
+                                  <div class="hwi-section-header-txt gpu">GPU</div>
+                                </div>
+                                <div class="hwi-section-rect-wrapper outter gpu2">
+                                  <div class="hwi-section-rect-wrapper inner gpu2">
+                                    <div class="hwi-data-values-wrapper gpu1">
+                                      <div class="hwi-section-rect-header gpu1">
+                                        <img class="hwi-section-header-ico sub gpu" src="assets/wc-hwi-nvidia-ico.png">
+                                      </div>
+                                      <div class="hwi-data-value-wrap gpu1 tempload">
+                                        <div class="hwi-gpu-tvs-wrap gpu1 temp">
+                                          <div class="hwi-dv-txt gpu1 temp"><span [ngClass]="{'rpi-pb-color-green':hwInfo.gpu1.temp.v<50,'rpi-pb-color-yellow':hwInfo.gpu1.temp.v>=50&&hwInfo.gpu1.temp.v<65,'rpi-pb-color-orange':hwInfo.gpu1.temp.v>=65&&hwInfo.gpu1.temp.v<80,'rpi-pb-color-red':hwInfo.gpu1.temp.v>=80}" class="hw-dv-v">{{hwInfo.gpu1.temp.v.toFixed(0)}}</span><span class="hw-dv-fx">{{hwInfo.gpu1.temp.fx}}</span></div>
+                                        </div>
+                                        <div class="hwi-gpu-tvs-wrap gpu1 load">
+                                          <div class="hwi-dv-txt gpu1 load"><span [ngClass]="{'rpi-pb-color-green':hwInfo.gpu1.load.v<50,'rpi-pb-color-yellow':hwInfo.gpu1.load.v>=50&&hwInfo.gpu1.load.v<65,'rpi-pb-color-orange':hwInfo.gpu1.load.v>=65&&hwInfo.gpu1.load.v<80,'rpi-pb-color-red':hwInfo.gpu1.load.v>=80}" class="hw-dv-v">{{hwInfo.gpu1.load.v.toFixed(0)}}</span><span class="hw-dv-fx">{{hwInfo.gpu1.load.fx}}</span></div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div class="hwi-bar gpu1 temp"><ion-progress-bar [ngClass]="{'rpi-pb-color-green':(hwInfo.gpu1.temp.v/100)<0.5,'rpi-pb-color-yellow':(hwInfo.gpu1.temp.v/100)>=0.5&&(hwInfo.gpu1.temp.v/100)<0.65,'rpi-pb-color-orange':(hwInfo.gpu1.temp.v/100)>=0.65&&(hwInfo.gpu1.temp.v/100)<0.80,'rpi-pb-color-red':(hwInfo.gpu1.temp.v/100)>=0.80}" class="piip-progbar hwi gpu1 temp" [mode]="'md'" [value]="(hwInfo.gpu1.temp.v/100)"></ion-progress-bar></div>
+                                    <div class="hwi-bar gpu1 temp"><ion-progress-bar [ngClass]="{'rpi-pb-color-green':(hwInfo.gpu1.load.v/100)<0.5,'rpi-pb-color-yellow':(hwInfo.gpu1.load.v/100)>=0.5&&(hwInfo.gpu1.load.v/100)<0.65,'rpi-pb-color-orange':(hwInfo.gpu1.load.v/100)>=0.65&&(hwInfo.gpu1.load.v/100)<0.80,'rpi-pb-color-red':(hwInfo.gpu1.load.v/100)>=0.80}" class="piip-progbar hwi gpu1 temp" [mode]="'md'" [value]="(hwInfo.gpu1.load.v/100)"></ion-progress-bar></div>
+                                    <div class="hwi-data-values-wrapper gpu2">
+                                      <div class="hwi-section-rect-header gpu2">
+                                        <img class="hwi-section-header-ico sub gpu" src="assets/wc-hwi-intel-ico.png">
+                                      </div>
+                                      <div class="hwi-data-value-wrap gpu2 tempload">
+                                        <div class="hwi-gpu-tvs-wrap gpu2 temp">
+                                          <img class="hwi-dv-ico gpu2 temp" src="assets/wc-hwi-temp-std-ico.png">
+                                          <div class="hwi-dv-txt gpu2 temp"><span [ngClass]="{'rpi-pb-color-green':hwInfo.gpu2.temp.v<50,'rpi-pb-color-yellow':hwInfo.gpu2.temp.v>=50&&hwInfo.gpu2.temp.v<65,'rpi-pb-color-orange':hwInfo.gpu2.temp.v>=65&&hwInfo.gpu2.temp.v<80,'rpi-pb-color-red':hwInfo.gpu2.temp.v>=80}" class="hw-dv-v">{{hwInfo.gpu2.temp.v.toFixed(0)}}</span><span class="hw-dv-fx">{{hwInfo.gpu2.temp.fx}}</span></div>
+                                        </div>
+                                        <div class="hwi-gpu-tvs-wrap gpu2 load">
+                                          <img class="hwi-dv-ico gpu2 load" src="assets/wc-hwi-load-std-ico.png">
+                                          <div class="hwi-dv-txt gpu2 load"><span [ngClass]="{'rpi-pb-color-green':hwInfo.gpu2.load.v<50,'rpi-pb-color-yellow':hwInfo.gpu2.load.v>=50&&hwInfo.gpu2.load.v<65,'rpi-pb-color-orange':hwInfo.gpu2.load.v>=65&&hwInfo.gpu2.load.v<80,'rpi-pb-color-red':hwInfo.gpu2.load.v>=80}" class="hw-dv-v">{{hwInfo.gpu2.load.v.toFixed(0)}}</span><span class="hw-dv-fx">{{hwInfo.gpu2.load.fx}}</span></div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div class="hwi-bar gpu1 temp"><ion-progress-bar [ngClass]="{'rpi-pb-color-green':(hwInfo.gpu2.temp.v/100)<0.5,'rpi-pb-color-yellow':(hwInfo.gpu2.temp.v/100)>=0.5&&(hwInfo.gpu2.temp.v/100)<0.65,'rpi-pb-color-orange':(hwInfo.gpu2.temp.v/100)>=0.65&&(hwInfo.gpu2.temp.v/100)<0.80,'rpi-pb-color-red':(hwInfo.gpu2.temp.v/100)>=0.80}" class="piip-progbar hwi gpu1 temp" [mode]="'md'" [value]="(hwInfo.gpu2.temp.v/100)"></ion-progress-bar></div>
+                                    <div class="hwi-bar gpu1 temp"><ion-progress-bar [ngClass]="{'rpi-pb-color-green':(hwInfo.gpu2.load.v/100)<0.5,'rpi-pb-color-yellow':(hwInfo.gpu2.load.v/100)>=0.5&&(hwInfo.gpu2.load.v/100)<0.65,'rpi-pb-color-orange':(hwInfo.gpu2.load.v/100)>=0.65&&(hwInfo.gpu2.load.v/100)<0.80,'rpi-pb-color-red':(hwInfo.gpu2.load.v/100)>=0.80}" class="piip-progbar hwi gpu1 temp" [mode]="'md'" [value]="(hwInfo.gpu2.load.v/100)"></ion-progress-bar></div>
+                                  </div>
+                                </div>
+                              </div>
+                            </ion-col>
+                            <ion-col class="hwinfo-col hwinfo-data-col cpu-col">
+                              <div class="hwi-section-wrapper cpu">
+                                <div class="hwi-section-header cpu">
+                                  <img class="hwi-section-header-ico cpu" src="assets/wc-hwi-cpu-cat-ico.png">
+                                  <div class="hwi-section-header-txt cpu">cpu</div>
+                                </div>
+                                <div class="hwi-section-circ-wrapper outter cpu">
+                                  <div class="hwi-section-circ-wrapper inner cpu">
+                                    <div class="hwi-section-circ-shadow cpu">
+                                      <circle-progress [outerStrokeColor]="(getCircBarCol(hwInfo.cpu.temp.v))" [outerStrokeGradientStopColor]="(getCircBarCol(hwInfo.cpu.temp.v))" class="hwi-circ cpu temp" [percent]="hwInfo.cpu.temp.v"></circle-progress>
+                                      <div class="hwi-data-values-wrapper cpu">
+                                        <div class="hwi-data-value-wrap cpu temp">
+                                          <img class="hwi-dv-ico cpu temp" src="assets/wc-hwi-temp-std-ico.png">
+                                          <div class="hwi-dv-txt cpu temp"><span [ngClass]="{'rpi-pb-color-green':hwInfo.cpu.temp.v<50,'rpi-pb-color-yellow':hwInfo.cpu.temp.v>=50&&hwInfo.cpu.temp.v<65,'rpi-pb-color-orange':hwInfo.cpu.temp.v>=65&&hwInfo.cpu.temp.v<80,'rpi-pb-color-red':hwInfo.cpu.temp.v>=80}" class="hw-dv-v">{{hwInfo.cpu.temp.v.toFixed(0)}}</span><span class="hw-dv-fx">{{hwInfo.cpu.temp.fx}}</span></div>
+                                        </div>
+                                        <div class="hwi-data-value-wrap cpu load">
+                                          <img class="hwi-dv-ico cpu load" src="assets/wc-hwi-load-std-ico.png">
+                                          <div class="hwi-dv-txt cpu load"><span [ngClass]="{'rpi-pb-color-green':hwInfo.cpu.load.v<50,'rpi-pb-color-yellow':hwInfo.cpu.load.v>=50&&hwInfo.cpu.load.v<65,'rpi-pb-color-orange':hwInfo.cpu.load.v>=65&&hwInfo.cpu.load.v<80,'rpi-pb-color-red':hwInfo.cpu.load.v>=80}" class="hw-dv-v">{{hwInfo.cpu.load.v.toFixed(0)}}</span><span class="hw-dv-fx">{{hwInfo.cpu.load.fx}}</span></div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                          <ion-row *ngIf="hwInfo&&siInfo&&siInfo.dfSize&&siInfo.netStats" [ngClass]="{'waitload':!siInfo}" class="hwinfo-row disks-usb-net-row">
+                            <ion-col class="hwinfo-col disks-usb-net-col disks">
+                              <div class="dun-section-outter-wrapper disks">
+                                <div class="dun-section-list-wrapper disks">
+                                  <div *ngFor="let df of siInfo.dfSize;let dfSI=index" class="dun-list-item disk">
+                                    <div (click)="refreshSIDisks()" class="dun-item dfl-item header">
+                                      <div class="dun-part mount">{{df.mount}}</div>
+                                    </div>
+                                    <div class="dun-part remain">{{((((df.available/1024)/1024)/1024)).toFixed(0)}}<div class="dun-gb">gb</div></div>
+                                    <div class="dun-item dfl-item pbar">
+                                      <div class="piip-bar cpu df"><ion-progress-bar [ngClass]="{'rpi-pb-color-green':df.use<50,'rpi-pb-color-yellow':df.use>=50&&df.use<65,'rpi-pb-color-orange':df.use>=65&&df.use<80,'rpi-pb-color-red':df.use>=80}" class="piip-progbar cpu df" [mode]="'md'" [value]="(df.use/100)"></ion-progress-bar></div>
+                                    </div>
+                                    <div class="fan-perc-txt df">
+                                      <div [ngClass]="{'rpi-pb-color-green':df.use<50,'rpi-pb-color-yellow':df.use>=50&&df.use<65,'rpi-pb-color-orange':df.use>=65&&df.use<80,'rpi-pb-color-red':df.use>=80}" class="fanperc-txt df">{{(df.use).toFixed(0)}}</div>
+                                      <div class="fanperc-perc df">%</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </ion-col>
+                            <ion-col class="hwinfo-col disks-usb-net-col net">
+                              <div *ngIf="siInfo&&siInfo.netStats" class="dun-net-main-wrapper">
+                                <div class="rxtx-group-wrapper rx">
+                                  <div class="rxtx-group-header rx">
+                                    <img class="rxtx-dir-ico rx" src="assets/wc-hwi-rx-ico.png">
+                                    <div class="rxtx-dir-txt rx">rx</div>
+                                  </div>
+                                  <div class="rxtx-line1-persec rx">
+                                    <div class="rxtx-line1-persec-prefix rx">p/s:</div>
+                                    <div class="rxtx-line1-persec-value-wrap rx" *ngIf="siInfo.netStats[0].rx_sec!==null&&siInfo.netStats[0].rx_sec>0">
+                                      <div class="rxtx-line1-persec-value no rx">{{(getRXTXTtl(siInfo.netStats[0].rx_sec)).n}}</div>
+                                      <div class="rxtx-line1-persec-value fx rx">{{(getRXTXTtl(siInfo.netStats[0].rx_sec)).s}}</div>
+                                    </div>
+                                    <div class="rxtx-line1-persec-nil-wrap rx" *ngIf="siInfo.netStats[0].rx_sec===null||siInfo.netStats[0].rx_sec<1">-</div>
+                                  </div>
+                                  <div class="rxtx-line2-alltime rx">
+                                    <div class="rxtx-line2-alltime-prefix rx">a/t:</div>
+                                    <div class="rxtx-line2-alltime-value-wrap rx" *ngIf="siInfo.netStats[0].rx_bytes!==null&&siInfo.netStats[0].rx_bytes>0">
+                                      <div class="rxtx-line2-alltime-value no rx">{{(getRXTXTtl(siInfo.netStats[0].rx_bytes)).n}}</div>
+                                      <div class="rxtx-line2-alltime-value fx rx">{{(getRXTXTtl(siInfo.netStats[0].rx_bytes)).s}}</div>
+                                    </div>
+                                    <div class="rxtx-line2-alltime-nil-wrap rx" *ngIf="siInfo.netStats[0].rx_bytes===null||siInfo.netStats[0].rx_bytes<1">-</div>
+                                  </div>
+                                </div>
+                                <div class="rxtx-group-wrapper tx">
+                                  <div class="rxtx-group-header tx">
+                                    <img class="rxtx-dir-ico tx" src="assets/wc-hwi-tx-ico.png">
+                                    <div class="rxtx-dir-txt tx">tx</div>
+                                  </div>
+                                  <div class="rxtx-line1-persec tx">
+                                    <div class="rxtx-line1-persec-prefix tx">p/s:</div>
+                                    <div class="rxtx-line1-persec-value-wrap tx" *ngIf="siInfo.netStats[0].tx_sec!==null&&siInfo.netStats[0].tx_sec>0">
+                                      <div class="rxtx-line1-persec-value no tx">{{(getRXTXTtl(siInfo.netStats[0].tx_sec)).n}}</div>
+                                      <div class="rxtx-line1-persec-value fx tx">{{(getRXTXTtl(siInfo.netStats[0].tx_sec)).s}}</div>
+                                    </div>
+                                    <div class="rxtx-line1-persec-nil-wrap tx" *ngIf="siInfo.netStats[0].tx_sec===null||siInfo.netStats[0].tx_sec<1">-</div>
+                                  </div>
+                                  <div class="rxtx-line2-alltime tx">
+                                    <div class="rxtx-line2-alltime-prefix tx">a/t:</div>
+                                    <div class="rxtx-line2-alltime-value-wrap tx" *ngIf="siInfo.netStats[0].tx_bytes!==null&&siInfo.netStats[0].tx_bytes>0">
+                                      <div class="rxtx-line2-alltime-value no tx">{{(getRXTXTtl(siInfo.netStats[0].tx_bytes)).n}}</div>
+                                      <div class="rxtx-line2-alltime-value fx tx">{{(getRXTXTtl(siInfo.netStats[0].tx_bytes)).s}}</div>
+                                    </div>
+                                    <div class="rxtx-line2-alltime-nil-wrap tx" *ngIf="siInfo.netStats[0].tx_bytes===null||siInfo.netStats[0].tx_bytes<1">-</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                          <ion-row *ngIf="hwInfo&&siInfo&&siInfo.dfSize&&siInfo.netStats" [ngClass]="{'waitload':!hwInfo}" class="hwinfo-row fans-pump-row">
+                            <ion-col class="hwinfo-col fans-pump-col">
+                              <div class="hwinfo-fans-pump-outter-wrapper">
+                                <div class="hwinfo-fans-pump-inner-wrapper">
+                                  <div class="fans-container">
+                                    <div *ngFor="let fan of hwInfo.cfans.v;let cfI=index" class="hwinfo-case-fan-wrap cf{{cfI}}">
+                                      <div class="cfan-label-div">
+                                        <div class="fan-pref-txt">cf</div>
+                                        <div class="fan-no-txt">{{(cfI+1)}}</div>
+                                      </div>
+                                      <div class="fan-data-wrap">
+                                        <img src="assets/wc-hwi-fan-282828-ico.png" class="fan-anim-img img{{cfI}} hwi-fan-rot" [ngStyle]="{'animation-duration':(2-((fan/2500)*2)).toFixed(2)+'s','filter':'brightness('+(1+((fan/2500)*2)).toFixed(2)+')'}">
+                                        <div class="fan-perc-txt">
+                                          <div [ngClass]="{'rpi-pb-color-green':((fan/2500)*100)<50,'rpi-pb-color-yellow':((fan/2500)*100)>=50&&((fan/2500)*100)<65,'rpi-pb-color-orange':((fan/2500)*100)>=65&&((fan/2500)*100)<80,'rpi-pb-color-red':((fan/2500)*100)>=80}" class="fanperc-txt">{{((fan/2500)*100).toFixed(0)}}</div>
+                                          <div class="fanperc-perc">%</div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div class="hwinfo-gpu1-fan-wrap">
+                                      <div class="fan-label-div">
+                                        <div class="fan-pref-txt">gf</div>
+                                        <div class="fan-no-txt">1</div>
+                                      </div>
+                                      <div class="fan-data-wrap">
+                                        <img src="assets/wc-hwi-fan-282828-ico.png" class="fan-anim-img img1 hwi-fan-rot" [ngStyle]="{'animation-duration':(2-((hwInfo.gpu1.fan.v/2500)*2)).toFixed(2)+'s','filter':'brightness('+(1+((hwInfo.gpu1.fan.v/2500)*2)).toFixed(2)+')'}">
+                                        <div class="fan-perc-txt">
+                                          <div [ngClass]="{'rpi-pb-color-green':((hwInfo.gpu1.fan.v/2500)*100)<50,'rpi-pb-color-yellow':((hwInfo.gpu1.fan.v/2500)*100)>=50&&((hwInfo.gpu1.fan.v/2500)*100)<65,'rpi-pb-color-orange':((hwInfo.gpu1.fan.v/2500)*100)>=65&&((hwInfo.gpu1.fan.v/2500)*100)<80,'rpi-pb-color-red':((hwInfo.gpu1.fan.v/2500)*100)>=80}" class="fanperc-txt">{{((hwInfo.gpu1.fan.v/2500)*100).toFixed(0)}}</div>
+                                          <div class="fanperc-perc">%</div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="pump-container">
+                                    <div class="pump-label-div">
+                                      <div class="pump-pref-txt">cp</div>
+                                      <div class="pump-no-txt">1</div>
+                                    </div>
+                                    <div class="hwinfo-cpu-pump-wrap">
+                                      <div class="hwinfo-piston-outter">
+                                        <div class="piton-preloader">
+                                          <svg class="piston-shaft" width="15px" height="34px" viewBox="0 0 15 34" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" [ngStyle]="{'animation-duration':(2-(hwInfo.pump.rpm.v/2800)).toFixed(2)+'s','filter':'brightness('+(1+(hwInfo.pump.rpm.v/2800)).toFixed(2)+')'}">
+                                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                <path d="M12.942,21.1136 C11.095,19.1296 9.684,16.6306 9.516,14.8626 C9.107,10.5546 9.044,3.2396 9.034,1.1826 C9.033,0.9966 8.882,0.8466 8.696,0.8466 L5.918,0.8466 C5.732,0.8466 5.581,0.9966 5.58,1.1826 C5.57,3.2396 5.507,10.5556 5.099,14.8626 C4.93,16.6306 3.495,19.1296 1.648,21.1136 C1.648,21.1136 0.001,21.7256 0.001,21.9126 L0.001,30.3926 C0.001,30.5796 2.326,31.2936 2.326,31.2936 C3.656,32.6186 5.42,33.3486 7.295,33.3486 C9.17,33.3486 10.934,32.6186 12.263,31.2946 C12.263,31.2946 14.589,30.5796 14.589,30.3926 L14.589,21.9126 C14.589,21.7256 12.942,21.1136 12.942,21.1136" id="Fill-1" fill="#383838"></path>
+                                            </g>
+                                          </svg>
+                                          <svg class="piston-head" width="19px" height="16px" viewBox="0 0 19 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" [ngStyle]="{'animation-duration':(2-(hwInfo.pump.rpm.v/2800)).toFixed(2)+'s','filter':'brightness('+(1+(hwInfo.pump.rpm.v/2800)).toFixed(2)+')'}">
+                                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                              <g>
+                                                  <path d="M16.9441,0 L1.6461,0 C1.0611,0 0.5831,0.545 0.5831,1.211 L0.5831,2.655 L18.0071,2.655 L18.0071,1.211 C18.0071,0.545 17.5291,0 16.9441,0" id="Fill-3" fill="#878787"></path>
+                                                  <path d="M0.5833,3.8355 L0.5833,14.5825 C0.5833,15.2485 1.0613,15.7935 1.6463,15.7935 L2.3613,15.7935 L2.4773,13.2365 L16.1133,13.2365 L16.2283,15.7935 L16.9443,15.7935 C17.5283,15.7935 18.0073,15.2485 18.0073,14.5825 L18.0073,3.8355 L0.5833,3.8355 Z" id="Fill-6" fill="#565656"></path>
+                                                  <path d="M11.3625,9.1882 C11.3625,10.3302 10.4365,11.2552 9.2955,11.2552 C8.1535,11.2552 7.2275,10.3302 7.2275,9.1882 C7.2275,8.0462 8.1535,7.1212 9.2955,7.1212 C10.4365,7.1212 11.3625,8.0462 11.3625,9.1882" id="Fill-8" fill="#262626"></path>
+                                              </g>
+                                            </g>
+                                          </svg>
+                                          <svg class="crank-shaft" width="27px" height="25px" viewBox="0 0 27 25" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" [ngStyle]="{'animation-duration':(2-(hwInfo.pump.rpm.v/2800)).toFixed(2)+'s','filter':'brightness('+(1+(hwInfo.pump.rpm.v/2800)).toFixed(2)+')'}">
+                                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                <path d="M10.2876,24.0994 C4.6156,24.0994 -0.0004,19.4834 -0.0004,13.8104 C-0.0004,13.2864 0.4256,12.8614 0.9496,12.8614 L8.2456,12.8614 L10.0216,1.2324 C10.0926,0.7684 10.4916,0.4264 10.9606,0.4264 L15.6296,0.4264 C16.0986,0.4264 16.4976,0.7684 16.5686,1.2324 L18.3446,12.8614 L25.6406,12.8614 C26.1656,12.8614 26.5906,13.2864 26.5906,13.8104 C26.5906,19.4834 21.9756,24.0994 16.3026,24.0994 L10.2876,24.0994 Z" id="Fill-12" fill="#525252"></path>
+                                            </g>
+                                          </svg>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div class="fan-perc-txt">
+                                      <div [ngClass]="{'rpi-pb-color-green':((hwInfo.pump.rpm.v/2500)*100)<50,'rpi-pb-color-yellow':((hwInfo.pump.rpm.v/2500)*100)>=50&&((hwInfo.pump.rpm.v/2500)*100)<65,'rpi-pb-color-orange':((hwInfo.pump.rpm.v/2500)*100)>=65&&((hwInfo.pump.rpm.v/2500)*100)<80,'rpi-pb-color-red':((hwInfo.pump.rpm.v/2500)*100)>=80}" class="fanperc-txt">{{((hwInfo.pump.rpm.v/2800)*100).toFixed(0)}}</div>
+                                      <div class="fanperc-perc">%</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                        </ion-grid>
+                      </div>
+                    </div>
+                  </ion-col>
+                </ion-row>
+                <ion-row class="phones-list-row">
+                  <div class="main-grid-subtitle-wrapper phones">
+                    <div class="devices-subtitle-label-wrapper phones">
+                      <img class="wc-main-subheader-ico phones" src="assets/wc-phones-subheader-ico.png">
+                      <div class="wc-main-subheader-txt phones">Phones</div>
+                    </div>
+                  </div>
+                  <div class="phones-list-main-wrapper outter">
+                    <div class="phones-list-main-wrapper inner">
+                      <ion-grid class="wc-grid phones-list-grid">
+                        <ion-row class="wc-row phones-list-item-row">
+                          <ion-col class="wc-col phones-list-item-col namemakemodelos">
+                            <div class="pirmd-col-wrapper online phone redmi">
+                              <div class="md-sensor-online-indic-wrapper phone redmi">
+                                <img [ngStyle]="{'display':phRedmiOnline?'block':'none'}" class="md-sensor-online-indic-ico online phone redmi" src="assets/wcc-status-green-led.png">
+                                <img [ngStyle]="{'display':!phRedmiOnline?'block':'none'}" class="md-sensor-online-indic-ico offline phone redmi" src="assets/wcc-status-red-led.png">
+                              </div>
+                              <div class="md-sensor-name-label-wrapper ocs">
+                                <div *ngIf="!phRedmiOnline" class="sensor-icon-wrapper ocs"><img class="sensor-icon-img webcam off phone redmi" src="assets/wc-phones-android-offline-ico.png"></div>
+                                <div *ngIf="phRedmiOnline" class="sensor-icon-wrapper ocs"><img class="sensor-icon-img webcam on phone redmi" src="assets/wc-phones-android-online-ico.png"></div>
+                                <div class="sensor-name-wrapper phone redmi">0ph</div>
+                              </div>
+                            </div>
+                          </ion-col>
+                          <ion-col class="wc-col phones-list-item-col power">
+                            <div class="phone-col-outter-wrapper power">
+                              <div [ngStyle]="{'display':phDSInfo.power.level.perc===0?'none':'block'}" class="phones-battery-outter-wrapper pi-info-part-wrap phone">
+                                <div *ngIf="phDSInfo.power.charging" class="battery anim">
+                                  <div class="battery-level-txt">{{(remPerc(phDSInfo.power.level.str))}}</div>
+                                </div>
+                                <div *ngIf="!phDSInfo.power.charging" class="batterynocharge">
+                                  <div class="batterynocharge-level" [ngStyle]="{'width':'calc('+phDSInfo.power.level.str+' - 2px)'}"></div>
+                                  <div class="battery-level-txt">{{(remPerc(phDSInfo.power.level.str))}}</div>
+                                </div>
+                              </div>
+                            </div>
+                          </ion-col>
+                          <ion-col class="wc-col phones-list-item-col wifi">
+                            <div class="phone-col-outter-wrapper wifi">
+                              <div class="pi-info-part-wrap txp phone">
+                                <div class="piip-text txp phone">
+                                  <div class="piip-label txp phone">{{phDSInfo.wifi.ssid}}</div>
+                                </div>
+                                <div class="piip-bar disk phone"><ion-progress-bar [ngClass]="{'rpi-pb-color-green':(rpiTX2Perc(phDSInfo.wifi.tx))>0.65,'rpi-pb-color-yellow':(rpiTX2Perc(phDSInfo.wifi.tx))<=0.65&&(rpiTX2Perc(phDSInfo.wifi.tx))>0.55,'rpi-pb-color-orange':(rpiTX2Perc(phDSInfo.wifi.tx))<=0.55&&(rpiTX2Perc(phDSInfo.wifi.tx))>0.50,'rpi-pb-color-red':(rpiTX2Perc(phDSInfo.wifi.tx))<=0.50&&(rpiTX2Perc(phDSInfo.wifi.tx))>-99,'rpi-pb-color-indet':(rpiTX2Perc(phDSInfo.wifi.tx))===-100}" class="piip-progbar txp" [mode]="'md'" [type]="(phDSInfo.wifi.tx===0?'indeterminate':'determinate')" value={{(rpiTX2Perc(phDSInfo.wifi.tx))}}></ion-progress-bar></div>
+                              </div>
+                            </div>
+                          </ion-col>
+                          <ion-col class="wc-col phones-list-item-col cpu">
+                            <div class="phone-col-outter-wrapper cpu">
+                              <div class="pi-info-part-wrap cpu phone">
+                                <div class="piip-text cpu">
+                                  <div class="piip-label cpu phone">PL</div>
+                                  <div class="piip-hyphen cpu phone">:</div>
+                                  <div [ngClass]="{'rpi-pb-color-indet':phDSInfo.cpu.perc===0,'rpi-pb-color-green':phDSInfo.cpu.perc<0.5,'rpi-pb-color-yellow':phDSInfo.cpu.perc>=0.5&&phDSInfo.cpu.perc<0.65,'rpi-pb-color-orange':phDSInfo.cpu.perc>=0.65&&phDSInfo.cpu.perc<0.80,'rpi-pb-color-red':phDSInfo.cpu.perc>=0.80}" class="piip-text-string cpu phone">{{phDSInfo.cpu.str}}</div>
+                                </div>
+                                <div class="piip-bar cpu phone"><ion-progress-bar [ngClass]="{'rpi-pb-color-indet':phDSInfo.cpu.perc===0,'rpi-pb-color-green':phDSInfo.cpu.perc<0.5,'rpi-pb-color-yellow':phDSInfo.cpu.perc>=0.5&&phDSInfo.cpu.perc<0.65,'rpi-pb-color-orange':phDSInfo.cpu.perc>=0.65&&phDSInfo.cpu.perc<0.80,'rpi-pb-color-red':phDSInfo.cpu.perc>=0.80}" class="piip-progbar cpu phone" [mode]="'md'" [type]="(phDSInfo.cpu.perc===0?'indeterminate':'determinate')" value={{phDSInfo.cpu.perc}}></ion-progress-bar></div>
+                              </div>
+                            </div>
+                          </ion-col>
+                          <ion-col class="wc-col phones-list-item-col mem">
+                            <div class="phone-col-outter-wrapper mem">
+                              <div class="pi-info-part-wrap ram phone">
+                                <div class="piip-text ram phone">
+                                  <div class="piip-label ram phone">RM</div>
+                                  <div class="piip-hyphen ram phone">:</div>
+                                  <div [ngClass]="{'rpi-pb-color-indet':phDSInfo.mem.perc===0,'rpi-pb-color-green':phDSInfo.mem.perc<0.5,'rpi-pb-color-yellow':phDSInfo.mem.perc>=0.5&&phDSInfo.mem.perc<0.65,'rpi-pb-color-orange':phDSInfo.mem.perc>=0.65&&phDSInfo.mem.perc<0.80,'rpi-pb-color-red':phDSInfo.mem.perc>=0.80}" class="piip-text-string ram phone">{{phDSInfo.mem.str}}</div>
+                                </div>
+                                <div class="piip-bar ram phone"><ion-progress-bar [ngClass]="{'rpi-pb-color-indet':phDSInfo.mem.perc===0,'rpi-pb-color-green':phDSInfo.mem.perc<0.5,'rpi-pb-color-yellow':phDSInfo.mem.perc>=0.5&&phDSInfo.mem.perc<0.65,'rpi-pb-color-orange':phDSInfo.mem.perc>=0.65&&phDSInfo.mem.perc<0.80,'rpi-pb-color-red':phDSInfo.mem.perc>=0.80}" class="piip-progbar ram phone" [mode]="'md'" [type]="(phDSInfo.mem.perc===0?'indeterminate':'determinate')" value={{phDSInfo.mem.perc}}></ion-progress-bar></div>
+                              </div>
+                            </div>
+                          </ion-col>
+                          <ion-col class="wc-col phones-list-item-col disk">
+                            <div class="phone-col-outter-wrapper disk">
+                              <div class="pi-info-part-wrap disk phone">
+                                <div class="piip-text disk phone">
+                                  <div class="piip-label disk phone">DF</div>
+                                  <div class="piip-hyphen disk phone">:</div>
+                                  <div [ngClass]="{'rpi-pb-color-indet':phDSInfo.disk.perc===0,'rpi-pb-color-green':phDSInfo.disk.perc<0.5,'rpi-pb-color-yellow':phDSInfo.disk.perc>=0.5&&phDSInfo.disk.perc<0.65,'rpi-pb-color-orange':phDSInfo.disk.perc>=0.65&&phDSInfo.disk.perc<0.80,'rpi-pb-color-red':phDSInfo.disk.perc>=0.80}" class="piip-text-string disk phone">{{phDSInfo.disk.str}}</div>
+                                </div>
+                                <div class="piip-bar disk phone"><ion-progress-bar [ngClass]="{'rpi-pb-color-indet':phDSInfo.disk.perc===0,'rpi-pb-color-green':phDSInfo.disk.perc<0.5,'rpi-pb-color-yellow':phDSInfo.disk.perc>=0.5&&phDSInfo.disk.perc<0.65,'rpi-pb-color-orange':phDSInfo.disk.perc>=0.65&&phDSInfo.disk.perc<0.80,'rpi-pb-color-red':phDSInfo.disk.perc>=0.80}" class="piip-progbar disk phone" [type]="(phDSInfo.disk.perc===0?'indeterminate':'determinate')" value={{phDSInfo.disk.perc}}></ion-progress-bar></div>
+                              </div>
+                            </div>
+                          </ion-col>
+                        </ion-row>
+                      </ion-grid>
+                    </div>
+                  </div>
+                </ion-row>
+                <ion-row class="other-computers-list-row">
+                  <div class="main-grid-subtitle-wrapper other-computers">
+                    <div class="devices-subtitle-label-wrapper other-computers">
+                      <img class="wc-main-subheader-ico ocs" src="assets/wc-things-header-ico.png">
+                      <div class="wc-main-subheader-txt ocs">Computers</div>
+                    </div>
+                  </div>
+                  <div class="ocs-list-main-wrapper outter">
+                    <div class="ocs-list-main-wrapper inner">
+                      <ion-grid class="wc-grid ocs-list-grid">
+                        <ion-row class="wc-row ocs-list-item-row">
+                          <ion-col class="wc-col ocs-list-item-col online-col ocs">
+                            <div class="pirmd-col-wrapper online">
+                              <div class="md-sensor-online-indic-wrapper ocs">
+                                <img [ngStyle]="{'display':rpiOnline?'block':'none'}" class="md-sensor-online-indic-ico online ocs" src="assets/wcc-status-green-led.png">
+                                <img [ngStyle]="{'display':!rpiOnline?'block':'none'}" class="md-sensor-online-indic-ico offline ocs" src="assets/wcc-status-red-led.png">
+                              </div>
+                            </div>
+                          </ion-col>
+                          <ion-col class="wc-col pirmd-sensor-col label-col ocs">
+                            <div class="pirmd-col-wrapper label ocs">
+                              <div class="md-sensor-name-label-wrapper ocs">
+                                <div *ngIf="!rpiOnline" class="sensor-icon-wrapper ocs"><img class="sensor-icon-img webcam off ocs" src="assets/wc-ocs-rpi-offline-ico.png"></div>
+                                <div *ngIf="rpiOnline" class="sensor-icon-wrapper ocs"><img class="sensor-icon-img webcam on ocs" src="assets/wc-ocs-rpi-online-ico.png"></div>
+                                <div class="sensor-name-wrapper ocs">0Pi4</div>
+                              </div>
+                            </div>
+                          </ion-col>
+                          <ion-col [ngClass]="{'isoffline':!rpiOnline}" class="wc-col pi-info-col">
+                            <div class="pi-info-parts-outter-wrapper">
+                              <div class="pi-info-part-wrap cpu">
+                                <div class="piip-text cpu">
+                                  <div class="piip-label cpu">{{rpiInfo.cpu.l}}</div>
+                                  <div class="piip-hyphen cpu">:</div>
+                                  <div [ngClass]="{'rpi-pb-color-indet':rpiInfo.cpu.v===-100,'rpi-pb-color-green':rpiInfo.cpu.v<0.5,'rpi-pb-color-yellow':rpiInfo.cpu.v>=0.5&&rpiInfo.cpu.v<0.65,'rpi-pb-color-orange':rpiInfo.cpu.v>=0.65&&rpiInfo.cpu.v<0.80,'rpi-pb-color-red':rpiInfo.cpu.v>=0.80}" class="piip-text-string cpu">{{rpiInfo.cpu.s}}</div>
+                                  <div class="piip-text-fx cpu">{{rpiInfo.cpu.fx}}</div>
+                                </div>
+                                <div class="piip-bar cpu"><ion-progress-bar [ngClass]="{'rpi-pb-color-indet':rpiInfo.cpu.v===-100,'rpi-pb-color-green':rpiInfo.cpu.v<0.5,'rpi-pb-color-yellow':rpiInfo.cpu.v>=0.5&&rpiInfo.cpu.v<0.65,'rpi-pb-color-orange':rpiInfo.cpu.v>=0.65&&rpiInfo.cpu.v<0.80,'rpi-pb-color-red':rpiInfo.cpu.v>=0.80}" class="piip-progbar cpu" [mode]="'md'" [type]="(rpiInfo.cpu.v===-100?'indeterminate':'determinate')" value={{rpiInfo.cpu.v}}></ion-progress-bar></div>
+                              </div>
+                              <div class="pi-info-part-wrap ram">
+                                <div class="piip-text ram">
+                                  <div class="piip-label ram">{{rpiInfo.ram.l}}</div>
+                                  <div class="piip-hyphen ram">:</div>
+                                  <div [ngClass]="{'rpi-pb-color-indet':rpiInfo.ram.v===-100,'rpi-pb-color-green':rpiInfo.ram.v<0.5,'rpi-pb-color-yellow':rpiInfo.ram.v>=0.5&&rpiInfo.ram.v<0.65,'rpi-pb-color-orange':rpiInfo.ram.v>=0.65&&rpiInfo.ram.v<0.80,'rpi-pb-color-red':rpiInfo.ram.v>=0.80}" class="piip-text-string ram">{{rpiInfo.ram.s}}</div>
+                                  <div class="piip-text-fx ram">{{rpiInfo.ram.fx}}</div>
+                                </div>
+                                <div class="piip-bar ram"><ion-progress-bar [ngClass]="{'rpi-pb-color-indet':rpiInfo.ram.v===-100,'rpi-pb-color-green':rpiInfo.ram.v<0.5,'rpi-pb-color-yellow':rpiInfo.ram.v>=0.5&&rpiInfo.ram.v<0.65,'rpi-pb-color-orange':rpiInfo.ram.v>=0.65&&rpiInfo.ram.v<0.80,'rpi-pb-color-red':rpiInfo.ram.v>=0.80}" class="piip-progbar ram" [mode]="'md'" [type]="(rpiInfo.ram.v===-100?'indeterminate':'determinate')" value={{rpiInfo.ram.v}}></ion-progress-bar></div>
+                              </div>
+                              <div class="pi-info-part-wrap disk">
+                                <div class="piip-text disk">
+                                  <div class="piip-label disk">{{rpiInfo.disk.l}}</div>
+                                  <div class="piip-hyphen disk">:</div>
+                                  <div [ngClass]="{'rpi-pb-color-indet':rpiInfo.disk.v===-100,'rpi-pb-color-green':rpiInfo.disk.v<0.5,'rpi-pb-color-yellow':rpiInfo.disk.v>=0.5&&rpiInfo.disk.v<0.65,'rpi-pb-color-orange':rpiInfo.disk.v>=0.65&&rpiInfo.disk.v<0.80,'rpi-pb-color-red':rpiInfo.disk.v>=0.80}" class="piip-text-string disk">{{rpiInfo.disk.s}}</div>
+                                  <div class="piip-text-fx disk">{{rpiInfo.disk.fx}}</div>
+                                </div>
+                                <div class="piip-bar disk"><ion-progress-bar [ngClass]="{'rpi-pb-color-indet':rpiInfo.disk.v===-100,'rpi-pb-color-green':rpiInfo.disk.v<0.5,'rpi-pb-color-yellow':rpiInfo.disk.v>=0.5&&rpiInfo.disk.v<0.65,'rpi-pb-color-orange':rpiInfo.disk.v>=0.65&&rpiInfo.disk.v<0.80,'rpi-pb-color-red':rpiInfo.disk.v>=0.80}" class="piip-progbar disk" [mode]="'md'" [type]="(rpiInfo.disk.v===-100?'indeterminate':'determinate')" value={{rpiInfo.disk.v}}></ion-progress-bar></div>
+                              </div>
+                              <div class="pi-info-part-wrap temp">
+                                <div class="piip-text temp">
+                                  <div class="piip-label temp">{{rpiInfo.temp.l}}</div>
+                                  <div class="piip-hyphen temp">:</div>
+                                  <div [ngClass]="{'rpi-pb-color-indet':(rpiTemp2Perc(rpiInfo.temp.v))===-100,'rpi-pb-color-green':(rpiTemp2Perc(rpiInfo.temp.v))<0.5,'rpi-pb-color-yellow':(rpiTemp2Perc(rpiInfo.temp.v))>=0.5&&(rpiTemp2Perc(rpiInfo.temp.v))<0.65,'rpi-pb-color-orange':(rpiTemp2Perc(rpiInfo.temp.v))>=0.65&&(rpiTemp2Perc(rpiInfo.temp.v))<0.80,'rpi-pb-color-red':(rpiTemp2Perc(rpiInfo.temp.v))>=0.80}" class="piip-text-string temp">{{rpiInfo.temp.s}}</div>
+                                  <div class="piip-text-fx temp">{{rpiInfo.temp.fx}}</div>
+                                </div>
+                                <div class="piip-bar disk"><ion-progress-bar [ngClass]="{'rpi-pb-color-indet':(rpiTemp2Perc(rpiInfo.temp.v))===-100,'rpi-pb-color-green':(rpiTemp2Perc(rpiInfo.temp.v))<0.5,'rpi-pb-color-yellow':(rpiTemp2Perc(rpiInfo.temp.v))>=0.5&&(rpiTemp2Perc(rpiInfo.temp.v))<0.65,'rpi-pb-color-orange':(rpiTemp2Perc(rpiInfo.temp.v))>=0.65&&(rpiTemp2Perc(rpiInfo.temp.v))<0.80,'rpi-pb-color-red':(rpiTemp2Perc(rpiInfo.temp.v))>=0.80}" class="piip-progbar temp" [mode]="'md'" [type]="(rpiInfo.temp.v===-100?'indeterminate':'determinate')" value={{(rpiTemp2Perc(rpiInfo.temp.v))}}></ion-progress-bar></div>
+                              </div>
+                              <div class="pi-info-part-wrap txp">
+                                <div class="piip-text txp">
+                                  <div class="piip-label txp">{{rpiInfo.txp.l}}</div>
+                                  <div class="piip-hyphen temp">:</div>
+                                  <div [ngClass]="{'rpi-pb-color-green':(rpiTX2Perc(rpiInfo.txp.v))>0.65,'rpi-pb-color-yellow':(rpiTX2Perc(rpiInfo.txp.v))<=0.65&&(rpiTX2Perc(rpiInfo.txp.v))>0.55,'rpi-pb-color-orange':(rpiTX2Perc(rpiInfo.txp.v))<=0.55&&(rpiTX2Perc(rpiInfo.txp.v))>0.50,'rpi-pb-color-red':(rpiTX2Perc(rpiInfo.txp.v))<=0.50&&(rpiTX2Perc(rpiInfo.txp.v))>-99,'rpi-pb-color-indet':(rpiTX2Perc(rpiInfo.txp.v))===-100}" class="piip-text-string txp">{{rpiInfo.txp.s}}</div>
+                                  <div class="piip-text-fx txp">{{rpiInfo.txp.fx}}</div>
+                                </div>
+                                <div class="piip-bar disk"><ion-progress-bar [ngClass]="{'rpi-pb-color-green':(rpiTX2Perc(rpiInfo.txp.v))>0.65,'rpi-pb-color-yellow':(rpiTX2Perc(rpiInfo.txp.v))<=0.65&&(rpiTX2Perc(rpiInfo.txp.v))>0.55,'rpi-pb-color-orange':(rpiTX2Perc(rpiInfo.txp.v))<=0.55&&(rpiTX2Perc(rpiInfo.txp.v))>0.50,'rpi-pb-color-red':(rpiTX2Perc(rpiInfo.txp.v))<=0.50&&(rpiTX2Perc(rpiInfo.txp.v))>-99,'rpi-pb-color-indet':(rpiTX2Perc(rpiInfo.txp.v))===-100}" class="piip-progbar txp" [mode]="'md'" [type]="(rpiInfo.txp.v===-100?'indeterminate':'determinate')" value={{(rpiTX2Perc(rpiInfo.txp.v))}}></ion-progress-bar></div>
+                              </div>
+                            </div>
+                            <div class="ocs-fn-btns-outter-wrapper">
+                              <div class="ocs-open-console-btn-wrapper rpi">
+                                <button (click)="doPutty2RC('192.168.0.18')" [disabled]="!rpiOnline" class="ocs-open-console-btn rpi">
+                                  <img class="ocs-open-console-btn-ico rpi" src="assets/wc-ocs-openconsole-ico.png">
+                                </button>
+                              </div>
+                              <div class="ocs-restart-btn-wrapper rpi">
+                                <button (click)="kodiQCFn('reboot',null)" [disabled]="!rpiOnline" class="ocs-restart-btn rpi">
+                                  <img class="ocs-restart-btn-ico rpi" src="assets/kqc-power-reboot.png">
+                                </button>
+                              </div>
+                            </div>
+                          </ion-col>
+                        </ion-row>
+
+                        <ion-row class="wc-row ocs-list-item-row deb">
+                          <ion-col class="wc-col ocs-list-item-col online-col ocs deb">
+                            <div class="pirmd-col-wrapper online deb">
+                              <div class="md-sensor-online-indic-wrapper ocs deb">
+                                <img [ngStyle]="{'display':debOnline?'block':'none'}" class="md-sensor-online-indic-ico online ocs deb" src="assets/wcc-status-green-led.png">
+                                <img [ngStyle]="{'display':!debOnline?'block':'none'}" class="md-sensor-online-indic-ico offline ocs deb" src="assets/wcc-status-red-led.png">
+                              </div>
+                            </div>
+                          </ion-col>
+                          <ion-col class="wc-col pirmd-sensor-col label-col ocs deb">
+                            <div class="pirmd-col-wrapper label ocs deb">
+                              <div class="md-sensor-name-label-wrapper ocs deb">
+                                <div *ngIf="!debOnline" class="sensor-icon-wrapper ocs deb"><img class="sensor-icon-img webcam off ocs" src="assets/wc-ocs-deb-offline-ico.png"></div>
+                                <div *ngIf="debOnline" class="sensor-icon-wrapper ocs deb"><img class="sensor-icon-img webcam on ocs" src="assets/wc-ocs-deb-online-ico.png"></div>
+                                <div class="sensor-name-wrapper ocs deb">0SVR</div>
+                              </div>
+                            </div>
+                          </ion-col>
+                          <ion-col [ngClass]="{'isoffline':!debOnline}" class="wc-col pi-info-col deb">
+                            <div class="pi-info-parts-outter-wrapper deb">
+                              <div class="pi-info-part-wrap cpu deb">
+                                <div class="piip-text cpu deb">
+                                  <div class="piip-label cpu deb">{{debInfo.cpu.l}}</div>
+                                  <div class="piip-hyphen cpu deb">:</div>
+                                  <div [ngClass]="{'rpi-pb-color-indet':debInfo.cpu.v===-100,'rpi-pb-color-green':debInfo.cpu.v<0.5,'rpi-pb-color-yellow':debInfo.cpu.v>=0.5&&debInfo.cpu.v<0.65,'rpi-pb-color-orange':debInfo.cpu.v>=0.65&&debInfo.cpu.v<0.80,'rpi-pb-color-red':debInfo.cpu.v>=0.80}" class="piip-text-string cpu deb">{{debInfo.cpu.s}}</div>
+                                  <div class="piip-text-fx cpu deb">{{debInfo.cpu.fx}}</div>
+                                </div>
+                                <div class="piip-bar cpu deb"><ion-progress-bar [ngClass]="{'rpi-pb-color-indet':debInfo.cpu.v===-100,'rpi-pb-color-green':debInfo.cpu.v<0.5,'rpi-pb-color-yellow':debInfo.cpu.v>=0.5&&debInfo.cpu.v<0.65,'rpi-pb-color-orange':debInfo.cpu.v>=0.65&&debInfo.cpu.v<0.80,'rpi-pb-color-red':debInfo.cpu.v>=0.80}" class="piip-progbar cpu deb" [mode]="'md'" [type]="(debInfo.cpu.v===-100?'indeterminate':'determinate')" value={{debInfo.cpu.v}}></ion-progress-bar></div>
+                              </div>
+                              <div class="pi-info-part-wrap ram deb">
+                                <div class="piip-text ram deb">
+                                  <div class="piip-label ram deb">{{debInfo.ram.l}}</div>
+                                  <div class="piip-hyphen ram deb">:</div>
+                                  <div [ngClass]="{'rpi-pb-color-indet':debInfo.ram.v===-100,'rpi-pb-color-green':debInfo.ram.v<0.5,'rpi-pb-color-yellow':debInfo.ram.v>=0.5&&debInfo.ram.v<0.65,'rpi-pb-color-orange':debInfo.ram.v>=0.65&&debInfo.ram.v<0.80,'rpi-pb-color-red':debInfo.ram.v>=0.80}" class="piip-text-string ram deb">{{debInfo.ram.s}}</div>
+                                  <div class="piip-text-fx ram deb">{{debInfo.ram.fx}}</div>
+                                </div>
+                                <div class="piip-bar ram deb"><ion-progress-bar [ngClass]="{'rpi-pb-color-indet':debInfo.ram.v===-100,'rpi-pb-color-green':debInfo.ram.v<0.5,'rpi-pb-color-yellow':debInfo.ram.v>=0.5&&debInfo.ram.v<0.65,'rpi-pb-color-orange':debInfo.ram.v>=0.65&&debInfo.ram.v<0.80,'rpi-pb-color-red':debInfo.ram.v>=0.80}" class="piip-progbar ram deb" [mode]="'md'" [type]="(debInfo.ram.v===-100?'indeterminate':'determinate')" value={{debInfo.ram.v}}></ion-progress-bar></div>
+                              </div>
+                              <div class="pi-info-part-wrap disk deb">
+                                <div class="piip-text disk deb">
+                                  <div class="piip-label disk deb">{{debInfo.disk.l}}</div>
+                                  <div class="piip-hyphen disk deb">:</div>
+                                  <div [ngClass]="{'rpi-pb-color-indet':debInfo.disk.v===-100,'rpi-pb-color-green':debInfo.disk.v<0.5,'rpi-pb-color-yellow':debInfo.disk.v>=0.5&&debInfo.disk.v<0.65,'rpi-pb-color-orange':debInfo.disk.v>=0.65&&debInfo.disk.v<0.80,'rpi-pb-color-red':debInfo.disk.v>=0.80}" class="piip-text-string disk deb">{{debInfo.disk.s}}</div>
+                                  <div class="piip-text-fx disk deb">{{debInfo.disk.fx}}</div>
+                                </div>
+                                <div class="piip-bar disk deb"><ion-progress-bar [ngClass]="{'rpi-pb-color-indet':debInfo.disk.v===-100,'rpi-pb-color-green':debInfo.disk.v<0.5,'rpi-pb-color-yellow':debInfo.disk.v>=0.5&&debInfo.disk.v<0.65,'rpi-pb-color-orange':debInfo.disk.v>=0.65&&debInfo.disk.v<0.80,'rpi-pb-color-red':debInfo.disk.v>=0.80}" class="piip-progbar disk deb" [mode]="'md'" [type]="(debInfo.disk.v===-100?'indeterminate':'determinate')" value={{debInfo.disk.v}}></ion-progress-bar></div>
+                              </div>
+                              <div class="pi-info-part-wrap temp deb"></div>
+                              <div class="pi-info-part-wrap txp deb"></div>
+                            </div>
+                            <div class="ocs-fn-btns-outter-wrapper deb">
+                              <div class="ocs-open-console-btn-wrapper rpi deb">
+                                <button (click)="doPutty2RC('192.168.0.11')" [disabled]="!rpiOnline" class="ocs-open-console-btn rpi deb">
+                                  <img class="ocs-open-console-btn-ico rpi deb" src="assets/wc-ocs-openconsole-ico.png">
+                                </button>
+                              </div>
+                              <div class="ocs-restart-btn-wrapper rpi deb">
+                                <button (click)="kodiQCFn('reboot',null)" [disabled]="!rpiOnline" class="ocs-restart-btn rpi deb">
+                                  <img class="ocs-restart-btn-ico rpi deb" src="assets/kqc-power-reboot.png">
+                                </button>
+                              </div>
+                            </div>
+                          </ion-col>
+                        </ion-row>
+
+                      </ion-grid>
+                    </div>
+                  </div>
+                </ion-row>
+                <ion-row class="motion-detect-sensor-list-row">
+                  <div class="main-grid-subtitle-wrapper motion-sensors">
+                    <div class="devices-subtitle-label-wrapper motion">
+                      <img class="wc-main-subheader-ico motion" src="assets/wc-motion-detect-subhead-ico.png">
+                      <div class="wc-main-subheader-txt motion">Motion</div>
+                      <div *ngIf="dCOP!==null&&dCamMotion.a!==null" class="wc-main-subheader-indic motion" [ngClass]="{'faded-color-webcam-indics':!dCamMotion.isMotion}">
+                        <img *ngIf="dCOP==='c'" class="motion-indic-ico cop cat" src="assets/wc-motion-indic-ico-cat.png">
+                        <img *ngIf="dCOP==='p'" class="motion-indic-ico cop per" src="assets/wc-motion-indic-ico-person.png">
+                        <div class="motion-indic-div">|</div>
+                        <img *ngIf="dCamMotion.a==='l'" class="motion-indic-ico area l" src="assets/wc-motion-indic-ico-l.png">
+                        <img *ngIf="dCamMotion.a==='k'" class="motion-indic-ico area k" src="assets/wc-motion-indic-ico-k.png">
+                        <img *ngIf="dCamMotion.a==='t'" class="motion-indic-ico area t" src="assets/wc-motion-indic-ico-t.png">
+                        <img *ngIf="dCamMotion.a==='b'" class="motion-indic-ico area b" src="assets/wc-motion-indic-ico-b.png">
+                      </div>
+                    </div>
+                    <div class="pir-toggles-wraper">
+                      <div class="pir-sound-toggle-wrap">
+                        <button (click)="pirToggles('power')" class="pir-toggle-btn power">
+                          <img [ngStyle]="{'display':wcData.pirStates.power?'block':'none'}" class="pir-toggle-btn-ico power on" src="assets/wc-home-footer-listen-on-ico.png">
+                          <img [ngStyle]="{'display':!wcData.pirStates.power?'block':'none'}" class="pir-toggle-btn-ico power off" src="assets/wc-home-footer-listen-off-ico.png">
+                        </button>
+                        <button (click)="pirToggles('sound')" class="pir-toggle-btn sound">
+                          <img [ngStyle]="{'display':wcData.pirStates.sound?'block':'none'}" class="pir-toggle-btn-ico sound on" src="assets/home-player-muted-red-ico.png">
+                          <img [ngStyle]="{'display':!wcData.pirStates.sound?'block':'none'}" class="pir-toggle-btn-ico sound off" src="assets/wc-kodiplayer-vol-ico.png">
+                        </button>
+                      </div>
+                    </div>
+                    <div class="devices-header-title-count-wrapper pir">
+                      <div class="devices-header-title-count-label-wrap pir">
+                        <img src="assets/wc-pircount-header-ico-878787.png" class="ttl-leds-count-ico pir">
+                        <div class="pirsensor-head-count-value headcountvaluetxt">{{(getTTLPirsCount())}}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <ion-col [ngStyle]="{'display':wcData.pirStates.power?'block':'none'}" class="motion-detect-sensor-list-main-col">
+                    <div class="motiondetect-main-outter-wrapper">
+                      <div class="motiondetect-main-inner-wrapper">
+                        <ion-grid class="wc-grid pirmd-sensors-grid">
+                          <ion-row class="wc-row pirmd-row-sensor-row webcam ctrls">
+                            <ion-col class="wc-col pirmd-sensor-col online-col">
+                              <div class="pirmd-col-wrapper online">
+                                <div class="md-sensor-online-indic-wrapper">
+                                  <img [ngStyle]="{'display':camPlugged?'block':'none'}" class="md-sensor-online-indic-ico online" src="assets/wcc-status-green-led.png">
+                                  <img [ngStyle]="{'display':!camPlugged?'block':'none'}" class="md-sensor-online-indic-ico offline" src="assets/wcc-status-red-led.png">
+                                </div>
+                              </div>
+                            </ion-col>
+                            <ion-col class="wc-col pirmd-sensor-col label-col">
+                              <div class="pirmd-col-wrapper label">
+                                <div class="md-sensor-name-label-wrapper">
+                                  <div *ngIf="!camPlugged" class="sensor-icon-wrapper"><img class="sensor-icon-img webcam off" src="assets/twt-cam-not-active-ico.png"></div>
+                                  <div *ngIf="camPlugged&&!dInitDone" class="sensor-icon-wrapper"><img class="sensor-icon-img webcam def" src="assets/twt-mode-video-ico.png"></div>
+                                  <div *ngIf="camPlugged&&dInitDone&&dLoopOn" class="sensor-icon-wrapper"><img class="sensor-icon-img webcam on" src="assets/twt-cam-active-ico.png"></div>
+                                  <div *ngIf="camPlugged&&dInitDone&&!dLoopOn" class="sensor-icon-wrapper"><img class="sensor-icon-img webcam paused" src="assets/wc-webcam-ico-paused.png"></div>
+                                  <div class="sensor-name-wrapper"><span class="pir-lbl-prefix">cam</span><span class="pir-lbl-no">0</span></div>
+                                </div>
+                              </div>
+                            </ion-col>
+                            <ion-col class="wc-col pirmd-sensor-col webcam-btns-col">
+                              <div class="wc-webcam-btns-outter-wrapper">
+                                <div class="wc-webcam-btn-wrap loop-start-stop">
+                                  <button (click)="toggleDiffy()" class="wc-camsync-btn loop-toggle">
+                                    <img *ngIf="dInitDone" class="wc-camsync-btn-ico loop-toggle off" src="assets/ytdl-header-ctrlbtn-stop-ico.png">
+                                    <img *ngIf="!dInitDone" class="wc-camsync-btn-ico loop-toggle on" src="assets/ytdl-header-ctrlbtn-play-ico.png">
+                                  </button>
+                                </div>
+                                <div class="wc-webcam-btn-wrap layer video">
+                                  <button (click)="hideShowCamView('video')" class="wc-camsync-btn layerbtn video">
+                                    <img *ngIf="!dCamLayers.video" class="wc-camsynclayer-ico video off" src="assets/wc-camsync-layer-video-ico.png">
+                                    <img *ngIf="dCamLayers.video" class="wc-camsynclayer-ico video on" src="assets/wc-camsync-layer-video-ico-on.png">
+                                  </button>
+                                </div>
+                                <div class="wc-webcam-btn-wrap layer motion">
+                                  <button (click)="hideShowCamView('motion')" class="wc-camsync-btn layerbtn motion">
+                                    <img *ngIf="!dCamLayers.motion" class="wc-camsynclayer-ico video off" src="assets/wc-camsync-layer-motion-ico.png">
+                                    <img *ngIf="dCamLayers.motion" class="wc-camsynclayer-ico video on" src="assets/wc-camsync-layer-motion-ico-on.png">
+                                  </button>
+                                </div>
+                                <div class="wc-webcam-btn-wrap stream-show-hide">
+                                  <button (click)="hideShowCamView()" (contextmenu)="toggleCamExpandOnMotion($event)" class="wc-camsync-btn hideshow">
+                                    <img *ngIf="!dCamViewShowing&&!dCamExpandOnMotion" class="wc-camsyncwebcam-img" src="assets/wc-accordian-expand-header-ico.png">
+                                    <img *ngIf="dCamViewShowing&&!dCamExpandOnMotion" class="wc-camsyncwebcam-img" src="assets/wc-accordian-contract-header-ico.png">
+                                    <img *ngIf="!dCamViewShowing&&dCamExpandOnMotion" class="wc-camsyncwebcam-img" src="assets/wc-accordian-expand-header-ico-on.png">
+                                    <img *ngIf="dCamViewShowing&&dCamExpandOnMotion" class="wc-camsyncwebcam-img" src="assets/wc-accordian-contract-header-ico-on.png">
+                                  </button>
+                                </div>
+                              </div>
+                            </ion-col>
+                            <ion-col class="wc-col wc-webcam motion-indic-col">
+                              <div class="pirmd-motioninfo-part indic">
+                                <div class="pirmd-indic-outter">
+                                  <div [ngStyle]="{'display':dCamMotion.isMotion?'block':'none'}" class="pirmd-indic-inner"><img class="pirmd-indic-img" src="assets/wc-netclients-list-ico-pirsensor.png"></div>
+                                </div>
+                              </div>
+                            </ion-col>
+                            <ion-col class="wc-col wc-webcam motion-xyapos-col">
+                              <div class="wc-webcam-motion-timecount-wrapper">
+                                <div class="webcam-time-count-value">
+                                  <span *ngIf="dMotionSCount>0&&dCamMotion.isMotion&&(anyPirCtrl())" class="wcam-tcv active">{{dMotionSCount}}</span>
+                                  <span *ngIf="dMotionSCount===0||!dCamMotion.isMotion||!(anyPirCtrl())" class="wcam-tcv notactive">-</span>
+                                </div>
+                              </div>
+                              <div class="wc-webcam-motion-xyapos-outter-wrapper" [ngClass]="{'notactive':!dCamMotion.isMotion}">
+                                <div class="xyapos-wrap cop">
+                                  <img *ngIf="dCOP==='c'" class="cop-ico cat" src="assets/wc-webcam-cop-ico-cat.png">
+                                  <img *ngIf="dCOP==='p'" class="cop-ico person" src="assets/wc-webcam-cop-ico-person.png">
+                                  <img *ngIf="dCOP===null" class="cop-ico nk" src="assets/wc-webcam-cop-ico-nk.png">
+                                </div>
+                                <div class="xyapos-wrap x">
+                                  <div class="wc-camsync-info-label posx">x:</div>
+                                  <div class="wc-camsync-info-data posx">
+                                    <span *ngIf="dAvgPos.x<1" class="dcammotion xpos false">-</span>
+                                    <span *ngIf="dAvgPos.y>0" class="dcammotion xpos true">{{dAvgPos.x.toFixed(0)}}</span>
+                                  </div>
+                                </div>
+                                <div class="xyapos-wrap y">
+                                  <div class="wc-camsync-info-label posy">Y:</div>
+                                  <div class="wc-camsync-info-data posy">
+                                    <span *ngIf="dAvgPos.y<1" class="dcammotion ypos false">-</span>
+                                    <span *ngIf="dAvgPos.y>0" class="dcammotion ypos true">{{dAvgPos.y.toFixed(0)}}</span>
+                                  </div>
+                                </div>
+                                <div class="xyapos-wrap a">
+                                  <div class="wc-camsync-info-label posa">A:</div>
+                                  <div class="wc-camsync-info-data posa">
+                                    <span *ngIf="dCamMotion.a===null" class="dcammotion apos false">-</span>
+                                    <span *ngIf="dCamMotion.a!==null" class="dcammotion apos true">{{dCamMotion.a}}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                          <ion-row [ngStyle]="{'display':dCamViewShowing?'flex':'none'}" class="wc-row camsync-status-row layers-row">
+                            <ion-col class="wc-col camsync-status-col layers-col">
+                              <div class="wc-camsync-canvas-layers-wrapper">
+                                <div class="webcam-layers-main-wrapper">
+                                  <canvas id="capcanvas" #capCanvas></canvas>
+                                  <canvas id="gridcanvas" #gridCanvas></canvas>
+                                  <canvas id="diffcanvas" #diffCanvas></canvas>
+                                  <video [ngStyle]="{'display':dCamLayers.video?'block':'none'}" #diffyVideo id="diffyvideo"></video>
+                                  <canvas [ngStyle]="{'display':dCamLayers.motion?'block':'none'}" id="motcanvas" #motCanvas></canvas>
+                                </div>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                          <ion-row *ngFor="let pir of mdSensors;index as pI" class="wc-row pirmd-row-sensor-row pir-{{pI}}">
+                            <ion-col class="wc-col pirmd-sensor-col online-col">
+                              <div class="pirmd-col-wrapper online">
+                                <div class="md-sensor-online-indic-wrapper">
+                                  <img [ngStyle]="{'display':pir.online.state?'block':'none'}" class="md-sensor-online-indic-ico online" src="assets/wcc-status-green-led.png">
+                                  <img [ngStyle]="{'display':!pir.online.state?'block':'none'}" class="md-sensor-online-indic-ico offline" src="assets/wcc-status-red-led.png">
+                                </div>
+                              </div>
+                            </ion-col>
+                            <ion-col class="wc-col pirmd-sensor-col label-col">
+                              <div class="pirmd-col-wrapper label">
+                                <div class="md-sensor-name-label-wrapper pirno{{pir.pirNo}}">
+                                  <div class="sensor-icon-wrapper"><img class="sensor-icon-img" src={{pir.ico}}></div>
+                                  <div class="sensor-name-wrapper"><span class="pir-lbl-prefix">pir</span><span class="pir-lbl-no pir-color-label-{{pir.pirNo}}">{{pir.pirNo}}</span></div>
+                                </div>
+                              </div>
+                            </ion-col>
+                            <ion-col size="3" class="wc-col pirmd-sensor-col members-col">
+                              <div class="pirmd-col-wrapper members">
+                                <div *ngIf="pir.members.length!==wledTree.length&&pir.members.length>0" class="pirmd-members-count">
+                                  <span class="pirmd-members-brack">(</span>{{(pir.members.length)}}<span class="pirmd-members-brack">)</span>
+                                </div>
+                                <div class="pirmd-members-names">
+                                  <div *ngIf="pir.members.length>0&&pir.members.length!==wledTree.length" class="pirmd-members-names list">
+                                    <span *ngFor="let pirMember of pir.members;index as pmI" class="pirmd-member-name list"><span class="mem-prefix">WL</span>{{pirMember}}<span *ngIf="(pmI+1)<pir.members.length" class="pirmd-member-list-comma">,</span></span>
+                                  </div>
+                                  <div *ngIf="pir.members.length===wledTree.length" class="pirmd-members-names all">
+                                    <span class="pirmd-member-name all">All</span>
+                                  </div>
+                                  <div *ngIf="pir.members.length===0" class="pirmd-members-names none">
+                                    <span class="pirmd-member-name none">None</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </ion-col>
+                            <ion-col class="wc-col pirmd-sensor-col motioninfo-col">
+                              <div class="pirmd-col-wrapper motioninfo">
+                                <div class="pirmd-motioninfo-part indic">
+                                  <div class="pirmd-indic-outter">
+                                    <div [ngStyle]="{'display':pir.motion.state?'block':'none'}" class="pirmd-indic-inner"><img class="pirmd-indic-img" src="assets/wc-netclients-list-ico-pirsensor.png"></div>
+                                  </div>
+                                </div>
+                                <div class="pirmd-motioninfo-part trigs">
+                                  <div class="pirmd-mip-value trigs count">
+                                    <span [ngStyle]="{'display':pirMotionData[pir.pirNo].count>0&&pirMotionData[pir.pirNo].count<6?'block':'none','color':pirMotionData[pir.pirNo].ctrl?'rgb(255 200 0 / 78%)':'#aaa'}" class="trigs-count-txt-opt some">{{(pirMotionData[pir.pirNo].count)}}</span>
+                                    <span [ngStyle]="{'display':pirMotionData[pir.pirNo].count<1||pirMotionData[pir.pirNo].count>5?'block':'none'}" class="trigs-count-txt-opt none">-</span>
+                                  </div>
+                                  <div class="pirmd-mip-splitter">|</div>
+                                  <div class="pirmd-mip-value trigs to">
+                                    <div [ngStyle]="{'display':pirMotionData[pir.pirNo].countTOS>0&&pirMotionData[pir.pirNo].countTOS<pirCountMaxTimeS[pir.pirNo]&&!pirMotionData[pir.pirNo].ctrl?'block':'none'}" class="pirto-opt inprog">{{(pirMotionData[pir.pirNo].countTOS)}}</div>
+                                    <div [ngStyle]="{'display':(pirMotionData[pir.pirNo].countTOS<1||pirMotionData[pir.pirNo].countTOS>(pirCountMaxTimeS[pir.pirNo]-1))&&!pirMotionData[pir.pirNo].ctrl?'block':'none'}" class="pirto-opt zero">-</div>
+                                    <div [ngStyle]="{'display':pirMotionData[pir.pirNo].ctrl?'block':'none'}" class="pirto-opt wait">ⴵ</div>
+                                  </div>
+                                </div>
+                                <div class="pirmd-motioninfo-part motion">
+                                  <div class="pirmd-mip-value ctrl">
+                                    <div [ngStyle]="{'display':pirMotionData[pir.pirNo].ctrl?'flex':'none'}" class="pirmd-mip-value opt on">
+                                      <div (click)="killPIRMotion(pir.pirNo)" class="pirmd-mip-value motion-txt">
+                                        <div class="char char1">M</div>
+                                        <div class="char char2">O</div>
+                                        <div class="char char3">T</div>
+                                        <div class="char char4">I</div>
+                                        <div class="char char5">O</div>
+                                        <div class="char char6">N</div>
+                                      </div>
+                                    </div>
+                                    <div [ngStyle]="{'display':!pirMotionData[pir.pirNo].ctrl?'flex':'none'}" class="pirmd-mip-value opt off">
+                                      <div class="pirmd-mip-value no-motion-txt">
+                                        <div class="pirmd-idle-txt">IDLE</div>
+                                      </div>
+                                    </div>
+                                    <div class="pirmd-mip-splitter">|</div>
+                                    <div class="pirmd-mip-value ctrl to">
+                                      <div [ngStyle]="{'display':pirMotionData[pir.pirNo].ctrl&&pirMotionData[pir.pirNo].ctrlTOS>0?'block':'none'}" class="pirto-opt inprog">{{(pirMotionData[pir.pirNo].ctrlTOS)}}</div>
+                                      <div [ngStyle]="{'display':!pirMotionData[pir.pirNo].ctrl||pirMotionData[pir.pirNo].ctrlTOS<1?'block':'none'}" class="pirto-opt zero">-</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </ion-col>
+                          </ion-row>
+                        </ion-grid>
+                      </div>
+                    </div>
+                  </ion-col>
+                </ion-row>
+                <ion-row class="device-list-main-grid-row devices-list darkscrolls" [ngStyle]="{'max-height':dCamViewShowing?'calc(100% - 629px)':'calc(100% - 446px)'}">
+                  <div class="main-grid-subtitle-wrapper icue-devices">
+                    <div class="devices-subtitle-label-wrapper icue">
+                      <img class="wc-main-subheader-ico icue-devices" src="assets/wc-devices-list-icue-subhead-ico.png">
+                      <div class="wc-main-subheader-txt icue-devices">iCUE</div>
+                    </div>
+                    <div *ngIf="wcData.tree.length>0" class="devices-header-title-count-wrapper icue">
+                      <div class="devices-header-title-count-label-wrap icue">
+                        <img src="assets/wc-ledcount-header-ico-878787.png" class="ttl-leds-count-ico icue">
+                        <div class="wc-icue-ttl-led-count-value headcountvaluetxt">{{(getTTLICUELedCount())}}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <ion-col *ngIf="!cueTreeReady" size="12" class="list-loading-col devices"><ion-spinner duration="400" class="list-loading-spinner devices" name="dots"></ion-spinner></ion-col>
+                  <ion-col *ngIf="cueTreeReady&&wcData.tree.length===0" size="12" class="list-loading-col devices"><div class="wificue-list-no-items-wrapper devices">no devices found</div></ion-col>
+                  <ion-col *ngFor="let ctGroup of wcData.tree;index as ctGI" [ngStyle]="{'display':cueTreeReady&&wcData.tree.length>0?'block':'none'}" class="device-list-main-grid-col devgroup-col">
+                    <div class="device-group-header-wrapper">
+                      <ion-grid class="wc-grid device-group-header-grid">
+                        <ion-row class="wc-row device-group-header-row">
+                          <ion-col class="wc-col device-group-header-col devicegroup-ico-col"><div class="dgh-ico-wrapper"><img class="dgh-ico-img" src={{ctGroup.dtIcon}}></div></ion-col>
+                          <ion-col class="wc-col device-group-header-col name-col">
+                            <div class="dgh-label">
+                              <div class="dgh-count-wrapper">
+                                <div class="dgh-count-brack">(</div>
+                                <div class="dgh-count-value">{{ctGroup.dtCount}}</div>
+                                <div class="dgh-count-brack">)</div>
+                              </div>
+                              <div class="dgh-label-name">{{ctGroup.dtName}}</div>
+                            </div>
+                          </ion-col>
+                        </ion-row>
+                      </ion-grid>
+                    </div>
+                    <div class="device-group-main-outter-wrapper">
+                      <div *ngFor="let ctDevice of ctGroup.dtDevices;index as ctDI" [ngStyle]="{'opacity':wcData.treeStates[ctDevice.info.id]?'0.88':'0.48'}" class="device-group-item-wrapper">
+                        <div class="dgitem-item-header-wrapper">
+                          <!-- //---- -->
+                          <div class="devselect-cb-btn-wrapper dev">
+                            <button (click)="toggleCTDeviceState('checked',ctDevice.info.id)" class="devselect-cb-btn dev">
+                              <img [ngStyle]="{'visibility':wcData.treeStates[ctDevice.info.id]?'visible':'hidden'}" src="assets/dev-select-checkmark-ico.png" class="devselect-cb-check-ico dev">
+                            </button>
+                          </div>
+                          <div class="device-level-vis-toggle-wrapper">
+                            <div class="dgitem-item-model">{{ctDevice.info.model}}</div>
+                            <div *ngIf="ctDevice.info.channelCount>0" class="dgitem-item-channo">
+                              <div class="dgitem-item-channo-prefix"><img src="assets/wc-channels-ico.png" class="item-channels-img-ico"></div>
+                              <div class="dgitem-item-channo-val">{{ctDevice.info.channelCount}}</div>
+                            </div>
+                            <div class="dgitem-item-ledno">
+                              <div class="dgitem-item-ledno-prefix"><img src="assets/wc-led-ico.png" class="item-led-img-ico"></div>
+                              <div class="dgitem-item-ledno-val">{{ctDevice.info.ledCount}}</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="dgitem-item-ledpos-wrapper">
+                          <div (click)="ccIndivDevice('icue','group',ctDevice.info.id)" (contextmenu)="ccIndivDevice('icue','indiv',ctDevice.info.id,$event)" class="dgitem-item-ledpos-deviceframe" [ngStyle]="{'opacity':wcData.syncStates.audioSync?'0.48':'1'}" [ngClass]="{'isanim':isS}">
+                            <div *ngFor="let ctDeviceLEDPos of ctDevice.pos;index as ctDLEDPosI" class="ledpos-led">
+                              <div [ngStyle]="{'background':(gColStyle(ctDevice.colors[ctDLEDPosI]))}" class="ledbground grp-device"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </ion-col>
+                  <div class="main-grid-subtitle-wrapper wled-devices">
+                    <div class="devices-subtitle-label-wrapper wled">
+                      <img class="wc-main-subheader-ico wled-devices" src="assets/wc-devices-list-wled-subhead-ico.png">
+                      <div class="wc-main-subheader-txt wled-devices">WLED</div>
+                    </div>
+                    <div *ngIf="wledTree&&wledTree.length>0" class="wc-wled-udpsync-toggle-wrapper">
+                      <button (click)="toggleWLEDUDPSync()" [ngStyle]="{'display':wledTree.length<2?'none':'flex'}" class="wc-wled-udpsync-toggle-btn">
+                        <img *ngIf="wledSyncGroupsOn" src="assets/wc-wled-udpsync-on-ico.png" class="wc-wled-udpsync-toggle-btn-ico on">
+                        <img *ngIf="!wledSyncGroupsOn" src="assets/wc-wled-udpsync-off-ico.png" class="wc-wled-udpsync-toggle-btn-ico off">
+                      </button>
+                    </div>
+                    <div *ngIf="wledTree.length>0" class="devices-header-title-count-wrapper wled">
+                      <div class="devices-header-title-count-label-wrap wled">
+                        <img src="assets/wc-ledcount-header-ico-878787.png" class="ttl-leds-count-ico wled">
+                        <div class="wc-wled-total-led-count-value headcountvaluetxt">{{(getAllWLEDLEDCount())}}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- ------------------------------------- -->
+                  <ion-col *ngIf="!wledTreeReady&&!wledDTLFXOverride" size="12" class="list-loading-col devices"><ion-spinner duration="400" class="list-loading-spinner devices" name="dots"></ion-spinner></ion-col>
+                  <ion-col *ngIf="wledTreeReady&&wledTree.length===0&&!wledDTLFXOverride" size="12" class="list-loading-col devices"><div class="wificue-list-no-items-wrapper devices">no devices found</div></ion-col>
+                  <ion-col *ngIf="wledDTLFXOverride" size="12" class="list-loading-col devices"><div class="wificue-list-no-items-wrapper devices">dtlfx is live</div></ion-col>
+                  <ion-col *ngFor="let wledDevice of wledTree;index as wledDI" [ngStyle]="{'display':wledTreeReady&&wledTree.length>0&&!wledDTLFXOverride?'block':'none'}" class="device-list-main-grid-col devgroup-col wled">
+                    <div class="device-group-header-wrapper">
+                      <ion-grid class="wc-grid device-group-header-grid">
+                        <ion-row class="wc-row device-group-header-row">
+                          <ion-col class="wc-col device-group-header-col devicegroup-ico-col">
+                            <div class="dgh-ico-wrapper">
+                              <img class="dgh-ico-img wled" [src]="(wledTypeIcos(wledDevice.info.arch))">
+                            </div>
+                          </ion-col>
+                          <ion-col class="wc-col device-group-header-col name-col">
+                            <div class="dgh-label">
+                              <div class="dgh-count-wrapper">
+                                <div class="dgh-count-brack">(</div>
+                                <div class="dgh-count-value">{{wledDevice.state.segments.length}}</div>
+                                <div class="dgh-count-brack">)</div>
+                              </div>
+                              <div class="dgh-label-name">{{wledDevice.info.name}}</div>
+                              <div class="wled-rssi-level-wrapper">
+                                <div class="wled-rssi-level-inner">
+                                  <span class="wled-rssi-level-sbrack">[</span>
+                                  <span *ngIf="wledRSSIs[wledDevice.info.name]" [ngClass]="{'rssi-good':wledRSSIs[wledDevice.info.name]>-67,'rssi-med':wledRSSIs[wledDevice.info.name]<=-67&&wledRSSIs[wledDevice.info.name]>=-70,'rssi-bad':wledRSSIs[wledDevice.info.name]<=-71&&wledRSSIs[wledDevice.info.name]>=-80,'crit':wledRSSIs[wledDevice.info.name]<-80}" class="wled-rssi-level-value">{{wledRSSIs[wledDevice.info.name]}}</span>
+                                  <span *ngIf="!wledRSSIs[wledDevice.info.name]" [ngStyle]="{'color':'#646464'}" class="wled-rssi-level-value">?</span>
+                                  <span class="wled-rssi-level-sbrack">]</span>
+                                </div>
+                              </div>
+                              <!-- ---------- -->
+                              <div *ngIf="wledTree&&wledTree.length>0" class="wled-subheader-brightslide-outter-wrapper group-sync-slider">
+                                <div [ngStyle]="{'display':wledSyncGroupsOn&&isWLEDGroupLeader(wledDevice.info.name)?'flex':'none'}" class="wled-subheader-brightslide-inner-wrapper">
+                                  <div class="wled-bright-group-indic-wrapper anchor">
+                                    <img *ngIf="(getWLEDGrpNo(wledDevice.info.name)===1)" src="assets/wledgroup-1-linked-icon.png" class="wled-bgroup-anch-ico grp1">
+                                    <img *ngIf="(getWLEDGrpNo(wledDevice.info.name)===2)" src="assets/wledgroup-2-linked-icon.png" class="wled-bgroup-seg-ico grp2">
+                                    <img *ngIf="(getWLEDGrpNo(wledDevice.info.name)===3)" src="assets/wledgroup-3-linked-icon.png" class="wled-bgroup-seg-ico grp3">
+                                    <img *ngIf="(getWLEDGrpNo(wledDevice.info.name)===4)" src="assets/wledgroup-4-linked-icon.png" class="wled-bgroup-seg-ico grp4">
+                                  </div>
+                                  <ion-range class="bright-range wled" [disabled]="!wledSyncGroupsOn" mode="ios" [step]="5" [snaps]="true" [min]="0" [max]="255" [pin]="false" [ticks]="false" [value]="wledTree[wledDI].state.brightness" (ionChange)="wledBrightness($event,wledDI,wledDevice.info.name)"></ion-range>
+                                  <div class="wled-bright-perc">{{(wledBPerc(wledDI))}}</div>
+                                </div>
+                              </div>
+                            </div>
+                          </ion-col>
+                        </ion-row>
+                      </ion-grid>
+                    </div>
+                    <div class="device-group-main-outter-wrapper">
+                      <div *ngFor="let wledSegs of wledDevice.state.segments;index as wledSI" [ngStyle]="{'opacity':wledStates[wledDevice.info.name][wledSI]?'0.88':'0.48'}" class="device-group-item-wrapper">
+                        <div class="dgitem-item-header-wrapper">
+                          <div class="devselect-cb-btn-wrapper dev">
+                            <button (click)="toggleWLEDSegChecked(wledDevice.info.name,wledSI)" class="devselect-cb-btn dev">
+                              <img [ngStyle]="{'visibility':wledStates[wledDevice.info.name][wledSI]?'visible':'hidden'}" src="assets/dev-select-checkmark-ico.png" class="devselect-cb-check-ico dev">
+                            </button>
+                          </div>
+                          <div class="device-level-vis-toggle-wrapper">
+                            <div *ngIf="!(isWLEDMatrix(wledDevice.info.name))" class="dgitem-item-model">Segment {{wledSegs.id}}</div>
+                            <div *ngIf="(isWLEDMatrix(wledDevice.info.name))" class="dgitem-item-model">Matrix {{wledDevice.info.leds.matrix.w}}x{{wledDevice.info.leds.matrix.h}}</div>
+                            <div *ngIf="wledTree&&wledTree.length>0" class="wled-indiv-bright-slider-wrapper-outter no-sync-slider">
+                              <div [ngStyle]="{'display':wledSyncGroupsOn?'flex':'none'}" class="wled-bright-group-indic-wrapper segment">
+                                <img *ngIf="(getWLEDGrpNo(wledDevice.info.name)=== 1)" src="assets/wledgroup-1-icon.png" class="wled-bgroup-seg-ico grp1">
+                                <img *ngIf="(getWLEDGrpNo(wledDevice.info.name)=== 2)" src="assets/wledgroup-2-icon.png"  class="wled-bgroup-seg-ico grp2">
+                                <img *ngIf="(getWLEDGrpNo(wledDevice.info.name)=== 3)" src="assets/wledgroup-3-icon.png"  class="wled-bgroup-seg-ico grp3">
+                                <img *ngIf="(getWLEDGrpNo(wledDevice.info.name)=== 4)" src="assets/wledgroup-4-icon.png"  class="wled-bgroup-seg-ico grp4">
+                              </div>
+                              <div [ngStyle]="{'display':!wledSyncGroupsOn?'flex':'none'}" class="wled-indiv-bright-slider-wrapper-inner">
+                                <ion-range class="bright-range wled" [disabled]="wledSyncGroupsOn" mode="ios" [step]="5" [snaps]="true" [min]="0" [max]="255" [pin]="false" [ticks]="false" [value]="wledTree[wledDI].state.brightness" (ionChange)="wledBrightness($event,wledDI,wledDevice.info.name)"></ion-range>
+                                <div class="wled-bright-perc">{{(wledBPerc(wledDI))}}</div>
+                              </div>
+                            </div>
+                            <div class="dgitem-item-ledno">
+                              <div class="dgitem-item-ledno-prefix"><img src="assets/wc-led-ico.png" class="item-led-img-ico"></div>
+                              <div *ngIf="!(isWLEDMatrix(wledDevice.info.name))" class="dgitem-item-ledno-val">{{wledSegs.length}}</div>
+                              <div *ngIf="(isWLEDMatrix(wledDevice.info.name))" class="dgitem-item-ledno-val">{{wledDevice.info.leds.count}}</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="dgitem-item-ledpos-wrapper">
+                          <div (click)="ccIndivDevice('wled','group',wledDevice.info.name)" (contextmenu)="ccIndivDevice('wled','indiv',wledDevice.info.name,$event)" class="dgitem-item-ledpos-deviceframe" [ngClass]="{'isanim':wledSegs.effectId>0}">
+                            <div *ngIf="!wcData.syncStates.audioSync" [ngStyle]="{'background':(wledColStyle(wledSegs.colors[0])),'opacity':((.25+((1/255)*wledDevice.state.brightness))>1?'1':(.25+((1/255)*wledDevice.state.brightness)).toFixed(2))}" class="ledbground wled-strip"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </ion-col>
+                </ion-row>
+                <!-- ------------------------------------- -->
+              </ion-grid>
+            </div>
+          </div>
+        </div>
+        <div [ngClass]="{'sbiHide':!sbiShowing}" (mouseenter)="toggleSBIMI()" (mouseleave)="toggleSBIMI()" class="status-info-bar-outter-wrapper">
+          <div class="status-info-bar-inner-wrapper">
+            <div class="status-info-bar-msg-wrapper">
+              <img class="status-info-bar-msg-ico" src="assets/wc-winbtn-about-ico.png">
+              <div class="status-info-bar txt">{{sbiMsg}}</div>
+            </div>
+          </div>
+        </div>
+      </ion-col>
+    </ion-row>
+    <ion-row [ngStyle]="{'background':winSet.trans?'transparent':'url(assets/noise.png) #373737'}" class="wificue-row main-page-row home footer-row">
+      <ion-col class="wificue-col main-page-col home footer-col left">
+        <div class="wificue-footer-col-wrap home left">
+          <div class="footer-status-wrap server">
+            <ion-spinner *ngIf="!footerNetStatus" duration="400" class="fsitem-spinner" name="dots"></ion-spinner>
+            <div *ngIf="netInfo" class="fsitemready-wrap server">
+              <button (click)="gotoNetworkMode()" class="fs-svr-statusinfo-btn clients">
+                <img src="assets/wc-home-footer-clients-ico.png" class="fs-item-ico svr-clients">
+                <div class="fsitem-text svr-clients">{{netInfo.clients.length}}</div>
+              </button>
+            </div>
+          </div>
+          <div class="footer-status-wrap network">
+            <ion-spinner *ngIf="!footerNetStatus" duration="400" class="fsitem-spinner" name="dots"></ion-spinner>
+            <div *ngIf="footerNetStatus" class="fsitemready-wrap netstatus">
+              <button (click)="gotoNetworkMode()" class="fs-svr-statusinfo-btn info">
+                <img *ngIf="footerNetStatus.error" src="assets/wc-footer-status-error-ico.png" class="fs-item-ico net error">
+                <img class="fsitem-ico net type" src={{footerNetStatus.ico}}>
+                <div class="fsitem-text net">{{footerNetStatus.label}}</div>
+              </button>
+            </div>
+          </div>
+          <div class="wificue-status-wrap listen">
+            <ion-spinner *ngIf="wcData.isListen===null" duration="400" class="fsitem-spinner" name="dots"></ion-spinner>
+            <button *ngIf="wcData.isListen!==null" (click)="doInvokeToggleWCListen()" class="footer-listen-onoff-toggle-btn">
+              <img [ngStyle]="{'opacity':netInfo&&netInfo.info.active&&navOnline?'1':'0.48'}" *ngIf="wcData.isListen!==null&&wcData.isListen===true" class="fsitem-ico listen on" src="assets/wc-home-footer-listen-on-ico.png">
+              <img [ngStyle]="{'opacity':netInfo&&netInfo.info.active&&navOnline?'1':'0.48'}" *ngIf="wcData.isListen!==null&&wcData.isListen===false" class="fsitem-ico listen off" src="assets/wc-home-footer-listen-off-ico.png">
+            </button>
+          </div>
+          <div class="footer-status-wrap sdk">
+            <ion-spinner *ngIf="sdkStatus===null" duration="400" class="fsitem-spinner" name="dots"></ion-spinner>
+            <div *ngIf="sdkStatus!==null" class="fsitemready-wrap sdkstatus">
+              <div class="fsitem-indic sdk">
+                <button (click)="doInvokeSDKErrAlert()" class="fs-sdk-statusinfo-btn">
+                  <img *ngIf="sdkStatus.session.code===6&&sdkStatus.error.code===0" class="fsitem-ico sdk ok" src="assets/wc-footer-status-ok-ico.png">
+                  <img *ngIf="sdkStatus.session.code!==6||sdkStatus.error.code!==0" class="fsitem-ico sdk err" src="assets/wc-footer-status-error-ico.png">
+                </button>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="hasKodi===null||hasKodi===true" class="footer-status-wrap kodistatus">
+            <ion-spinner *ngIf="hasKodi===null" duration="400" class="fsitem-spinner" name="dots"></ion-spinner>
+            <div *ngIf="hasKodi===true" class="fsitemready-wrap kodistatus">
+              <div class="fsitem-indic kodi">
+                <button (click)="toggleKodiQCPop()" [disabled]="!kodiAuthValid" [ngClass]="{'kodiqcopen':kodiQCIsShowing}" class="fs-sdk-statusinfo-btn kodi">
+                  <img *ngIf="!kodiAuthValid" class="fsitem-ico kodi notauth" src="assets/wc-kodiplayer-ico-red.png">
+                  <img *ngIf="kodiAuthValid&&kodiIsRunning" class="fsitem-ico kodi auth run" src="assets/wc-kodiplayer-ico.png">
+                  <img *ngIf="kodiAuthValid&&!kodiIsRunning" class="fsitem-ico kodi auth notrun" src="assets/wc-kodiplayer-ico-orange.png">
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="footer-status-wrap twtstatus">
+            <ion-spinner *ngIf="twtAuthInProg" duration="400" class="fsitem-spinner" name="dots"></ion-spinner>
+            <div *ngIf="!twtAuthInProg" class="fsitemready-wrap twtstatus">
+              <div class="fsitem-indic twt">
+                <button (click)="toggleShowTwitch()" class="fs-sdk-statusinfo-btn">
+                  <img class="fsitem-ico twt auth" src="assets/wc-twitch-status-ico.png">
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="footer-status-wrap ytdlstatus">
+            <div class="fsitemready-wrap ytdlstatus">
+              <div class="fsitem-indic ytdl">
+                <button (click)="openMoreWin('ytdl')" [ngClass]="{'kodiqcisopen':(mwIsOpen('ytdl'))}" class="fs-sdk-statusinfo-btn">
+                  <img class="fsitem-ico ytdl" src="assets/wc-ytdl-ico.png">
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="footer-status-wrap wifi-ng">
+            <div class="fsitemready-wrap wifi-ng">
+              <div class="fsitem-indic wifi-ng">
+                <button (click)="openMoreWin('wifing')" [ngClass]="{'kodiqcisopen':(mwIsOpen('wifing'))}" class="fs-sdk-statusinfo-btn">
+                  <img class="fsitem-ico wifi-ng" src="assets/wc-tray-wifi-ng-ico.png">
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</div>
+
+<div [ngStyle]="{'display':kodiQCIsShowing?'flex':'none'}" [ngClass]="{'isin':KQCInAni}" class="kodi-qctrl-overlay-outter-wrapper">
+  <div class="kodi-qctrl-inner-wrapper">
+    <ion-grid class="wc-grid kodi-qctrl-grid">
+      <ion-row class="wc-row kodi-qctrl-row core-btns-row">
+        <ion-col class="wc-col kodi-qctrl-col core-btns-col-left">
+          <div class="kqc-btn-section-wrap powerbtns">
+            <div class="kqc-btn-div-wrap quit">
+              <button (click)="kodiQCFn('Application.Quit',null)" class="kqc-btn power quit"><img class="kqc-btn-ico power quit" src="assets/kqc-power-quit.png"></button>
+            </div>
+            <div class="kqc-btn-div-wrap startx">
+              <button (click)="kodiQCFn('startx',null)" class="kqc-btn power startx"><img class="kqc-btn-ico power startx" src="assets/kqc-power-startx.png"></button>
+            </div>
+            <div class="kqc-btn-div-wrap reboot">
+              <button (click)="kodiQCFn('reboot',null)" class="kqc-btn power reboot"><img class="kqc-btn-ico power reboot" src="assets/kqc-power-reboot.png"></button>
+            </div>
+            <div class="kqc-btn-section-divider outter"><div class="kqc-btn-section-divider inner"></div></div>
+            <div class="kqc-btn-div-wrap volup">
+              <button (click)="kodiQCFn('Application.SetVolume','inc')" class="kqc-btn power volup"><img class="kqc-btn-ico power volup" src="assets/kqc-power-volup.png"></button>
+            </div>
+            <div class="kqc-btn-div-wrap volmute">
+              <button (click)="kodiQCFn('Application.SetMute',null)" class="kqc-btn power volmute"><img class="kqc-btn-ico power volmute" src="assets/kqc-power-volmute.png"></button>
+            </div>
+            <div class="kqc-btn-div-wrap voldown">
+              <button (click)="kodiQCFn('Application.SetVolume','dec')" class="kqc-btn power voldown"><img class="kqc-btn-ico power voldown" src="assets/kqc-power-voldown.png"></button>
+            </div>
+          </div>
+        </ion-col>
+        <ion-col class="wc-col kodi-qctrl-col move-btns-col-center">
+          <div class="kqc-move-outter-wrapper">
+            <div class="kqc-btn-section-wrap movebtns line1">
+              <div class="kqc-btn-div-wrap home">
+                <button (click)="kodiQCFn('viewmode',null)" class="kqc-btn move soundlink"><img class="kqc-btn-ico move soundlink" src="assets/wc-kodiqc-viewmode.png"></button>
+              </div>
+              <div class="kqc-btn-div-wrap up">
+                <button (click)="kodiQCFn('Input.Up',null)" class="kqc-btn move up"><img class="kqc-btn-ico move up" src="assets/kqc-move-up.png"></button>
+              </div>
+              <div class="kqc-btn-div-wrap zoomies">
+                <button (click)="kodiQCFn('zoomies',null)" class="kqc-btn move zoomies"><img class="kqc-btn-ico move zoomies" src="assets/wc-kodiqc-zoomies-ico.png"></button>
+              </div>
+            </div>
+            <div class="kqc-btn-section-wrap movebtns line2">
+              <div class="kqc-btn-div-wrap left">
+                <button (click)="kodiQCFn('Input.Left',null)" class="kqc-btn move left"><img class="kqc-btn-ico move left" src="assets/kqc-move-left.png"></button>
+              </div>
+              <div class="kqc-btn-div-wrap select">
+                <button (click)="kodiQCFn('Input.Select',null)" class="kqc-btn move select"><img class="kqc-btn-ico move select" src="assets/kqc-move-select.png"></button>
+              </div>
+              <div class="kqc-btn-div-wrap right">
+                <button (click)="kodiQCFn('Input.Right',null)" class="kqc-btn move right"><img class="kqc-btn-ico move right" src="assets/kqc-move-right.png"></button>
+              </div>
+            </div>
+            <div class="kqc-btn-section-wrap movebtns line3">
+              <div class="kqc-btn-div-wrap back">
+                <button (click)="kodiQCFn('Input.Back',null)" class="kqc-btn move back"><img class="kqc-btn-ico move back" src="assets/kqc-move-back.png"></button>
+              </div>
+              <div class="kqc-btn-div-wrap down">
+                <button (click)="kodiQCFn('Input.Down',null)" class="kqc-btn move down"><img class="kqc-btn-ico move down" src="assets/kqc-move-down.png"></button>
+              </div>
+              <div class="kqc-btn-div-wrap home">
+                <button (click)="kodiQCFn('Input.Home',null)" class="kqc-btn move home"><img class="kqc-btn-ico move home" src="assets/kqc-move-home.png"></button>
+              </div>
+            </div>
+          </div>
+        </ion-col>
+        <ion-col class="wc-col kodi-qctrl-col mediatype-btns-col-right">
+          <div class="kqc-btn-section-wrap mediatype">
+            <div class="kqc-btn-div-wrap addons">
+              <button (click)="kodiQCFn('GUI.ActivateWindow','addon')" class="kqc-btn mtype addons"><img class="kqc-btn-ico mtype addons" src="assets/kqc-mt-addons.png"></button>
+            </div>
+            <div class="kqc-btn-div-wrap pictures">
+              <button (click)="kodiQCFn('GUI.ActivateWindow','pictures')" class="kqc-btn mtype pictures"><img class="kqc-btn-ico mtype pictures" src="assets/kqc-mt-pictures.png"></button>
+            </div>
+            <div class="kqc-btn-div-wrap videos">
+              <button (click)="kodiQCFn('GUI.ActivateWindow','videos')" class="kqc-btn mtype videos"><img class="kqc-btn-ico mtype videos" src="assets/kqc-mt-videos.png"></button>
+            </div>
+            <div class="kqc-btn-div-wrap favourites">
+              <button (click)="kodiQCFn('GUI.ActivateWindow','favourites')" class="kqc-btn mtype favourites"><img class="kqc-btn-ico mtype favourites" src="assets/kqc-mt-favourites.png"></button>
+            </div>
+            <div class="kqc-btn-div-wrap weather">
+              <button (click)="kodiQCFn('GUI.ActivateWindow','weather')" class="kqc-btn mtype weather"><img class="kqc-btn-ico mtype weather" src="assets/kqc-mt-weather.png"></button>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</div>
+
+<div *ngIf="kodiUPInputShowing" class="wc-kodiupinput-overlay-background">
+  <div class="wc-kodiupinput-popup-wrapper">
+    <ion-grid class="wc-grid kodiupinput-grid">
+      <ion-row class="wc-row kodiupinput-row header-row">
+        <ion-col class="wc-col kodiupinput-col header-col">
+          <div class="kodiupinput-header-wrap">
+            <div class="kodiupinput-header-textico">
+              <img src="assets/wc-kodi-icon.png" class="kodiupinput-header-ico-img">
+              <div class="kodiupinput-header-text">kodi authentication</div>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+      <div [ngStyle]="{'display':kodiTestingAuth?'flex':'none'}" class="kodiupinput-content-wrapper result">
+        <div class="kodiupinput-testing-wrapper">
+          <div class="kodiupinput-testing-info-wrapper">
+            <div class="kodiuptest-status-stage-wrapper">
+              <div *ngIf="kodiTestStatus.stage==='inprog'" class="kodiuptest-stage inprog">
+                <ion-spinner *ngIf="kodiTestStatus.stage==='inprog'" duration="400" class="lfstarting-spin kodiuptest" name="dots"></ion-spinner>
+                <div class="kodiuptest-stage-text inprog">saving & testing...</div>
+              </div>
+              <div *ngIf="kodiTestStatus.stage==='result'" class="kodiuptest-stage result">
+                <div class="kodiuptest-result-summary-wrapper">
+                  <img *ngIf="kodiTestStatus.msg[0]==='ok'" class="lfstartres-ico ok" src="assets/wcc-status-green-led.png">
+                  <div *ngIf="kodiTestStatus.msg[0]==='ok'" class="kodiuptest-summary-text">success</div>
+                  <img *ngIf="kodiTestStatus.msg[0]==='part'" class="lfstartres-ico part" src="assets/wcc-status-yellow-led.png">
+                  <div *ngIf="kodiTestStatus.msg[0]==='part'"class="kodiuptest-summary-text">success (!)</div>
+                  <img *ngIf="kodiTestStatus.msg[0]==='fail'" class="lfstartres-ico fail" src="assets/wcc-status-red-led.png">
+                  <div *ngIf="kodiTestStatus.msg[0]==='fail'"class="kodiuptest-summary-text">failed</div>
+                </div>
+                <div class="kodiuptest-result-detail-wrapper">
+                  <div class="kodiuptest-status-text l1">{{kodiTestStatus.msg[1]}}</div>
+                  <div class="kodiuptest-status-text l2">{{kodiTestStatus.msg[2]}}</div>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+      </div>
+      <div [ngStyle]="{'display':!kodiTestingAuth?'block':'none'}" class="kodiupinput-content-wrapper input">
+        <ion-row class="wc-row kodiupinput-row noauth-row">
+          <ion-col class="wc-col kodiupinput-col noauth-col">
+            <div class="kodi-noauth-cblabel-wrap">
+              <div class="devselect-cb-btn-wrapper dev">
+                <button (click)="kodiUPPop('toggle')" class="devselect-cb-btn dev">
+                  <img [ngStyle]="{'visibility':kodiHasAuth?'hidden':'visible'}" src="assets/dev-select-checkmark-ico.png" class="devselect-cb-check-ico dev">
+                </button>
+              </div>
+              <div class="kodi-noauth-cblabel">No Authorization</div>
+            </div>
+          </ion-col>
+        </ion-row>
+        <ion-row class="wc-row kodiupinput-row username">
+          <ion-col class="wc-col kodiupinput-col username">
+            <div class="kodiupinput-wrap username">
+              <div class="kodiupinput-inputlabel username">
+                <div class="kodiupinput-label username">username:</div>
+                <input #kodiUserInput type="text" value="" [disabled]="!kodiHasAuth" (keyup)="kodiUPPop('poke','kodiUserInput')" (blur)="kodiUPPop('poke','kodiUserInput')" (mouseenter)="kodiUPPop('poke','kodiUserInput')" (focus)="kodiUPPop('poke','kodiUserInput')" (mouseleave)="kodiUPPop('poke','kodiUserInput')" class="kodiupinput-input username">
+              </div>
+            </div>
+          </ion-col>
+        </ion-row>
+        <ion-row class="wc-row kodiupinput-row password">
+          <ion-col class="wc-col kodiupinput-col password">
+            <div class="kodiupinput-wrap password">
+              <div class="kodiupinput-inputlabel password">
+                <div class="kodiupinput-label password">password:</div>
+                <input #kodiPassInput type="password" [value]="" [disabled]="!kodiHasAuth" (keyup)="kodiUPPop('poke','kodiPassInput')" (blur)="kodiUPPop('poke','kodiPassInput')" (mouseenter)="kodiUPPop('poke','kodiPassInput')" (focus)="kodiUPPop('poke','kodiPassInput')" (mouseleave)="kodiUPPop('poke','kodiPassInput')" class="kodiupinput-input password">
+              </div>
+            </div>
+          </ion-col>
+        </ion-row>
+      </div>
+      <ion-row class="wc-row kodiupinput-row footer-row">
+        <ion-col class="wc-col kodiupinput-col heaer-col">
+          <div class="kodiupinput-footer-wrap">
+            <div class="kodiupinput-footer-buttons">
+              <button #kodiClBtn (click)="kodiUPPop('close')" [ngStyle]="{'display':kodiTestingAuth&&kodiTestStatus.stage==='result'?'flex':'none'}" class="kodiupinput-button">close</button>
+              <button (click)="kodiUPPop('tryagain')" [ngStyle]="{'display':kodiTestingAuth&&kodiTestStatus.stage==='result'&&kodiTestStatus.msg[0]==='fail'?'flex':'none'}" class="kodiupinput-button">Try Again</button>
+              <button (click)="kodiUPPop('result','cancel')" [ngStyle]="{'display':!kodiTestingAuth?'flex':'none'}" class="kodiupinput-button cancel">cancel</button>
+              <button #kodiOKBtn (click)="kodiUPPop('result',{auth:kodiHasAuth,up:{u:kodiUserInput.value,p:kodiPassInput.value}})" [ngStyle]="{'display':!kodiTestingAuth?'flex':'none'}" [disabled]="kodiHasAuth&&(kodiUserInput.value.length<1||kodiPassInput.value.length<1)" class="kodiupinput-button ok">ok</button>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</div>
+
+<div (click)="doAWake(true)" *ngIf="wcData.isSleep" class="wc-sleepmode-overlay-backdrop">
+  <div class="wc-sleepmode-backdrop-wake-wrapper">
+    <div (click)="doAWake(false)" class="wc-sleepmode-backdrop-wake-label">
+      <img class="wc-sleepmode-backdrop-wake-ico-img" src="assets/wc-settings-timedfns-autowake-ico.png">
+      <div class="wc-sleepmode-backdrop-wake-text">wake</div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="wcData.isSleep" class="wc-sleepmode-notif-outter-wrapper">
+  <div class="wc-sleepmode-notif-inner-wrapper">
+    <div class="wc-sleepmode-notif-label-wrapper">
+      <img class="wc-sleepmode-ico-img" src="assets/wc-sleepmode-ico.png">
+      <div class="wc-sleepmode-txt">sleeping</div>
+    </div>
+  </div>
+</div>

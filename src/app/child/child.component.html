@@ -1,0 +1,678 @@
+<div class="wc-childw-main-outter-wrapper">
+  <div class="wc-childw-main-inner-wrapper" [ngStyle]="{'border-top-left-radius':cWin&&(cWin.snaps.top||cWin.snaps.left)?'0px':'8px','border-top-right-radius':cWin&&(cWin.snaps.top||cWin.snaps.right)?'0px':'8px','border-bottom-right-radius':cWin&&(cWin.snaps.bottom||cWin.snaps.right)?'0px':'8px','border-bottom-left-radius':cWin&&(cWin.snaps.bottom||cWin.snaps.left)?'0px':'8px'}">
+    <div *ngIf="!cwDataReady" class="wc-childw-loading-wrapper">
+      <div class="wc-childw-spinner-wrap">
+        <ion-spinner duration="400" class="childw-data-loading" name="dots"></ion-spinner>
+      </div>
+    </div>
+    <ion-grid *ngIf="cwDataReady" [ngStyle]="{'border-top-left-radius':cWin&&(cWin.snaps.top||cWin.snaps.left)?'0px':'8px','border-top-right-radius':cWin&&(cWin.snaps.top||cWin.snaps.right)?'0px':'8px','border-bottom-right-radius':cWin&&(cWin.snaps.bottom||cWin.snaps.right)?'0px':'8px','border-bottom-left-radius':cWin&&(cWin.snaps.bottom||cWin.snaps.left)?'0px':'8px'}" class="wc-grid childw-grid main-grid">
+      <ion-row class="wc-row childw-row main-row header-row">
+        <ion-col class="wc-col childw-col main-col header-icon-col">
+          <div class="childw-header-icon-wrap twitch"><img src="assets/wc-twitch-status-ico.png" class="childw-header-icon twitch"></div>
+          <div class="childw-header-title-wrap">Twitch</div>
+          <div *ngIf="twtUser" class="childw-header-user-wrap twtuser">
+            <img src={{twtUser.profile_image_url}} class="childw-header-icon twtuser">
+            <div [ngStyle]="{'color':twtChatColor?twtChatColor:'#aaaaaa'}" class="childw-header-login dname">{{twtUser.display_name}}</div>
+          </div>
+        </ion-col>
+        <ion-col class="wc-col childw-col main-col header-closebtn-col">
+          <div class="twtfnbtns-all-outter-wrapper">
+            <div class="header-fn-btn-outter-wrapper header-twtformattoggle-btns outter-wrapper">
+              <div class="header-fn-btn-inner-wrapper header-twtformattoggle-btns inner-wrapper">
+                <button (click)="twtStreamFn('audio')" [ngClass]="{'format-selected':twtSPStatus.hidevideo}" [disabled]="twtSPStatus.hidevideo" class="twtstreamfn-btn audio">
+                  <img *ngIf="!twtSPStatus.hidevideo" src="assets/twt-format-toggle-audio-off-ico.png" class="twtstreamfn-btn-ico audio off">
+                  <img *ngIf="twtSPStatus.hidevideo" src="assets/twt-format-toggle-audio-on-ico.png" class="twtstreamfn-btn-ico audio on">
+                </button>
+                <button (click)="twtStreamFn('video')" [ngClass]="{'format-selected':!twtSPStatus.hidevideo}" [disabled]="!twtSPStatus.hidevideo"  class="twtstreamfn-btn video">
+                  <img *ngIf="twtSPStatus.hidevideo" src="assets/twt-format-toggle-video-off-ico.png" class="twtstreamfn-btn-ico video off">
+                  <img *ngIf="!twtSPStatus.hidevideo" src="assets/twt-format-toggle-video-on-ico.png" class="twtstreamfn-btn-ico video on">
+                </button>
+              </div>
+            </div>
+            <div class="header-fn-btn-outter-wrapper header-twtwintoggle-btns outter-wrapper">
+              <div class="header-fn-btn-inner-wrapper header-twtwintoggle-btns inner-wrapper">
+                <button (click)="twtStreamFn('togglewin')" [ngClass]="{'win-selected':twtWinToggle==='list'}" [disabled]="twtWinToggle==='list'" class="twtstreamfn-btn list">
+                  <img *ngIf="twtWinToggle==='list'" src="assets/twt-wintoggle-list-on-ico.png" class="twtstreamfn-btn-ico liston">
+                  <img *ngIf="twtWinToggle==='chat'" src="assets/twt-wintoggle-list-off-ico.png" class="twtstreamfn-btn-ico listoff">
+                </button>
+                <button (click)="twtStreamFn('togglewin')" [ngClass]="{'win-selected':twtWinToggle==='chat'}" [disabled]="twtWinToggle==='chat'"  class="twtstreamfn-btn chat">
+                  <img *ngIf="twtWinToggle==='chat'" src="assets/twt-wintoggle-chat-on-ico.png" class="twtstreamfn-btn-ico chaton">
+                  <img *ngIf="twtWinToggle==='list'" src="assets/twt-wintoggle-chat-off-ico.png" class="twtstreamfn-btn-ico chatoff">
+                </button>
+                <button (click)="twtShowHideChatList()" [ngClass]="{'win-selected':twtChatListHidden}" class="twtstreamfn-btn showhidechatlist">
+                  <img *ngIf="twtChatListHidden" src="assets/wc-twt-showchatwindow-ico.png" class="twtstreamfn-btn-ico showhidechatlist">
+                  <img *ngIf="!twtChatListHidden" src="assets/wc-twt-hidechatwindow-ico.png" class="twtstreamfn-btn-ico showhidechatlist">
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="wificue-winbtn-wrap close-btn childw">
+            <button (click)="killChildWindow()" [ngClass]="{'detached-btn-radius-right':cWin&&(!cWin.snaps.top&&!cWin.snaps.right)}" class="wificue-winbtn close-btn childw">
+              <img src="assets/wc-winbtn-close-ico.png" class="wifi-cue-winbtn-ico close-btn childw">
+            </button>
+          </div>
+        </ion-col>
+      </ion-row>
+      <ion-row class="wc-row childw-row main-row embed-plyr-row">
+        <ion-col class="wc-col childw-col main-col embed-plyr-col">
+          <div class="twtstreamplyr-top-module-wrapper">
+            <!-- ----------------------------- -->
+            <div [ngClass]="{'stream-video-hidden':twtSPStatus.hidevideo||twtVizOn}" [ngStyle]="{'filter':'brightness('+twtVideoBright.toString()+')'}" class="wc-childw-twitch-embed-video outter-wrapper">
+              <div class="twtplayer-inner-wrapper inter-mode">
+                <div #twtintplyr id="twtintplyr" class="twt-inter-div-class"></div>
+                <div class="twtplyr-shield-overlay" [ngStyle]="{'display':twtSPStatus.hidevideo?'none':'flex'}">
+                  <div *ngIf="twtSPStatus.muted||twtSPStatus.paused" class="plyr-shield-active-mode-wrapper">
+                    <div class="plyr-shield-active-inner">
+                      <img *ngIf="twtSPStatus.muted" src="assets/twt-plyr-muted-big-ico.png" class="plyr-shield-active-ico muted">
+                      <div *ngIf="twtSPStatus.muted&&twtSPStatus.paused" class="plyr-shield-big-plus-txt">+</div>
+                      <img *ngIf="twtSPStatus.paused" src="assets/twt-plyr-paused-big-ico.png" class="plyr-shield-active-ico paused">
+                    </div>
+                  </div>
+                  <div class="plyr-shield-select-mode-wrapper">
+                    <div (click)="twtStreamFn('togglemute')" class="plyr-shield-section left-mute">
+                      <div class="mo-ico-wrapper mute">
+                        <img src="assets/twt-plyr-domute-mo-ico.png" class="mo-ico mute">
+                      </div>
+                    </div>
+                    <div (click)="toggleVideoBright()" class="plyr-shield-section center">
+                      <div *ngIf="twtStreamTimes" class="mo-time-topper">
+                        <div class="time-topper-wrap">
+                          <img src="assets/twt-mention-time-ico.png" class="mo-time-ico">
+                          <div class="tt-value live"><span class="tt-label live">l:</span><span class="tt-time live">{{twtStreamTimes.times.st}}</span></div>
+                          <div class="tt-value view"><span class="tt-label watch">v:</span><span class="tt-time watch">{{twtStreamTimes.times.wt}}</span></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div (click)="twtStreamFn('togglepaused')" class="plyr-shield-section right-pause">
+                      <div class="mo-ico-wrapper pause">
+                        <img src="assets/twt-plyr-dopause-mo-ico.png" class="mo-ico pause">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div [ngStyle]="{'display':twtChangeStream.inprog?'block':'none'}" class="twtplyr-changestream-outter-wrapper">
+                  <div class="twtplyr-changestream-inner-wrapper">
+                    <ion-grid class="wc-grid changestream-grid">
+                      <ion-row class="wc-row changestream-row">
+                        <ion-col class="wc-col changestream-col icon-col">
+                          <div class="twtplyr-changestream-icon-wrap">
+                            <img *ngIf="twtChangeStream.reason==='dead'" class="changestream-big-ico dead" src="assets/twt-plyr-deadstream-rip-ico.png">
+                            <img *ngIf="twtChangeStream.reason==='change'" class="changestream-big-ico change" src="assets/twt-plyr-changestream-ico.png">
+                            <img *ngIf="twtChangeStream.reason==='adblock'" class="changestream-big-ico adblock" src="assets/twt-plyr-adblock-ico.png">
+                            <img *ngIf="twtChangeStream.reason==='no'" class="changestream-big-ico no" src="assets/twt-plyr-nostream-ico.png">
+                          </div>
+                        </ion-col>
+                        <ion-col class="wc-col changestream-col info-col">
+                          <div class="twtplyr-changestream-info-wrap">
+                            <div class="twtplyr-changestream-info-part reason">
+                              <div class="twtplyr-cs-reason-txt-wrap"><span class="csreason-prefix">{{twtChangeStream.reason}}</span><span class="csreason-suffix">stream</span></div>
+                            </div>
+                            <div [ngStyle]="{'display':twtChangeStream.reason==='no'?'none':'flex'}" class="twtplyr-changestream-info-part currentstream">
+                              <div class="cs-stream-wrap now ico">
+                                <img *ngIf="twtChangeStream.reason==='dead'" class="cs-stream-ico now dead" src="assets/twt-plyr-deadstream-dead-ico.png">
+                                <img *ngIf="twtChangeStream.reason==='change'" class="cs-stream-ico now change" src="assets/twt-plyr-changestream-nowstream-ico.png">
+                                <img *ngIf="twtChangeStream.reason==='adblock'" class="cs-stream-ico now adblock" src="assets/twt-plyr-changestream-adblocksmall-ico.png">
+                              </div>
+                              <div class="cs-stream-wrap now name">{{twtChangeStream.nowStream}}</div>
+                            </div>
+                            <div [ngStyle]="{'display':twtChangeStream.reason==='no'?'none':'flex'}" class="twtplyr-changestream-info-part nextstream">
+                              <div class="cs-stream-wrap next ico"><img class="cs-stream-ico next" src="assets/twt-plyr-deadstream-next-ico.png"></div>
+                              <div class="cs-stream-wrap next name">{{twtChangeStream.nextStream}}</div>
+                            </div>
+                            <div [ngStyle]="{'display':twtChangeStream.reason==='no'?'none':'flex'}" class="twtplyr-changestream-info-part countdown">
+                              <div class="cs-stream-wrap cdown action-txt"><span class="cs-cd-action-txt starting" *ngIf="twtChangeStream.reason==='dead'||twtChangeStream.reason==='change'">starting</span><span *ngIf="twtChangeStream.reason==='adblock'" class="cs-cd-action-txt returning">returning</span><span class="cs-cd-txt-in">in</span><span class="cs-cd-txt-timeval">{{twtChangeStream.data.time}}</span></div>
+                              <div *ngIf="twtChangeStream.reason!=='adblock'" class="cs-stream-wrap cdown cancelbtn">
+                                <button (click)="cancelChangeStream()" class="cs-cd-cancel-btn">cancel</button>
+                              </div>
+                            </div>
+                          </div>
+                        </ion-col>
+                      </ion-row>
+                    </ion-grid>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- ----------------------------- -->
+            <div #twtCanvasWrap [ngStyle]="{'display':twtVizOn?'block':'none'}" style="height:162px;width:288px" class="twt-viz-wrapper">
+              <canvas #twtCanvas id="twtcanvas" height="162" width="288" style="height:162px;width:288px" class="twt-viz-canvas-element"></canvas>
+            </div>
+            <!-- ----------------------------- -->
+            <div class="twt-streamplyr-infobar-outter-wrapper">
+              <div class="twt-streamplyr-infobar-inner-wrapper">
+                <div class="twtspib-wrapper channel">
+                  <div (click)="toggleTWTViz()" [ngClass]="{'twtchannelplaying-anim':twtSPStatus.playing}" class="twtspib-channel value">{{twtSPStatus.channel}}</div>
+                  <div class="twtspib-playstop-ico-wrapper">
+                    <img *ngIf="twtSPStatus.playing&&!twtSPStatus.paused" class="twtspib-playstop-ico playing" src="assets/twt-stream-stats-playing-ico.png">
+                    <img *ngIf="twtSPStatus.paused" class="twtspib-playstop-ico stopping" src="assets/twt-stream-stats-stopping-ico.png">
+                  </div>
+                </div>
+                <div class="twtspib-wrapper title">
+                  <div class="twtspib-title value">
+                    <div class="twtscrollshader left"></div>
+                    <div id="twt-info-container" (mousedown)="twtInfoHandler($event)" class="twtplayer-playinginfo-outter-wrapper">
+                      <div id="twt-info-wrap" (mouseenter)="twtScroll('stop')" (mouseleave)="twtScroll('start')" class="twtplayer-playinginfo-inner-wrapper">{{twtSPStatus.title}}</div>
+                    </div>
+                    <div class="twtscrollshader right"></div>
+                  </div>
+                </div>
+                <div class="twtspib-wrapper stats">
+                  <div class="twtspib-stats value">
+                    <div (click)="twtStreamPlayer('toggleQualities',null)" class="spib-stats value format"><span *ngIf="twtSPStatus.format==='chunked'" class="fval fischunk">SRC</span><span *ngIf="twtSPStatus.format!=='chunked'" class="fval fnotchunk">{{twtSPStatus.format.split('p')[0]}}</span></div>
+                    <div class="spib-stats stream-wrap">
+                      <div class="stats-inner-wrap statsobj">
+                        <span class="statsobjlabel fps">f:</span><span class="spib-stats value fps">{{(twtSPStatus.stats.fps/10).toFixed(0)}}</span>
+                        <span class="statsobjlabel playback">k:</span><span class="spib-stats value kbps">{{(twtSPStatus.stats.playbackRate/1000).toFixed(0)}}</span>
+                        <span class="statsobjlabel latency">d:</span><span class="spib-stats value latency">{{twtSPStatus.stats.hlsLatencyBroadcaster.toFixed(0)}}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+      <ion-row [ngStyle]="{'display':twtChatListHidden?'none':'flex'}" class="wc-row childw-row main-row content-row">
+        <ion-col class="wc-col childw-col main-col content-col">
+          <div class="child-main-content-outter-wrapper">
+            <ion-grid class="wc-grid child-content-grid">
+              <ion-row [ngClass]="{'not-chat':twtWinToggle==='list'||trigSummaryOpen}" class="wc-row child-content-row">
+                <ion-col class="wc-col child-content-col">
+                  <!-- SUBS LIST STARTS -->
+                  <div *ngIf="twtWinToggle==='list'" class="child-content-main-wrapper live-subs-wrapper">
+                    <div class="live-subs-wrap count">
+                      <div class="twt-ls-streams-header-counts-content">
+                        <img *ngIf="twtLives.length>0" src="assets/wcc-status-green-led.png" class="twt-ls-count-icon-img some">
+                        <img *ngIf="twtLives.length<1" src="assets/wcc-status-red-led.png" class="twt-ls-count-icon-img none">
+                        <div class="twt-ls-count-txt" [ngStyle]="{'color':twtLives.length<1?'#f15656':'#56f170'}">{{twtLives.length}}</div>
+                        <div class="twt-ls-streams" [ngStyle]="{'color':twtLives.length<1?'rgb(241 86 86 / 68%)':'rgb(85 241 111 / 68%)'}">streams</div>
+                        <div class="twt-ls-outof-count">
+                          <div class="twt-ls-outof-count slash">/</div>
+                          <div class="twt-ls-outof-count count">{{twtFollowing.length}}</div>
+                        </div>
+                      </div>
+                      <div class="twt-ls-refresh-wrapper">
+                        <button (click)="refreshLives()" [disabled]="livesRefreshing" class="twt-ls-refresh-btn">
+                          <img class="twt-ls-refresh-btn-img" src="assets/wc-wled-udpsync-on-ico.png">
+                        </button>
+                      </div>
+                    </div>
+                    <div *ngIf="livesRefreshing" class="twtls-lives-refreshing-wrapper">
+                      <ion-spinner duration="400" class="twtls-lives-refreshing" name="dots"></ion-spinner>
+                    </div>
+                    <div *ngIf="twtLives.length>0&&twtFollowing.length>0&&!livesRefreshing" class="live-subs-wrap list">
+                      <div *ngFor="let ls of twtLives;index as lsi" class="twt-ls-sub islive" [ngClass]="{'live-is-playing':twtChatRoom&&twtChatRoom===ls.user_login}" (click)="streamListSelect(ls.user_login)">
+                        <div class="twt-lslist-item thumbnail"><img src={{ls.thumbnail_url}} class="twt-ls-icon-img"></div>
+                        <div class="twt-lslist-item twt-ls-name-txt">{{ls.user_name}}</div>
+                        <div class="twt-lslist-item pipe">|</div>
+                        <div class="twt-lslist-item twt-ls-viewers">{{ls.viewer_count}}</div>
+                        <div class="twt-lslist-item pipe">|</div>
+                        <div class="twt-lslist-item twt-ls-type">
+                          <img *ngIf="ls.game_name==='Music'" class="twt-ls-type-ico music" src="assets/twt-list-ismusic-ico.png">
+                          <img *ngIf="ls.game_name!=='Music'" class="twt-ls-type-ico game" src="assets/twt-list-isgame-ico.png">
+                        </div>
+                        <div class="twt-lslist-item pipe">|</div>
+                        <div *ngIf="ls.rt" class="twt-lslist-item runtime">{{ls.rt}}</div>
+                        <div class="twt-lslist-item pipe">|</div>
+                        <div *ngIf="ls.language!=='English'" class="twt-lslist-item twt-ls-language">{{ls.language}}<div class="twt-lslist-item pipe">|</div></div>
+                        <div class="twt-lslist-item title">{{ls.title}}</div>
+                      </div>
+                      <div class="live-subs-wrap count offline">
+                        <div class="twt-ls-streams-header-counts-content offline">
+                          <img src="assets/wcc-status-red-led.png" class="twt-ls-count-icon-img none">
+                            <div class="twt-ls-count-txt" style="color:rgb(241 86 86 / 68%)">{{(twtFollowing.length-twtLives.length)}}</div>
+                            <div class="twt-ls-streams" style="color:rgb(241 86 86 / 68%)">offline</div>
+                            <div class="twt-ls-outof-count">
+                              <div class="twt-ls-outof-count slash">/</div>
+                              <div class="twt-ls-outof-count count">{{twtFollowing.length}}</div>
+                            </div>
+                        </div>
+                        <div class="twt-ls-refresh-wrapper">
+                          <button (click)="refreshLives()" [disabled]="livesRefreshing" class="twt-ls-refresh-btn">
+                            <img class="twt-ls-refresh-btn-img" src="assets/wc-wled-udpsync-on-ico.png">
+                          </button>
+                        </div>
+                      </div>
+                      <div class="twt-ls-offlinesubs wrapper">
+                        <span *ngFor="let ols of twtFollowing;index as olsi" class="twt-ls-offlinesub">
+                          <span class="sub-offline-item">{{ols.to_name}}<span *ngIf="olsi<twtFollowing.length-1" class="offlinesub-comma">,</span></span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- SUBS LIST ENDS -->
+                  <!-- STREAM CHAT STARTS -->
+                  <div *ngIf="twtWinToggle==='chat'" class="child-content-main-wrapper twt-chat-wrapper-outter-wrapper">
+                    <div (mouseenter)="chatCMFns('me')" (mouseleave)="chatCMFns('ml')" class="twt-chat-wrapper-inner-wrapper">
+                      <div (contextmenu)="chatCMFns('cm')" class="twt-chat-topper">
+                        <div class="chattop-section connstatus">
+                          <div class="chattop-value connstatus">
+                            <button (click)="twtChatConnection('connect')" *ngIf="!twtChatConn" class="chattop-connect-indic-btn doconnect">
+                              <img src="assets/wc-netclients-list-ico-banned.png" class="ctv disc">
+                            </button>
+                            <button (click)="twtChatConnection('disconnect')" *ngIf="twtChatConn" class="chattop-connect-indic-btn disconnect">
+                              <img src="assets/wc-netclients-list-ico-auth.png" class="ctv conn">
+                            </button>
+                          </div>
+                        </div>
+                        <div *ngIf="twtChatErr>0" class="chattop-section connerrs"><span class="chattop-label connerrs">E:</span><span class="chattop-value connerrs">{{twtChatErr}}</span></div>
+                        <div *ngIf="twtChatConn&&twtChatRoom&&twtChatRoomData" class="chattop-section roomname">
+                          <div class="chatroominfo-outter-wrapper">
+                            <div *ngIf="twtChatRoomData&&twtChatRoomData.me&&(twtChatRoomData.me.bits>0||twtChatRoomData.me.mod||twtChatRoomData.me.sub)" class="roomdata-wrapper mepart">
+                              <div *ngIf="twtChatRoomData.me.mod" class="chatroominfo me-bits">M</div>
+                              <div *ngIf="twtChatRoomData.me.sub" class="chatroominfo me-bits">S</div>
+                            </div>
+                            <div *ngIf="twtChatRoomData&&twtChatRoomData.room" class="roomdata-wrapper roompart">
+                              <div *ngIf="twtChatRoomData.room.emoteonly" class="chatroominfo emoteonly">!E</div>
+                              <div *ngIf="twtChatRoomData.room.followersonly" class="chatroominfo followersonly">!F</div>
+                              <div *ngIf="twtChatRoomData.room.subsonly" class="chatroominfo emoteonly">!S</div>
+                            </div>
+                            <div (click)="toggleChatUsersSheet()" *ngIf="twtChatRoomData.users" class="chatroominfo usercount-wrapper">
+                              <img *ngIf="!twtChatUsersShowing" class="twt-topper-ico usercount-ico-img" src="assets/twt-chat-usr-count.png">
+                              <img *ngIf="twtChatUsersShowing" class="twt-topper-ico usercount-ico-img" src="assets/twt-chat-usr-count-red.png">
+                              <div [ngStyle]="{'color':twtChatUsersIncDec==='same'?'#bbb':twtChatUsersIncDec==='inc'?'#20c997':'#ff4c4c'}" class="twt-topper-value twt-msg-count-txt">{{twtChatRoomData.users.length}}</div>
+                            </div>
+                            <div class="exit-chatroom-button-wrapper">
+                              <button (click)="exitRoomStream(twtChatRoom)" class="exit-chatroom-btn">
+                                <img class="exit-chatroom-btn-ico" src="assets/twt-chatroom-exit-hover.ico.png">
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <div *ngIf="twtChatMentions.length>0" class="header-chatmentions-wrapper">
+                          <button (click)="chatMentions('show')" class="twtchatmention-btn show">
+                            <div class="twtchatmention-btn-label-wrapper show">
+                              <img src="assets/twt-chat-mention-ico.png" class="twtchatmention-btn-label-ico show">
+                              <div class="twtchatmention-btn-label-txt show">{{twtChatMentions.length}}</div>
+                            </div>
+                          </button>
+                          <button (click)="chatMentions('clear')" class="twtchatmention-btn clear">
+                            <div class="twtchatmention-btn-label-wrapper clear">
+                              <img src="assets/wc-tray-connected-false.png" class="twtchatmention-btn-label-ico clear">
+                            </div>
+                          </button>
+                        </div>
+                        <div class="chattop-fnbtn-section-wrapper">
+                          <div class="bot-triggers-toggle-btn-wrapper">
+                            <button (click)="toggleTriggersSummary()" [ngClass]="{'triggers-open':trigSummaryOpen}" class="toggle-trigs-btn" [disabled]="!twtSPStatus.init">
+                              <img *ngIf="!trigSummaryOpen&&!newBotAction" src="assets/twt-chat-bot-toggle-triggers-ico.png">
+                              <img *ngIf="!trigSummaryOpen&&newBotAction" src="assets/twt-chat-bot-toggle-triggers-active.png">
+                              <img *ngIf="trigSummaryOpen" src="assets/twt-chat-bot-toggle-triggers-close.png">
+                            </button>
+                          </div>
+                          <div [ngStyle]="{'display':twtSPStatus.init}" class="toggle-rtbpm-btn-wrapper">
+                            <button (click)="rtBPMToggle()" [ngClass]="{'rtbpm-running':twtSaveData.toggles.bpmLoopOn}" class="toggle-rtbpm-btn" [disabled]="!twtSPStatus.init">
+                              <img src="assets/wc-twt-rtbpm-ico-std.png" class="toggle-rtbpm-btn-ico">
+                            </button>
+                          </div>
+                          <div [ngStyle]="{'display':twtSPStatus.init&&twtSPStatus.playing&&!twtSPStatus.paused&&!twtSPStatus.muted}" class="find-tune-btn-wrapper">
+                            <button (click)="doFindTune('start')" class="find-tune-btn" [disabled]="findingTune||ftResult!==null">
+                              <img [ngStyle]="{'display':!findingTune?'block':'none'}" src="assets/wc-twt-findtune-ico.png" class="find-tune-btn-ico">
+                              <ion-spinner  [ngStyle]="{'display':findingTune?'block':'none'}" class="find-tune-spinner" name="circular"></ion-spinner>
+                            </button>
+                          </div>
+                          <div class="clear-pause-btns-wrapper">
+                            <button (click)="twtChatClearPause('pause')" class="chattop-clearpause-btn pause">
+                              <img src="assets/twt-chat-channel-pause-ico.png" [ngClass]="{'blinking':twtChatIsPaused}" class="clearpause-btn-ico pause">
+                            </button>
+                            <button (click)="twtChatClearPause('clear')" class="chattop-clearpause-btn clear">
+                              <img src="assets/twt-chat-channel-cls-ico.png" class="clearpause-btn-ico clear">
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <div [ngStyle]="{'display':twtSvrMsgs.length>0?'block':'none'}" [ngClass]="{'svrmsg-out-anim':smOutAnim}" class="twt-server-msgs">
+                        <div *ngFor="let svrm of twtSvrMsgs;index as svrmi" id="twtsvrm{{svrmi}}" class="twtsvrmsg">{{svrm}}</div>
+                      </div>
+                      <div *ngIf="twtSaveData!==null" class="twt-chat-chatroom">
+                        <!-- ////////// CHATTERS SHEET STARTS //////////  -->
+                        <div [ngStyle]="{'display':twtChatUsersShowing?'block':'none'}" class="twt-chatters-sheet-outter-wrapper">
+                          <div class="twt-chatters-sheet-inner-wrapper">
+                            <ion-grid class="wc-grid twt-chatters-list-grid">
+                              <ion-row class="wc-row twt-chatters-list-row header-row">
+                                <ion-col class="wc-col twt-chatters-list-col header-col">
+                                  <div class="chatters-list-div-wrap header">
+                                    <img class="chatters-list-header-ico" src="assets/twt-chat-usr-count-white.png">
+                                    <div class="chatters-list-header-text">chatters</div>
+                                  </div>
+                                </ion-col>
+                              </ion-row>
+                              <ion-row class="wc-row twt-chatters-list-row list-row">
+                                <ion-col class="wc-col twt-chatters-list-col list-col">
+                                  <div class="chatters-list-div-wrap list darkscrolls">
+                                    <div *ngFor="let cuObj of twtChatRoomData.users;index as cui" (click)="twtChatInputFn('refUser',$event,cuObj.name)" class="chatters-list chatter-item-wrap">
+                                      <div class="chatters-list-no">{{(cui+1)}}</div>
+                                      <img *ngIf="!cuObj.isSub&&!cuObj.isMod&&!cuObj.isVIP&&cuObj.name.toLowerCase()!==twtChatRoom&&cuObj.name!==twtUser.display_name.toLowerCase()" src="assets/twt-mention-user-ico.png" class="chatter-ico std">
+                                      <img *ngIf="cuObj.name.toLowerCase()===twtChatRoom" src="assets/wc-home-footer-clients-ico.png" class="chatter-ico owner">
+                                      <img *ngIf="!cuObj.isVIP&&!cuObj.isMod&&cuObj.name.toLowerCase()!==twtChatRoom&&cuObj.isSub" src="assets/wc-netclients-list-ico-auth.png" class="chatter-ico sub">
+                                      <img *ngIf="cuObj.name.toLowerCase()!==twtChatRoom&&cuObj.isMod" src="assets/wc-exclctrlstar.png" class="chatter-ico mod">
+                                      <img *ngIf="!cuObj.isMod&&cuObj.name.toLowerCase()!==twtChatRoom&&cuObj.isVIP" src="assets/twt-chatter-vip-ico.png" class="chatter-ico vip">
+                                      <img *ngIf="cuObj.name===twtUser.display_name.toLowerCase()" src={{twtUser.profile_image_url}} class="chatter-ico me">
+                                      <div [ngClass]="{'is-me-class':cuObj.name===twtUser.display_name.toLowerCase(),'is-owner-class':cuObj.name.toLowerCase()===twtChatRoom,'is-mod-class':cuObj.isMod,'is-vip-class':cuObj.isVIP}" class="chatter-value-txt name">{{cuObj.name}}</div>
+                                    </div>
+                                  </div>
+                                </ion-col>
+                              </ion-row>
+                            </ion-grid>
+                          </div>
+                        </div>
+                        <!-- ////////// CHATTERS SHEET ENDS //////////  -->
+                        <!-- ////////// TRIGGERS SHEET STARTS //////////  -->
+                        <div [ngStyle]="{'display':trigSummaryOpen?'block':'none'}" class="twt-chat-triggers-outter-wrapper">
+                          <div class="twt-chat-triggers-topbar-outter-wrapper">
+                            <div class="twt-chat-triggers-inner-wrapper topbar">
+                              <div class="tct-topbar-section-wrap auto">
+                                <div class="tct-tb-fn-wrap auto greet">
+                                  <img [ngStyle]="{'opacity':this.twtSaveData.toggles.greetOn?'1':'0.48'}" class="tct-tb-fn-label-ico greet" src="assets/cm-twt-greet-ico.png">
+                                  <button (click)="twtDataToggles('greet')" class="tct-tb-fn-btn auto greet">
+                                    <img [ngStyle]="{'display':this.twtSaveData.toggles.greetOn?'block':'none'}" class="tct-tb-fn-btn-ico auto greet on" src="assets/wc-home-footer-listen-on-ico.png">
+                                    <img [ngStyle]="{'display':!this.twtSaveData.toggles.greetOn?'block':'none'}" class="tct-tb-fn-btn-ico auto greet off" src="assets/wc-home-footer-listen-off-ico.png">
+                                  </button>
+                                </div>
+                                <div class="tct-tb-fn-wrap auto rah">
+                                  <img [ngStyle]="{'opacity':this.twtSaveData.toggles.rahRahOn?'1':'0.48'}" class="tct-tb-fn-label-ico rahrah" src="assets/cm-twt-letsgo-ico.png">
+                                  <button (click)="twtDataToggles('rah')" class="tct-tb-fn-btn auto rah">
+                                    <img [ngStyle]="{'display':this.twtSaveData.toggles.rahRahOn?'block':'none'}" class="tct-tb-fn-btn-ico auto rah on" src="assets/wc-home-footer-listen-on-ico.png">
+                                    <img [ngStyle]="{'display':!this.twtSaveData.toggles.rahRahOn?'block':'none'}" class="tct-tb-fn-btn-ico auto rah off" src="assets/wc-home-footer-listen-off-ico.png">
+                                  </button>
+                                </div>
+                                <div class="tct-tb-fn-wrap auto bpm">
+                                  <img [ngStyle]="{'opacity':this.twtSaveData.toggles.bpmReqOn?'1':'0.48'}" class="tct-tb-fn-label-ico bpm" src="assets/wc-twt-rtbpm-ico-std.png">
+                                  <button (click)="twtDataToggles('bpm')" class="tct-tb-fn-btn auto bpm">
+                                    <img [ngStyle]="{'display':this.twtSaveData.toggles.bpmReqOn?'block':'none'}" class="tct-tb-fn-btn-ico auto bpm on" src="assets/wc-home-footer-listen-on-ico.png">
+                                    <img [ngStyle]="{'display':!this.twtSaveData.toggles.bpmReqOn?'block':'none'}" class="tct-tb-fn-btn-ico auto bpm off" src="assets/wc-home-footer-listen-off-ico.png">
+                                  </button>
+                                </div>
+                                <div class="tct-tb-fn-wrap auto tune">
+                                  <img [ngStyle]="{'opacity':this.twtSaveData.toggles.tuneReqOn?'1':'0.48'}" class="tct-tb-fn-label-ico tune" src="assets/wc-twt-findtune-matching-ico.png">
+                                  <button (click)="twtDataToggles('tune')" class="tct-tb-fn-btn auto tune">
+                                    <img [ngStyle]="{'display':this.twtSaveData.toggles.tuneReqOn?'block':'none'}" class="tct-tb-fn-btn-ico auto tune on" src="assets/wc-home-footer-listen-on-ico.png">
+                                    <img [ngStyle]="{'display':!this.twtSaveData.toggles.tuneReqOn?'block':'none'}" class="tct-tb-fn-btn-ico auto tune off" src="assets/wc-home-footer-listen-off-ico.png">
+                                  </button>
+                                </div>
+                                <div class="tct-tb-fn-wrap auto wc">
+                                  <img [ngStyle]="{'opacity':this.twtSaveData.toggles.welcomeOn?'1':'0.48'}" class="tct-tb-fn-label-ico wc" src="assets/twt-trigger-toggle-welcome-ico.png">
+                                  <button (click)="twtDataToggles('wc')" class="tct-tb-fn-btn auto wc">
+                                    <img [ngStyle]="{'display':this.twtSaveData.toggles.welcomeOn?'block':'none'}" class="tct-tb-fn-btn-ico auto wc on" src="assets/wc-home-footer-listen-on-ico.png">
+                                    <img [ngStyle]="{'display':!this.twtSaveData.toggles.welcomeOn?'block':'none'}" class="tct-tb-fn-btn-ico auto wc off" src="assets/wc-home-footer-listen-off-ico.png">
+                                  </button>
+                                </div>
+                                <div class="tct-tb-fn-wrap auto tysub">
+                                  <img [ngStyle]="{'opacity':this.twtSaveData.toggles.tySubOn?'1':'0.48'}" class="tct-tb-fn-label-ico tysub" src="assets/twt-trigger-tysub-ico.png">
+                                  <button (click)="twtDataToggles('tysub')" class="tct-tb-fn-btn auto tysub">
+                                    <img [ngStyle]="{'display':this.twtSaveData.toggles.tySubOn?'block':'none'}" class="tct-tb-fn-btn-ico auto tysub on" src="assets/wc-home-footer-listen-on-ico.png">
+                                    <img [ngStyle]="{'display':!this.twtSaveData.toggles.tySubOn?'block':'none'}" class="tct-tb-fn-btn-ico auto tysub off" src="assets/wc-home-footer-listen-off-ico.png">
+                                  </button>
+                                </div>
+                                <div class="tct-tb-fn-wrap auto tybits">
+                                  <img [ngStyle]="{'opacity':this.twtSaveData.toggles.tyBitsOn?'1':'0.48'}" class="tct-tb-fn-label-ico tybits" src="assets/twt-trigger-tybits-ico.png">
+                                  <button (click)="twtDataToggles('tybits')" class="tct-tb-fn-btn auto tybits">
+                                    <img [ngStyle]="{'display':this.twtSaveData.toggles.tyBitsOn?'block':'none'}" class="tct-tb-fn-btn-ico auto tybits on" src="assets/wc-home-footer-listen-on-ico.png">
+                                    <img [ngStyle]="{'display':!this.twtSaveData.toggles.tyBitsOn?'block':'none'}" class="tct-tb-fn-btn-ico auto tybits off" src="assets/wc-home-footer-listen-off-ico.png">
+                                  </button>
+                                </div>
+                                <div class="tct-tb-clear-wrap">
+                                  <button (click)="clearTriggerEvents()" [disabled]="twtSaveData.data.sessionTriggers.length<1" class="tct-tb-fn-btn auto clear">
+                                    <img class="tct-tb-fn-btn-ico clear" src="assets/twt-mention-dismiss-ico.png">
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div *ngIf="!rahRahAnim&&twtSaveData&&twtSaveData.data&&twtSaveData.data.sessionTriggers" class="twt-chat-triggers-inner-wrapper darkscrolls">
+                            <div *ngFor="let trigger of twtSaveData.data.sessionTriggers;index as trigi" class="twtchattrigger">
+                              <ion-grid class="wc-grid twtchattrigger-grid">
+                                <ion-row class="wc-row twtchattrigger-row whatwhowhen">
+                                  <ion-col class="wc-col twtchattrigger-col type-col">
+                                    <div class="trigger-wrap type">
+                                      <img *ngIf="trigger.type==='tune'" class="trigger-ico tune" src="assets/wc-twt-findtune-ico.png">
+                                      <img *ngIf="trigger.type==='bpm'" class="trigger-ico bpm" src="assets/wc-twt-rtbpm-ico-std.png">
+                                      <img *ngIf="trigger.type!=='tune'&&trigger.type!=='bpm'" class="trigger-ico gen" src="assets/twt-trigger-gentype-ico.png">
+                                      <div class="trigger-text-value type">{{trigger.type}}</div>
+                                    </div>
+                                  </ion-col>
+                                  <ion-col class="wc-col twtchattrigger-col user-col">
+                                    <div class="trigger-wrap user">
+                                      <img *ngIf="trigger.userIsMod" class="trigger-ico ismod" src="assets/wc-exclctrlstar.png">
+                                      <img class="trigger-ico user" src="assets/twt-mention-user-ico.png">
+                                      <div class="trigger-text-value user">{{trigger.user}}</div>
+                                    </div>
+                                  </ion-col>
+                                  <ion-col class="wc-col twtchattrigger-col channel-col">
+                                    <div class="trigger-wrap channel">
+                                      <img class="trigger-ico channel" src="assets/twt-mention-channel-ico.png">
+                                      <div class="trigger-text-value channel">{{trigger.channel}}</div>
+                                    </div>
+                                  </ion-col>
+                                  <ion-col class="wc-col twtchattrigger-col time-col">
+                                    <div class="trigger-wrap time">
+                                      <img class="trigger-ico time" src="assets/twt-mention-time-ico.png">
+                                      <div class="trigger-text-value time">{{trigger.time.s}}</div>
+                                    </div>
+                                  </ion-col>
+                                </ion-row>
+                                <ion-row *ngIf="trigger.matches&&trigger.matches.length>0&&trigger.type!=='rahrah'&&trigger.type!=='greet'" class="wc-row twtchattrigger-row details match">
+                                  <ion-col class="wc-col twtchattrigger-col details-col match">
+                                    <div class="trigger-details-wrapper match">
+                                      <img class="trigger-ico match" src="assets/twt-trigger-match-ico.png">
+                                      <div class="mention-quote-txt trigger">
+                                        <div *ngFor="let trigMatch of trigger.matches;index as tmi" class="trigger-match-txt">
+                                          <div *ngIf="trigMatch" class="trigger-match-txt-str">{{trigMatch}}</div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </ion-col>
+                                </ion-row>
+                                <ion-row *ngIf="trigger.didSkip&&trigger.skip&&trigger.skip.length>0" class="wc-row twtchattrigger-row details skip">
+                                  <ion-col class="wc-col twtchattrigger-col details-col skip">
+                                    <img class="trigger-ico skip" src="assets/twt-trigger-skip-ico.png">
+                                    <div class="trigger-details-wrapper skip">
+                                      <span *ngFor="let trigSkip of trigger.skip;index as tsi" class="trigger-skip-txt">{{trigSkip}}<span *ngIf="trigger.skip.length>1&&tsi!==trigger.skip.length-1" class="tmcomma">,</span></span>
+                                    </div>
+                                  </ion-col>
+                                </ion-row>
+                              </ion-grid>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- ////////// TRIGGERS SHEET ENDS //////////  -->
+                        <!-- ////////// MENTIONS SHEET STARTS //////////  -->
+                        <div [ngStyle]="{'display':mentionsShowing&&twtChatMentions.length>0?'flex':'none'}" class="twt-chat-mentions-outter-wrapper darkscrolls">
+                          <div class="twt-chat-mentions-inner-wrapper">
+                            <div *ngFor="let mention of twtChatMentions;index as menti" class="twtchatmention">
+                              <ion-grid class="wc-grid twtchatmention-grid">
+                                <ion-row class="wc-row twtchatmention-row whowhenwhere-row">
+                                  <ion-col class="wc-col twtchatmention-col whowhen-col who-col">
+                                    <div class="mention-wrap who-wrapper">
+                                      <img *ngIf="mention.tags['mod']==='1'" class="mention-ico ismod" src="assets/wc-exclctrlstar.png">
+                                      <img class="mention-ico user" src="assets/twt-mention-user-ico.png">
+                                      <div class="mention-value nick">{{mention.tags['display-name']}}</div>
+                                    </div>
+                                  </ion-col>
+                                  <ion-col class="wc-col twtchatmention-col whowhen-col where-col">
+                                    <div class="mention-wrap where-wrapper">
+                                      <img class="mention-ico channel" src="assets/twt-mention-channel-ico.png">
+                                      <div class="mention-value channel">{{mention.command.channel}}</div>
+                                    </div>
+                                  </ion-col>
+                                  <ion-col size="4" class="wc-col twtchatmention-col whowhen-col when-col">
+                                    <div class="mention-wrap when-wrapper">
+                                      <img class="mention-ico time" src="assets/twt-mention-time-ico.png">
+                                      <div class="mention-value time">{{niceTime(mention.tags['tmi-sent-ts'])}}</div>
+                                    </div>
+                                  </ion-col>
+                                </ion-row>
+                                <ion-row class="wc-row twtchatmention-row what-row">
+                                  <ion-col size="12" class="wc-col twtchatmention-col whowhen-col what-col">
+                                    <div class="mention-wrap what-wrapper">
+                                      <img class="mention-quote-ico left" src="assets/twt-mention-quote-left-ico.png">
+                                      <div class="mention-quote-txt">{{mention.parameters}}</div>
+                                      <img class="mention-quote-ico right" src="assets/twt-mention-quote-right-ico.png">
+                                    </div>
+                                  </ion-col>
+                                </ion-row>
+                                <ion-row *ngIf="mentionReply&&mentionReply.tags.id===mention.tags.id" class="wc-row twtchatmention-row replyinput-row">
+                                  <ion-col class="wc-col twtchatmention-col replyinput-col">
+                                    <div class="mention-wrap replyinput-wrapper">
+                                      <div class="reply-type-indic">{{mentionReply.type.charAt(0)}}</div>
+                                      <input #twtReplyInput [value]="" class="reply-mention-whisper-input" (keydown)="mentionReplyInputFn('kd',$event,twtReplyInput.value)" (focus)="mentionReplyInputFn('f',$event,twtReplyInput.value)">
+                                      <div class="reply-cancel-btn-wrapper">
+                                        <button (click)="mentionAction('cancelReply',menti)" class="reply-cancel-btn">
+                                          <img class="reply-cancel-btn-ico" src="assets/twt-stream-stopclose-btn-ico.png">
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </ion-col>
+                                </ion-row>
+                                <ion-row class="wc-row twtchatmention-row actions-row">
+                                  <ion-col class="wc-col twtchatmention-col actions-col actions-col">
+                                    <div class="mention-wrap actions-wrapper">
+                                      <button (click)="mentionAction('dismiss',menti,mention)" class="mention-btn action-btn dismiss"><img src="assets/twt-mention-dismiss-ico.png" class="mention-ico action dismiss"></button>
+                                      <button (click)="mentionAction('showReply',menti,'whisper')" class="mention-btn action-btn whisper"><img src="assets/twt-mention-whisper-ico.png" class="mention-ico action whisper"></button>
+                                      <button (click)="mentionAction('showReply',menti,'privmsg')" class="mention-btn action-btn reply"><img src="assets/twt-mention-reply-ico.png" class="mention-ico action reply"></button>
+                                    </div>
+                                  </ion-col>
+                                </ion-row>
+                              </ion-grid>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- ////////// MENTIONS SHEET ENDS //////////  -->
+                        <div *ngFor="let m of twtChatMsgs;index as mi" id="twtcm{{mi}}" [ngStyle]="{'display':mentionsShowing||trigSummaryOpen?'none':'table'}" [ngClass]="{'mymsg':m.tags['display-name']===twtUser.display_name||m.isMe,'myrahmsg':m.isRah}" class="twtchatmsg">
+                          <div *ngIf="!m.isRah" class="twtchatmsg-not-rah">
+                            <img *ngIf="m.isMe" src={{twtUser.profile_image_url}} class="twtchatmsgico mymsgico">
+                            <span *ngIf="m.tags['mod']==='1'" class="twtmsg nickstatus mod">@</span>
+                            <span *ngIf="m.tags['subscriber']==='1'&&m.tags['mod']!=='1'" class="twtmsg nickstatus sub">+</span>
+                            <span *ngIf="m.tags['mod']==='1'||m.tags['subscriber']==='1'" class="twtmsg nickpipe">|</span>
+                            <span (click)="twtChatInputFn('refUser',$event,m.tags['display-name'])" [ngStyle]="{'color':m.tags['display-name']===twtUser.display_name||m.isMe?'#fff':'#b85cfd'}" class="twtmsg nick">{{m.tags['display-name']}}</span>
+                            <span *ngIf="m.tags.emotes&&m.tags['emote-only']==='1'" class="twtmsg txt emotesonly">emotes only</span>
+                            <span *ngIf="m.tags.emotes&&!m.tags['emote-only']" class="twtmsg txt mix">{{m.parameters}}<span class="txtmsg txt plusemotes">+emotes</span></span>
+                            <span *ngIf="m.tags.emotes===null" class="twtmsg txt noemotes">{{m.parameters}}</span>
+                            <span *ngIf="m.isMe" class="twtmsg txt memsgtxt">{{m.parameters}}</span>
+                          </div>
+                          <div *ngIf="m.isRah" class="twtchatmsg-is-rah">
+                            <div *ngFor="let rahObj of m.rah;index as roi" class="rah-bit-wrap">
+                              <div [ngStyle]="{'display':rahObj.u===null?'flex':'none'}" class="rah-bit-value txt">{{rahObj.n}}</div>
+                              <img [ngStyle]="{'display':rahObj.u!==null?'flex':'none'}" src={{rahObj.u}} class="rah-bit-value img">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="twt-chat-footer">
+                        <div class="twt-chat-input-wrapper">
+                          <div class="twtchat-input-wrap">
+                            <div *ngIf="twtUser" class="twt-chat-input-nickname-prefix-wrapper">{{twtUser.display_name}}</div>
+                            <input #twtChatInput class="twtchat-input" [value]="" (keydown)="twtChatInputFn('kd',$event,twtChatInput.value)" (focus)="twtChatInputFn('f',$event,twtChatInput.value)">
+                          </div>
+                          <div class="twtchat-send">
+                            <button (click)="twtChatInputFn('cls',$event,twtChatInput.value)" class="twtchat-btn cmd">
+                              <img class="twtchat-send-ico" src="assets/twt-chat-input-cls-ico.png">
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- STREAM CHAT ENDS -->
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </div>
+        </ion-col>
+      </ion-row>
+      <ion-row class="twtstatusbar-row">
+        <ion-col class="twtstatusbar-col">
+          <div class="twtstatusbar-outter-wrapper">
+            <div class="twtstatusbar-inner-wrapper">
+              <div [ngClass]="{'hide-status-bar':twtStatus.type===null||twtStatus.source===null||twtStatus.msg===null}" [ngStyle]="{'display':findingTune||ftResult!==null?'none':'flex'}" class="twtstatusbar-content">
+                <div class="twtstatus-type-ico-wrapper">
+                  <img *ngIf="twtStatus.type==='ok'" src="assets/wcc-status-green-led.png" class="twtstatusbar-type-ico ok">
+                  <img *ngIf="twtStatus.type==='info'" src="assets/wcc-status-yellow-led.png" class="twtstatusbar-type-ico info">
+                  <img *ngIf="twtStatus.type==='error'" src="assets/wcc-status-red-led.png" class="twtstatusbar-type-ico error">
+                </div>
+                <div class="twtstatus-source-ico-wrapper">
+                  <img *ngIf="twtStatus.source==='player'" src="assets/twt-ffmpeg-ico.png" class="twtstatus-source-ico player">
+                  <img *ngIf="twtStatus.source==='chat'" src="assets/twt-status-source-chat-ico.png" class="twtstatus-source-ico chat">
+                  <img *ngIf="twtStatus.source==='ctrl'" src="assets/wc-winbtn-settings-ico.png" class="twtstatus-source-ico auth">
+                </div>
+                <div class="twtstatusbar-msg">{{twtStatus.msg}}</div>
+              </div>
+
+              <div [ngStyle]="{'display':!findingTune&&ftResult===null&&twtSaveData!==null&&twtSaveData.toggles.rahRahOn?'flex':'none'}" class="next-rahrah-wrap">
+                <div class="next-rahrah-cdown-value">
+                  <div [ngStyle]="{'display':!rahRahAnim?'flex':'none'}" class="rrcdv time">{{rahRahCD}}</div>
+                  <div [ngStyle]="{'display':rahRahAnim?'flex':'none'}" class="rrcdv rah">Rah!</div>
+                </div>
+                <div class="next-rahrah-cdown-ico">
+                  <img [ngStyle]="{'display':!rahRahAnim?'flex':'none'}" src="assets/twt-rahrah-grey-ico.png" class="rrcdimg time heartbeatanim">
+                  <img [ngStyle]="{'display':rahRahAnim?'flex':'none'}" src="assets/twt-rahrah-color-ico.png" class="rrcdimg rah">
+                </div>
+              </div>
+
+              <div [ngStyle]="{'display':!findingTune&&ftResult===null&&twtSaveData.toggles.bpmLoopOn?'flex':'none'}" class="twtstatusbar-rtbpm-wrapper">
+                <div [ngStyle]="{'display':rtBPMResult!==null?'flex':'none'}" class="sb-rtbpm-result-wrapper">
+                  <div [ngClass]="{'newnotifytext-same':rtNotifyNew&&rtPrevBPMResult===null||(rtNotifyNew&&rtBPMResult.r&&rtPrevBPMResult.r&&rtBPMResult.d===rtPrevBPMResult.d),'newnotifytext-ok':rtNotifyNew&&rtBPMResult.r&&rtPrevBPMResult!==null&&rtPrevBPMResult.r&&rtBPMResult.d>rtPrevBPMResult.d,'newnotifytext-err':(rtNotifyNew&&rtBPMResult.r&&rtPrevBPMResult!==null&&rtPrevBPMResult.r&&rtBPMResult.d<rtPrevBPMResult.d)||!rtBPMResult.r}" class="sb-rtbpm-result-value">
+                    <div *ngIf="rtBPMResult!==null" class="bpmval bpm-stable">
+                      <img [ngStyle]="{'display':rtNotifyNew&&rtPrevBPMResult===null||(rtNotifyNew&&rtBPMResult.r&&rtPrevBPMResult!==null&&rtPrevBPMResult.r&&rtBPMResult.d===rtPrevBPMResult.d)?'block':'none'}" class="bpm-val-trend-ico same" src="assets/twt-bpm-same-ico.png">
+                      <img [ngStyle]="{'display':rtNotifyNew&&rtPrevBPMResult!==null&&rtBPMResult.r&&rtPrevBPMResult!==null&&rtPrevBPMResult.r&&rtBPMResult.d<rtPrevBPMResult.d?'block':'none'}" class="bpm-val-trend-ico dec" src="assets/twt-bpm-down-dec-ico.png">
+                      <img [ngStyle]="{'display':rtNotifyNew&&rtPrevBPMResult!==null&&rtBPMResult.r&&rtPrevBPMResult!==null&&rtPrevBPMResult.r&&rtBPMResult.d>rtPrevBPMResult.d?'block':'none'}" class="bpm-val-trend-ico inc" src="assets/twt-bpm-up-inc-ico.png">
+                      <div class="bpm-result-text">{{rtBPMResult.d}}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="sb-rtbpm-ico-wrapper">
+                  <img [ngStyle]="{'display':!rtNotifyNew?'block':'none'}" src="assets/wc-twt-rtbpm-ico-std.png" class="sb-rtbpm-ico std heartbeatanim">
+                  <img [ngStyle]="{'display':rtNotifyNew&&rtPrevBPMResult===null||(rtNotifyNew&&rtBPMResult.r&&rtPrevBPMResult!==null&&rtPrevBPMResult.r&&rtBPMResult.d===rtPrevBPMResult.d)?'block':'none'}" src="assets/wc-twt-rtbpm-ico-gold.png" class="sb-rtbpm-ico gold">
+                  <img [ngStyle]="{'display':rtNotifyNew&&rtPrevBPMResult!==null&&rtBPMResult.r&&rtPrevBPMResult!==null&&rtPrevBPMResult.r&&rtBPMResult.d>rtPrevBPMResult.d?'block':'none'}" src="assets/wc-twt-rtbpm-ico-green.png" class="sb-rtbpm-ico green">
+                  <img [ngStyle]="{'display':rtNotifyNew&&rtPrevBPMResult!==null&&rtBPMResult.r&&rtPrevBPMResult!==null&&rtPrevBPMResult.r&&rtBPMResult.d<rtPrevBPMResult.d?'block':'none'}" src="assets/wc-twt-rtbpm-ico-red.png" class="sb-rtbpm-ico red">
+                  <img [ngStyle]="{'display':rtNotifyNew&&rtBPMResult!==null&&rtBPMResult.r===false?'block':'none'}" src="assets/wc-twt-findtune-error-ico.png" class="sb-rtbpm-ico error">
+                </div>
+              </div>
+
+              <div [ngStyle]="{'display':findingTune||ftResult?'flex':'none'}" class="twtstatusbar-findtune-wrapper">
+                <div class="sb-findtune-wrap ft-prefix">
+                  <img class="sb-findtune-prefix-ico" src="assets/wc-twt-findtune-ico.png">
+                  <div class="sb-findtune-prefix-txt">FT:</div>
+                </div>
+                <div class="sb-findtune-wrap status-ico">
+                  <img *ngIf="findingTune&&ftStatus==='recording'" src="assets/wc-twt-findtune-recording-ico.png" class="ft-status-ico recording">
+                  <img *ngIf="findingTune&&ftStatus==='matching'" src="assets/wc-twt-findtune-matching-ico.png" class="ft-status-ico matching">
+                  <img *ngIf="ftResult&&!ftResult.r&&ftResult.d==='error'" src="assets/wc-twt-findtune-error-ico.png" class="ft-status-ico error">
+                  <img *ngIf="ftResult&&!ftResult.r&&(ftResult.d==='notfound'||ftResult.d==='lackdetail')" src="assets/wc-twt-findtune-notfound-ico.png" class="ft-status-ico notfound">
+                  <img *ngIf="ftResult&&ftResult.r" src="assets/wc-twt-findtune-wasfound-ico.png" class="ft-status-ico wasfound">
+                </div>
+                <div class="sb-findtune-wrap text">
+                  <div *ngIf="findingTune&&ftStatus==='recording'" class="ft-status-txt recording">Recording...</div>
+                  <div *ngIf="findingTune&&ftStatus==='matching'" class="ft-status-txt matching">Matching...</div>
+                  <div *ngIf="ftResult&&!ftResult.r&&ftResult.d==='error'" class="ft-status-txt error">Unknown Error</div>
+                  <div *ngIf="ftResult&&!ftResult.r&&ftResult.d==='notfound'" class="ft-status-txt notfound">Not Found</div>
+                  <div *ngIf="ftResult&&!ftResult.r&&ftResult.d==='lackdetail'" class="ft-status-txt notfound">Detail Missing</div>
+                  <div *ngIf="ftResult&&ftResult.r" class="ft-status-txt wasfound">
+                    <span class="ft-status-txt-span artist">{{ftResult.d.artist}}</span>
+                    <span class="ft-status-txt-span joiner">-</span>
+                    <span class="ft-status-txt-span title">{{ftResult.d.title}}</span>
+                  </div>
+                </div>
+
+                <div *ngIf="!findingTune&&ftResult&&ftResult.r" class="sb-findtune-wrap action">
+                  <button (click)="doFindTune('sharechat')" [disabled]="ftResult.d.action==='sharedchat'" class="sb-findtune-action-btn sharechat">
+                    <img *ngIf="ftResult.d.action!=='sharedchat'" class="sb-findtune-action-btn-ico sharechat" src="assets/wc-twt-findtune-sharechat-btn-ico.png">
+                    <img *ngIf="ftResult.d.action==='sharedchat'" class="sb-findtune-action-btn-ico didaction" src="assets/wc-twt-findtune-didaction-ico.png">
+                  </button>
+                  <button (click)="doFindTune('sharecb')" [disabled]="ftResult.d.action==='copied'" class="sb-findtune-action-btn sharecb">
+                    <img *ngIf="ftResult.d.action!=='copied'" class="sb-findtune-action-btn-ico sharecb" src="assets/wc-twt-findtune-shareclipboard-ico.png">
+                    <img *ngIf="ftResult.d.action==='copied'" class="sb-findtune-action-btn-ico didaction" src="assets/wc-twt-findtune-didaction-ico.png">
+                  </button>
+                  <button (click)="doFindTune('close')" class="sb-findtune-action-btn close">
+                    <img class="sb-findtune-action-btn-ico close" src="assets/wc-twt-findtune-close-ico.png">
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</div>
